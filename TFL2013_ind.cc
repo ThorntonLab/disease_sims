@@ -46,6 +46,7 @@ typedef vector<unsigned> ftvector;
 
 typedef boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps > lookup_table_type;
 
+//Functions for the Thornton, Foran, and Long (2013) model
 struct disease_effect
 {
   typedef double result_type;
