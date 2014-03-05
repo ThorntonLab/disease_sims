@@ -83,6 +83,56 @@ struct disease_effect_to_fitness
   }
 };
 
+//Define a model where phenotype is 1, 1+s, (1+s)^2 for a site, then total value is product over sites
+struct multiplicative_phenotype_updater_hom
+{
+  typedef void result_type;
+  template<typename iterator_type>
+  inline void operator()(double & fitness, const iterator_type & m1) const
+  {
+    fitness *= ( std::pow(1. + m1->s,2.) );
+  }
+};
+
+struct multiplicative_phenotype_updater_het
+{
+  typedef void result_type;
+  template<typename iterator_type>
+  inline void operator()(double & fitness, const iterator_type & m1) const
+  {
+    fitness *= ( 1. + m1->s );
+  }
+};
+
+struct multiplicative_phenotype
+{
+  typedef double result_type;
+  template< typename iterator_type>
+  inline double operator()(const iterator_type & g1, const iterator_type & g2) const
+  {
+    return site_dependent_fitness()(g1,g2,
+				    boost::bind(multiplicative_phenotype_updater_hom(),_1,_2),
+				    boost::bind(multiplicative_phenotype_updater_het(),_1,_2),
+				    1.);
+  }
+};
+
+struct multiplicative_disease_effect_to_fitness
+{
+  typedef double result_type;
+  template< typename iterator_type >
+  inline double operator()(const iterator_type & g1, const iterator_type & g2,
+			   const double & sd, const double & sd_s,gsl_rng * r) const
+  {
+    double genetic = multiplicative_phenotype()(g1,g2);
+    double noise = gsl_ran_gaussian(r,sd);
+    double fitness = exp( (-1. * pow(genetic+noise,2.))/(2.*pow(sd_s,2)) );
+    return ( fitness );
+  }
+};
+
+
+//The mutation model
 struct mutation_model
 {
   typedef mtype result_type;
@@ -138,6 +188,8 @@ int main(int argc, char ** argv)
     }
 
   const unsigned seed = atoi(argv[argument++]);
+
+  const bool multiplicative = false;
 
   //Determine growth rate under exponential growth model.
   double G = 0.;
@@ -246,14 +298,25 @@ int main(int argc, char ** argv)
   ostringstream phenobuffer;
   for( unsigned i = 0 ; i < diploids.size() ; ++i )
     {
-      pair<double,double> pheno = disease_effect()(diploids[i].first,
-						   diploids[i].second,
-						   sd,
-						   r);
-      double x = pheno.first;
-      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-      x = pheno.second;
-      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+      if (! multiplicative) //TFL disease model
+	{
+	  pair<double,double> pheno = disease_effect()(diploids[i].first,
+						       diploids[i].second,
+						       sd,
+						       r);
+	  double x = pheno.first;
+	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	  x = pheno.second;
+	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	}
+      else //Multiplicative model
+	{
+	  double x = multiplicative_phenotype()(diploids[i].first,
+						diploids[i].second);
+	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	  x = gsl_ran_gaussian(r,sd);
+	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	}
     }
 
   //Write out effects information for causative sites
