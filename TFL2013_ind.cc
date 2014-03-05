@@ -127,7 +127,8 @@ struct multiplicative_disease_effect_to_fitness
   {
     double genetic = multiplicative_phenotype()(g1,g2);
     double noise = gsl_ran_gaussian(r,sd);
-    double fitness = exp( (-1. * pow(genetic+noise,2.))/(2.*pow(sd_s,2)) );
+    //Subtract 1 so that phenotype has mean 1 and std_dev sd_s
+    double fitness = exp( (-1. * pow(genetic+noise-1.,2.))/(2.*pow(sd_s,2)) );
     return ( fitness );
   }
 };
