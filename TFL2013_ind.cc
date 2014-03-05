@@ -19,28 +19,14 @@
 #include <boost/container/vector.hpp>
 #include <boost/pool/pool_alloc.hpp>
 
+#include <mutation_with_age.hpp>
+
 using namespace std;
 using namespace boost::iostreams;
 using Sequence::SimData;
 using namespace KTfwd;
 
-struct mutation_with_age : public mutation_base
-{
-  mutable unsigned o;
-  double s;
-  char label; //'A' = "amino acid", 'S' = "synonymous"  Only used here in that A = causative, S = neutral.
-  mutation_with_age( const double & position, const double & sel_coeff,
-		     const unsigned & count,const unsigned & origin, const char & ch,
-		     const bool & n=true) 
-    : mutation_base(position,count,n),o(origin),s(sel_coeff),label(ch)
-  {
-  }
-  bool operator==(const mutation_with_age & rhs) const
-  {
-    return( fabs(this->pos-rhs.pos) <= std::numeric_limits<double>::epsilon() &&
-	    this->s == rhs.s );
-  }	
-};
+
 
 typedef mutation_with_age mtype;
 //boost containers
@@ -67,7 +53,7 @@ struct disease_effect
   typedef double result_type;
   template< typename iterator_type >
   inline std::pair<double,double> operator()(const iterator_type & g1, const iterator_type & g2,
-			   const double & sd, gsl_rng * r) const
+					     const double & sd, gsl_rng * r) const
   {
     //The effect of each allele is additive across mutations
     double e1 = 0.,e2=0.;
@@ -143,15 +129,16 @@ int main(int argc, char ** argv)
   const unsigned ngens_evolve = atoi(argv[argument++]);
   const unsigned N2 = atoi(argv[argument++]);
   const unsigned ngens_evolve_growth = atoi(argv[argument++]);
-  const unsigned samplesize1 = atoi(argv[argument++]);
-  const char * ofn = argv[argument++];
-  const char * ofn2 = argv[argument++];
-  const char * ofn3 = NULL;
+  const unsigned replicate_no = atoi(argv[argument++]);
+  const char * indexfile = argv[argument++];
+  const char * hapfile = argv[argument++];
+  const char * phenofile = argv[argument++];
+  const char * effectsfile = NULL;
   if( dist_effects )
     {
-      ofn3 = argv[argument++];
+      effectsfile = argv[argument++];
     }
-  int nreps=atoi(argv[argument++]);
+
   const unsigned seed = atoi(argv[argument++]);
 
   //Determine growth rate under exponential growth model.
@@ -171,88 +158,124 @@ int main(int argc, char ** argv)
   gsl_rng * r =  gsl_rng_alloc(gsl_rng_taus2);
   gsl_rng_set(r,seed);
 
-  while(nreps--)
+  lookup_table_type lookup;
+  //the population begins with 1 gamete with no mutations
+  glist gametes(1,gtype(2*N));
+  mlist mutations;
+  mvector fixations;      
+  ftvector fixation_times;
+  std::vector< std::pair< glist::iterator, glist::iterator> > diploids(N,
+								       std::make_pair(gametes.begin(),
+										      gametes.begin()));
+  unsigned generation;
+  unsigned ttl_gen = 0;
+  double wbar=1;
+
+  boost::function<double(void)> recmap = boost::bind(gsl_rng_uniform,r);
+
+  for( generation = 0; generation < ngens_burnin; ++generation,++ttl_gen )
     {
-      lookup_table_type lookup;
-      //the population begins with 1 gamete with no mutations
-      glist gametes(1,gtype(2*N));
-      mlist mutations;
-      mvector fixations;      
-      ftvector fixation_times;
-      std::vector< std::pair< glist::iterator, glist::iterator> > diploids(N,
-									   std::make_pair(gametes.begin(),
-											  gametes.begin()));
-      unsigned generation;
-      unsigned ttl_gen = 0;
-      double wbar=1;
+      //Evolution w/no deleterious mutations and no selection.
+      wbar = sample_diploid(r,
+			    &gametes,
+			    &diploids,
+			    &mutations,
+			    N,
+			    mu_neutral,
+			    boost::bind(mutation_model(),r,ttl_gen,s,0.,mu_neutral,&mutations,&lookup,dist_effects),
+			    boost::bind(KTfwd::genetics101(),_1,_2,
+					&gametes,
+					littler,
+					r,
+					recmap),
+			    boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
+			    boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
+			    boost::bind(KTfwd::no_selection(),_1,_2),
+			    boost::bind(KTfwd::mutation_remover(),_1,0,2*N));
+      KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N);
+    }
 
-      boost::function<double(void)> recmap = boost::bind(gsl_rng_uniform,r);
+  for( generation = 0; generation < ngens_evolve; ++generation,++ttl_gen )
+    {
+      //Evolve under the disease model
+      wbar = sample_diploid(r,
+			    &gametes,
+			    &diploids,
+			    &mutations,
+			    N,
+			    mu_disease+mu_neutral,
+			    boost::bind(mutation_model(),r,ttl_gen,s,mu_disease,mu_neutral,&mutations,&lookup,dist_effects),
+			    boost::bind(KTfwd::genetics101(),_1,_2,
+					&gametes,
+					littler,
+					r,
+					recmap),
+			    boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
+			    boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
+			    boost::bind(disease_effect_to_fitness(),_1,_2,sd,sd_s,r),
+			    boost::bind(KTfwd::mutation_remover(),_1,0,2*N));
+      KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N);
+    }
+  //Exp. growth phase w/disease model
+  for( generation = 0 ; generation < ngens_evolve_growth ; ++generation,++ttl_gen )
+    {
+      unsigned N_next = round( N*pow(G,generation+1) );
+      wbar = sample_diploid(r,
+			    &gametes,
+			    &diploids,
+			    &mutations,
+			    N,
+			    N_next,
+			    mu_disease+mu_neutral,
+			    boost::bind(mutation_model(),r,ttl_gen,s,mu_disease,mu_neutral,&mutations,&lookup,dist_effects),
+			    boost::bind(KTfwd::genetics101(),_1,_2,
+					&gametes,
+					littler,
+					r,
+					recmap),
+			    boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
+			    boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
+			    boost::bind(disease_effect_to_fitness(),_1,_2,sd,sd_s,r),
+			    boost::bind(KTfwd::mutation_remover(),_1,0,2*N));
+      KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N);
+    }
 
-      for( generation = 0; generation < ngens_burnin; ++generation,++ttl_gen )
-	{
-	  //Evolution w/no deleterious mutations and no selection.
-	  wbar = sample_diploid(r,
-				&gametes,
-				&diploids,
-				&mutations,
-				N,
-				mu_neutral,
-				boost::bind(mutation_model(),r,ttl_gen,s,0.,mu_neutral,&mutations,&lookup,dist_effects),
-				boost::bind(KTfwd::genetics101(),_1,_2,
-					    &gametes,
-					    littler,
-					    r,
-					    recmap),
-				boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
-				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(KTfwd::no_selection(),_1,_2),
-				boost::bind(KTfwd::mutation_remover(),_1,0,2*N));
-      	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N);
-	}
+  //Write out the population
+  ostringstream popbuffer;
+  write_binary_pop(&gametes,&mutations,&diploids,boost::bind(mwriter(),_1,_2),popbuffer);
 
-      for( generation = 0; generation < ngens_evolve; ++generation,++ttl_gen )
+  //Write out the phenotypes
+  ostringstream phenobuffer;
+  for( unsigned i = 0 ; i < diploids.size() ; ++i )
+    {
+      pair<double,double> pheno = disease_effect()(diploids[i].first,
+						   diploids[i].second,
+						   sd,
+						   r);
+      double x = pheno.first;
+      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+      x = pheno.second;
+      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+    }
+
+  //Write out effects information for causative sites
+  ostringstream effectstream;
+  for( typename mlist::const_iterator i = mutations.begin() ; i != mutations.end() ; ++i )
+    {
+      if(!i->neutral)
 	{
-	  //Evolve under the disease model
-	  wbar = sample_diploid(r,
-				&gametes,
-				&diploids,
-				&mutations,
-				N,
-				mu_disease+mu_neutral,
-				boost::bind(mutation_model(),r,ttl_gen,s,mu_disease,mu_neutral,&mutations,&lookup,dist_effects),
-				boost::bind(KTfwd::genetics101(),_1,_2,
-					    &gametes,
-					    littler,
-					    r,
-					    recmap),
-				boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
-				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(disease_effect_to_fitness(),_1,_2,sd,sd_s,r),
-				boost::bind(KTfwd::mutation_remover(),_1,0,2*N));
-      	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N);
-	}
-      //Exp. growth phase w/disease model
-      for( generation = 0 ; generation < ngens_evolve_growth ; ++generation,++ttl_gen )
-	{
-	  unsigned N_next = round( N*pow(G,generation+1) );
-	  wbar = sample_diploid(r,
-				&gametes,
-				&diploids,
-				&mutations,
-				N,
-				N_next,
-				mu_disease+mu_neutral,
-				boost::bind(mutation_model(),r,ttl_gen,s,mu_disease,mu_neutral,&mutations,&lookup,dist_effects),
-				boost::bind(KTfwd::genetics101(),_1,_2,
-					    &gametes,
-					    littler,
-					    r,
-					    recmap),
-				boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
-				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(disease_effect_to_fitness(),_1,_2,sd,sd_s,r),
-				boost::bind(KTfwd::mutation_remover(),_1,0,2*N));
-      	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N);
+	  if(effectsfile != NULL)
+	    {
+	      //position of causative mutation, effect size, count, age
+	      double pos = i->pos;
+	      double s = i->s;
+	      double count = double(i->n);
+	      double age = double(ttl_gen - i->o + 1);
+	      effectstream.write( reinterpret_cast<char *>(&pos), sizeof(double) );
+	      effectstream.write( reinterpret_cast<char *>(&s), sizeof(double) );
+	      effectstream.write( reinterpret_cast<char *>(&count), sizeof(double) );
+	      effectstream.write( reinterpret_cast<char *>(&age), sizeof(double) );
+	    }
 	}
     }
 }
