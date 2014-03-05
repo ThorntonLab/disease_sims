@@ -6,7 +6,6 @@
   Rewritten to use the fwdpp library v >= 0.2.0
 */
 #include <fwdpp/diploid.hh>
-#include <Sequence/SimData.hpp>
 #include <utility>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
@@ -23,7 +22,6 @@
 
 using namespace std;
 using namespace boost::iostreams;
-using Sequence::SimData;
 using namespace KTfwd;
 
 
