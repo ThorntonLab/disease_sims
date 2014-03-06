@@ -28,21 +28,21 @@ using namespace boost::iostreams;
 using namespace boost::program_options;
 using namespace KTfwd;
 
-typedef mutation_with_age mtype;
+
 //boost containers
 #ifndef USE_STANDARD_CONTAINERS
-typedef boost::pool_allocator<mtype> mut_allocator;
-typedef boost::container::list<mtype,mut_allocator > mlist;
-typedef KTfwd::gamete_base<mtype,mlist> gtype;
+typedef boost::pool_allocator<TFLmtype> mut_allocator;
+typedef boost::container::list<TFLmtype,mut_allocator > mlist;
+typedef KTfwd::gamete_base<TFLmtype,mlist> gtype;
 typedef boost::pool_allocator<gtype> gam_allocator;
 typedef boost::container::list<gtype,gam_allocator > glist;
-typedef boost::container::vector<mtype> mvector;
+typedef boost::container::vector<TFLmtype> mvector;
 typedef boost::container::vector<unsigned> ftvector;
 #else
-typedef std::list<mtype > mlist;
-typedef gamete_base<mtype, mlist> gtype;
+typedef std::list<TFLmtype > mlist;
+typedef gamete_base<TFLmtype, mlist> gtype;
 typedef std::list<gtype> glist;
-typedef vector<mtype> mvector;
+typedef vector<TFLmtype> mvector;
 typedef vector<unsigned> ftvector;
 #endif
 
@@ -139,7 +139,7 @@ struct multiplicative_disease_effect_to_fitness
 //The mutation model
 struct mutation_model
 {
-  typedef mtype result_type;
+  typedef TFLmtype result_type;
   inline result_type operator()( gsl_rng * r, const unsigned int & ttl_generations,
 				 const double & s, const double & ud, const double & un, const  mlist * mutations,
 				 lookup_table_type * lookup,
@@ -155,14 +155,14 @@ struct mutation_model
       {
 	if( ! dist_effects )
 	  {
-	    return mtype(pos,s,1,ttl_generations,'A',false);
+	    return TFLmtype(pos,s,1,ttl_generations,'A',false);
 	  }
 	else
 	  {
-	    return mtype(pos,gsl_ran_exponential(r,s),1,ttl_generations,'A',false);
+	    return TFLmtype(pos,gsl_ran_exponential(r,s),1,ttl_generations,'A',false);
 	  }
       }
-    return mtype(pos,0.,1,ttl_generations,'S',true);
+    return TFLmtype(pos,0.,1,ttl_generations,'S',true);
   }
 };
 
@@ -252,7 +252,7 @@ int main(int argc, char ** argv)
 					params.littler,
 					r,
 					recmap),
-			    boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
+			    boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 			    boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
 			    boost::bind(KTfwd::no_selection(),_1,_2),
 			    boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
@@ -276,7 +276,7 @@ int main(int argc, char ** argv)
 					    params.littler,
 					    r,
 					    recmap),
-				boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
+				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
 				boost::bind(disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,r),
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
@@ -299,7 +299,7 @@ int main(int argc, char ** argv)
 					    params.littler,
 					    r,
 					    recmap),
-				boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
+				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
 				boost::bind(disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,r),
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
@@ -322,7 +322,7 @@ int main(int argc, char ** argv)
 					    params.littler,
 					    r,
 					    recmap),
-				boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
+				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
 				boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,r),
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
@@ -344,7 +344,7 @@ int main(int argc, char ** argv)
 					    params.littler,
 					    r,
 					    recmap),
-				boost::bind(KTfwd::insert_at_end<mtype,mlist>,_1,_2),
+				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
 				boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,r),
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));

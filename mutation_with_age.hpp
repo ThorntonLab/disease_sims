@@ -21,11 +21,13 @@ struct mutation_with_age : public KTfwd::mutation_base
   }	
 };
 
+typedef mutation_with_age TFLmtype;
+
 //function object to write mutation data in binary format
 struct mwriter
 {
   typedef void result_type;
-  result_type operator()( const mutation_with_age & m, std::ostringstream & buffer ) const
+  result_type operator()( const TFLmtype & m, std::ostringstream & buffer ) const
   {
     unsigned u = m.n;
     buffer.write( reinterpret_cast< char * >(&u),sizeof(unsigned) );
@@ -45,7 +47,7 @@ struct mwriter
 //function object to read mutation data in binary format
 struct mreader
 {
-  typedef mutation_with_age result_type;
+  typedef TFLmtype result_type;
   result_type operator()( std::istream & in ) const
   {
     unsigned n;
