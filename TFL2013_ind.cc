@@ -21,12 +21,12 @@
 
 #include <mutation_with_age.hpp>
 
+#include <fcntl.h>
+
 using namespace std;
 using namespace boost::iostreams;
 using namespace boost::program_options;
 using namespace KTfwd;
-
-
 
 typedef mutation_with_age mtype;
 //boost containers
@@ -213,7 +213,7 @@ int main(int argc, char ** argv)
     }
 
   cerr << '#';
-  for(unsigned i=0;i<argc;++i)
+  for(int i=0;i<argc;++i)
     {
       cerr << argv[i] << ' ';
     }
@@ -335,6 +335,15 @@ int main(int argc, char ** argv)
 
   //Write out effects information for causative sites
   ostringstream effectstream;
+  unsigned ncausative=0;
+  for( typename mlist::const_iterator i = mutations.begin() ; i != mutations.end() ; ++i )
+    {
+      if ( ! i->neutral )
+	{
+	  ++ncausative;
+	}
+    }
+  effectstream.write( reinterpret_cast<char *>(&ncausative),sizeof(unsigned) );
   for( typename mlist::const_iterator i = mutations.begin() ; i != mutations.end() ; ++i )
     {
       if(!i->neutral)
@@ -353,13 +362,151 @@ int main(int argc, char ** argv)
 	    }
 	}
     }
+
+  /*
+    OK, now we lock the index file first.  Then, the rest of the output files.
+
+    Write the relevant info to the index files, then the output files.
+
+    Then, unlock output files first, releasing lock on index last.
+  */
+  //get file descriptors and grab locks in desired order
+  struct flock index_flock, hapfile_flock, phenofile_flock, effects_flock;
+  index_flock.l_type = F_WRLCK;/*Write lock*/
+  index_flock.l_whence = SEEK_SET;
+  index_flock.l_start = 0;
+  index_flock.l_len = 0;/*Lock whole file*/
+
+  //lock index file ASAP
+  FILE * index_fh = fopen(params.indexfile.c_str(),"a");
+  int index_fd = fileno(index_fh);
+  if ( index_fd == -1 ) 
+    { 
+      std::cerr << "ERROR: could not open " << params.indexfile << '\n';
+      exit(10);
+    }
+  if (fcntl(index_fd, F_SETLKW,&index_flock) == -1) 
+    {
+      std::cerr << "ERROR: could not obtain lock on " << params.indexfile << '\n';
+      exit(10);
+    }
+
+  hapfile_flock.l_type = F_WRLCK;/*Write lock*/
+  hapfile_flock.l_whence = SEEK_SET;
+  hapfile_flock.l_start = 0;
+  hapfile_flock.l_len = 0;/*Lock whole file*/
+
+  phenofile_flock.l_type = F_WRLCK;/*Write lock*/
+  phenofile_flock.l_whence = SEEK_SET;
+  phenofile_flock.l_start = 0;
+  phenofile_flock.l_len = 0;/*Lock whole file*/
+
+  effects_flock.l_type = F_WRLCK;/*Write lock*/
+  effects_flock.l_whence = SEEK_SET;
+  effects_flock.l_start = 0;
+  effects_flock.l_len = 0;/*Lock whole file*/
+
+  FILE * haps_fh = fopen(params.hapfile.c_str(),"a");
+  int hapfile_fd = fileno(haps_fh);
+
+  if ( hapfile_fd == -1 ) 
+    { 
+      std::cerr << "ERROR: could not open " << params.hapfile << '\n';
+      exit(10);
+    }
+  if (fcntl(index_fd, F_SETLKW,&index_flock) == -1) 
+    {
+      std::cerr << "ERROR: could not obtain lock on " << params.hapfile << '\n';
+      exit(10);
+    }
+
+  FILE * pheno_fh = fopen(params.phenofile.c_str(),"a");
+  int pheno_fd = fileno(pheno_fh);
+  if ( pheno_fd == -1 ) 
+    { 
+      std::cerr << "ERROR: could not open " << params.phenofile << '\n';
+      exit(10);
+    }
+  if (fcntl(pheno_fd, F_SETLKW,&index_flock) == -1) 
+    {
+      std::cerr << "ERROR: could not obtain lock on " << params.phenofile << '\n';
+      exit(10);
+    }
+
+  FILE * effect_fh = NULL;
+  int effect_fd = 0;
+  effect_fh = fopen(params.effectsfile.c_str(),"a");
+  effect_fd = fileno(effect_fh);
+  if ( effect_fd == -1 ) 
+    { 
+      std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
+      exit(10);
+    }
+  if (fcntl(effect_fd, F_SETLKW,&index_flock) == -1) 
+    {
+      std::cerr << "ERROR: could not obtain lock on " << params.effectsfile << '\n';
+      exit(10);
+    }
+
+  //Write the index data
+  std::ostringstream indexstream;
+  indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
+	      << ftell(pheno_fh) << ' ' << ftell(haps_fh);
+  fprintf(index_fh,"%s\n",indexstream.str().c_str());
+
+
+  //write the haplotype data
+  ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size());
+  //write the phenotype data
+  ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() );
+  //write the effects
+  ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() );
+  //clear buffer
+
+  //release the locks
+  index_flock.l_type = F_UNLCK;
+  hapfile_flock.l_type = F_UNLCK;
+  phenofile_flock.l_type = F_UNLCK;
+  effects_flock.l_type = F_UNLCK;
+
+  if (fcntl(effect_fd, F_UNLCK,&effects_flock) == -1) 
+    {
+      std::cerr << "ERROR: could not release lock on " << params.effectsfile << '\n';
+      exit(10);
+    }
+  fflush(effect_fh);
+  fclose(effect_fh);
+
+  if (fcntl(pheno_fd, F_UNLCK,&phenofile_flock) == -1) 
+    {
+      std::cerr << "ERROR: could not release lock on " << params.phenofile << '\n';
+      exit(10);
+    }
+  fflush( pheno_fh );
+  fclose( pheno_fh);
+
+  if (fcntl(hapfile_fd, F_UNLCK,&hapfile_flock) == -1) 
+    {
+      std::cerr << "ERROR: could not releaselock on " <<  params.hapfile << '\n';
+      exit(10);
+    }
+  fflush( haps_fh );
+  fclose(haps_fh);
+
+  if (fcntl(index_fd, F_UNLCK,&index_flock) == -1) 
+    {
+      std::cerr << "ERROR: could not release lock on " << params.indexfile << '\n';
+      exit(10);
+    }
+  fflush( index_fh );
+  fclose(index_fh);
 }
 
 simparams parse_command_line(const int & argc,
 			     char ** argv)
 {
   simparams rv;
-  options_description desc("Usage: TFL2013 -h to see help");
+  options_description desc("Simulate the genetic model from Thornton, Foran, and Long (2013) PLoS Genetics 9(2): e1003258.\nUsage: TFL2013 -h to see help");
   desc.add_options()
     ("help,h", "Produce help message")
     ("popsize1,1", value<unsigned>(&rv.N)->default_value(20000), "Diploid population number")
@@ -395,7 +542,7 @@ simparams parse_command_line(const int & argc,
 
   if( rv.indexfile.empty() || rv.hapfile.empty() || rv.phenofile.empty() )
     {
-      if (rf.indexfile.empty())
+      if (rv.indexfile.empty())
 	{
 	  cerr << "Error: indef file name required.  Use -h to see options\n";
 	}
@@ -411,8 +558,6 @@ simparams parse_command_line(const int & argc,
 	}
       exit(10);
     }
-
-
 
   return rv;
 }
