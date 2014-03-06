@@ -19,9 +19,11 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <boost/program_options.hpp>
 
-#include <mutation_with_age.hpp>
-
 #include <fcntl.h>
+
+#include <mutation_with_age.hpp>
+#include <TFL_fitness_models.hpp>
+
 
 using namespace std;
 using namespace boost::iostreams;
@@ -47,94 +49,6 @@ typedef vector<unsigned> ftvector;
 #endif
 
 typedef boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps > lookup_table_type;
-
-//Functions for the Thornton, Foran, and Long (2013) model
-struct disease_effect
-{
-  typedef double result_type;
-  template< typename iterator_type >
-  inline std::pair<double,double> operator()(const iterator_type & g1, const iterator_type & g2,
-					     const double & sd, gsl_rng * r) const
-  {
-    //The effect of each allele is additive across mutations
-    double e1 = 0.,e2=0.;
-    typename  iterator_type::value_type::mutation_container::const_iterator itr;
-    for(itr = g1->smutations.begin() ; itr != g1->smutations.end() ; ++itr)
-      {
-	e1 += (*itr)->s;
-      }
-    for(itr = g2->smutations.begin() ; itr != g2->smutations.end() ; ++itr)
-      {
-	e2 += (*itr)->s;
-      }
-    double effect = pow( e1*e2, 0.5 );
-    return make_pair(effect, gsl_ran_gaussian(r,sd));
-  }
-};
-
-//calculates the fitess of a diploid
-struct disease_effect_to_fitness
-{
-  typedef double result_type;
-  template< typename iterator_type >
-  inline double operator()(const iterator_type & g1, const iterator_type & g2,
-			   const double & sd, const double & sd_s,gsl_rng * r) const
-  {
-    pair<double,double> effect = disease_effect()(g1,g2,sd,r);
-    double fitness = exp( (-1. * pow(effect.first+effect.second,2.))/(2.*pow(sd_s,2)) );
-    return ( fitness );
-  }
-};
-
-//Define a model where phenotype is 1, 1+s, (1+s)^2 for a site, then total value is product over sites
-struct multiplicative_phenotype_updater_hom
-{
-  typedef void result_type;
-  template<typename iterator_type>
-  inline void operator()(double & fitness, const iterator_type & m1) const
-  {
-    fitness *= ( std::pow(1. + m1->s,2.) );
-  }
-};
-
-struct multiplicative_phenotype_updater_het
-{
-  typedef void result_type;
-  template<typename iterator_type>
-  inline void operator()(double & fitness, const iterator_type & m1) const
-  {
-    fitness *= ( 1. + m1->s );
-  }
-};
-
-struct multiplicative_phenotype
-{
-  typedef double result_type;
-  template< typename iterator_type>
-  inline double operator()(const iterator_type & g1, const iterator_type & g2) const
-  {
-    return site_dependent_fitness()(g1,g2,
-				    boost::bind(multiplicative_phenotype_updater_hom(),_1,_2),
-				    boost::bind(multiplicative_phenotype_updater_het(),_1,_2),
-				    1.);
-  }
-};
-
-struct multiplicative_disease_effect_to_fitness
-{
-  typedef double result_type;
-  template< typename iterator_type >
-  inline double operator()(const iterator_type & g1, const iterator_type & g2,
-			   const double & sd, const double & sd_s,gsl_rng * r) const
-  {
-    double genetic = multiplicative_phenotype()(g1,g2);
-    double noise = gsl_ran_gaussian(r,sd);
-    //Subtract 1 so that phenotype has mean 1 and std_dev sd_s
-    double fitness = exp( (-1. * pow(std::abs(genetic+noise)-1.,2.))/(2.*pow(sd_s,2)) );
-    return ( fitness );
-  }
-};
-
 
 //The mutation model
 struct mutation_model
