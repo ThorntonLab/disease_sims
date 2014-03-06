@@ -393,23 +393,26 @@ simparams parse_command_line(const int & argc,
       exit(0);
     }
 
-  if( rv.indexfile.empty() )
+  if( rv.indexfile.empty() || rv.hapfile.empty() || rv.phenofile.empty() )
     {
-      cerr << "Error: index file name required.  Use -h to see options\n";
+      if (rf.indexfile.empty())
+	{
+	  cerr << "Error: indef file name required.  Use -h to see options\n";
+	}
+
+      if( rv.hapfile.empty() )
+	{
+	  cerr << "Error: population output file name required.  Use -h to see options\n";
+	}
+	
+      if( rv.phenofile.empty() )
+	{
+	  cerr << "Error: phenotypes output file name required.  Use -h to see options\n";
+	}
       exit(10);
     }
 
-  if( rv.hapfile.empty() )
-    {
-      cerr << "Error: population output file name required.  Use -h to see options\n";
-      exit(10);
-    }
 
-  if( rv.phenofile.empty() )
-    {
-      cerr << "Error: phenotypes output file name required.  Use -h to see options\n";
-      exit(10);
-    }
 
   return rv;
 }
