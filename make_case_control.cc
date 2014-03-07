@@ -79,29 +79,29 @@ struct cc_intermediate
 {
   SimData neutral,causative;
   vector<char> min_n,min_c; //minor alleles, defined from controls
-  vector<double> phenotypes;
+  vector<pair<double,double> > phenotypes;
 };
 
 params process_command_line(int argc, char ** argv);
 
 void process_subset( vector< pair<double,string> > & datablock_neut,
 		     vector< pair<double,string> > & datablock_sel,
-		     vector< double > & ccphenos,
+		     vector< pair<double,double> > & ccphenos,
 		     const vector< pair<glist::iterator,glist::iterator> > & diploids,
-		     const vector<double> & popphenos,
+		     const vector<pair<double,double> > & popphenos,
 		     const vector<size_t> & indlist,
 		     const unsigned & maxnum,
 		     const unsigned & ttl,
 		     const unsigned & offset);
 
 cc_intermediate process_population( const vector< pair<glist::iterator,glist::iterator> > & diploids,
-				    const vector<double> & phenotypes,
+				    const vector<pair<double,double> > & phenotypes,
 				    const vector<size_t> & put_controls,
 				    const vector<size_t> & put_cases,
 				    const unsigned & ncontrols,
 				    const unsigned & ncases);
 
-std::pair<double,double> phenosums(const vector<double> & phenos, const double & case_proportion, double * cutoff);
+std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, const double & case_proportion, double * cutoff);
 
 int main(int argc, char ** argv)
 {
@@ -156,7 +156,7 @@ int main(int argc, char ** argv)
   //Read in the phenotype data
   ifstream phenostream( options.phenofile.c_str() );
   phenostream.seekg( pheno_offset );
-  vector< double > phenotypes;
+  vector< pair<double,double> > phenotypes;
   unsigned nphenos;
   phenostream.read( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
   for( unsigned i = 0 ; i < nphenos ; ++i )
@@ -166,7 +166,7 @@ int main(int argc, char ** argv)
       double x,y;
       phenostream.read( reinterpret_cast<char *>(&x), sizeof(double) );
       phenostream.read( reinterpret_cast<char *>(&y), sizeof(double) );
-      phenotypes.push_back( x+y );
+      phenotypes.push_back( make_pair(x,y) );
     }
   phenostream.close();
 
@@ -186,12 +186,13 @@ int main(int argc, char ** argv)
 
   for( size_t i = 0 ; i < phenotypes.size() ; ++i )
     {
-      if( phenotypes[i] >= cutoff )
+      const double P = phenotypes[i].first+phenotypes[i].second;
+      if( P >= cutoff )
 	{
 	  put_cases.push_back(i);
 	}
-      else if ( phenotypes[i] >= mean_sd.first - mean_sd.second &&
-		phenotypes[i] <= mean_sd.first + mean_sd.second )
+      else if ( P >= mean_sd.first - mean_sd.second &&
+		P <= mean_sd.first + mean_sd.second )
 	{
 	  put_controls.push_back(i);
 	}
@@ -318,9 +319,13 @@ params process_command_line(int argc, char ** argv)
   return rv;
 }
 
-std::pair<double,double> phenosums(const vector<double> & phenos, const double & case_proportion, double * cutoff)
+std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, const double & case_proportion, double * cutoff)
 {
-  vector<double> pcopy(phenos);
+  vector<double> pcopy;
+  for(unsigned i=0;i<phenos.size();++i)
+    {
+      pcopy.push_back(phenos[i].first+phenos[i].second);
+    }
   sort(pcopy.begin(),pcopy.end());
   return std::make_pair( gsl_stats_mean(&pcopy[0],1,pcopy.size()),
 			 gsl_stats_sd(&pcopy[0],1,pcopy.size()) );
@@ -330,9 +335,9 @@ std::pair<double,double> phenosums(const vector<double> & phenos, const double &
 
 void process_subset( vector< pair<double,string> > & datablock_neut,
 		     vector< pair<double,string> > & datablock_sel,
-		     vector< double > & ccphenos,
+		     vector< pair<double,double> > & ccphenos,
 		     const vector< pair<glist::iterator,glist::iterator> > & diploids,
-		     const vector<double> & popphenos,
+		     const vector<pair<double,double> > & popphenos,
 		     const vector<size_t> & indlist,
 		     const unsigned & maxnum,
 		     const unsigned & ttl,
@@ -411,8 +416,9 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 	}
     }
 }
+
 cc_intermediate process_population( const vector< pair<glist::iterator,glist::iterator> > & diploids,
-				    const vector<double> & phenotypes,
+				    const vector<pair<double,double> > & phenotypes,
 				    const vector<size_t> & put_controls,
 				    const vector<size_t> & put_cases,
 				    const unsigned & ncontrols,
