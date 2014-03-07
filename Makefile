@@ -15,3 +15,11 @@ make_case_control.o: mutation_with_age.hpp
 readCC.o: readCC.hpp
 
 esm_chisq_zscore.o: readCC.hpp
+
+chisq_per_marker.o: chisq_per_marker.hpp
+
+esm.o: esm.hpp
+
+esm_filter_sites.o: esm_filter_sites.hpp
+
+locking_routines.o: locking_routines.hpp
