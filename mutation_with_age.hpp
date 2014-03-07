@@ -5,6 +5,16 @@
 #include <cmath>
 #include <iosfwd>
 #include <sstream>
+
+#ifndef USE_STANDARD_CONTAINERS
+#include <boost/container/list.hpp>
+#include <boost/container/vector.hpp>
+#include <boost/pool/pool_alloc.hpp>
+#else
+#include <vector>
+#include <list>
+#endif
+
 struct mutation_with_age : public KTfwd::mutation_base
 {
   mutable unsigned o;
@@ -24,6 +34,22 @@ struct mutation_with_age : public KTfwd::mutation_base
 };
 
 typedef mutation_with_age TFLmtype;
+//boost containers
+#ifndef USE_STANDARD_CONTAINERS
+typedef boost::pool_allocator<TFLmtype> mut_allocator;
+typedef boost::container::list<TFLmtype,mut_allocator > mlist;
+typedef KTfwd::gamete_base<TFLmtype,mlist> gtype;
+typedef boost::pool_allocator<gtype> gam_allocator;
+typedef boost::container::list<gtype,gam_allocator > glist;
+typedef boost::container::vector<TFLmtype> mvector;
+typedef boost::container::vector<unsigned> ftvector;
+#else
+typedef std::list<TFLmtype > mlist;
+typedef gamete_base<TFLmtype, mlist> gtype;
+typedef std::list<gtype> glist;
+typedef std::vector<TFLmtype> mvector;
+typedef std::vector<unsigned> ftvector;
+#endif
 
 //function object to write mutation data in binary format
 struct mwriter
