@@ -273,6 +273,8 @@ int main(int argc, char ** argv)
 
   //Write out the phenotypes
   ostringstream phenobuffer;
+  unsigned nphenos = diploids.size();
+  phenobuffer.write( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
   for( unsigned i = 0 ; i < diploids.size() ; ++i )
     {
       if (! params.multiplicative) //TFL disease model
