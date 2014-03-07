@@ -150,6 +150,32 @@ int main(int argc, char ** argv)
   double cutoff;
   pair<double,double> mean_sd = phenosums(phenotypes,options.case_proportion,&cutoff);
 
+  /*
+    2. Assign an individual to be a putative case, control, nor not included
+    
+    putative case = phenotype >= cutoff
+    putative control = phenotype within mean +/- sd of population distribution
+  */
+  vector< size_t > put_cases,put_controls;
+
+  for( size_t i = 0 ; i < phenotypes.size() ; ++i )
+    {
+      if( phenotypes[i] >= cutoff )
+	{
+	  put_cases.push_back(i);
+	}
+      else if ( phenotypes[i] >= mean_sd.first - mean_sd.second &&
+		phenotypes[i] <= mean_sd.first + mean_sd.second )
+	{
+	  put_controls.push_back(i);
+	}
+    }
+
+  //Randomize lists
+  boost::function< size_t (size_t) > rand = boost::bind(&gsl_ran_flat, r, 0,double(put_cases.size()));
+  random_shuffle(put_cases.begin(),put_cases.end(),rand);
+  rand = boost::bind(&gsl_ran_flat, r, 0,double(put_controls.size()));
+  random_shuffle(put_controls.begin(),put_controls.end(),rand);
 
   //obtain file lock on index ASAP
   // FILE * ai_fh = fopen(anova_indexfile,"a");
