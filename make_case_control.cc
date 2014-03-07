@@ -139,6 +139,7 @@ int main(int argc, char ** argv)
       phenostream.read( reinterpret_cast<char *>(&y), sizeof(double) );
       phenotypes.push_back( std::make_pair(x,y) );
     }
+  phenostream.close();
   //obtain file lock on index ASAP
   // FILE * ai_fh = fopen(anova_indexfile,"a");
   // int ai_fd = fileno(ai_fh);
