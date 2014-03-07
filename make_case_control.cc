@@ -75,6 +75,7 @@ struct params
 
 params process_command_line(int argc, char ** argv);
 
+std::pair<double,double> phenosums(const vector<double> & phenos, const double & case_proportion, double * cutoff);
 
 int main(int argc, char ** argv)
 {
@@ -142,6 +143,14 @@ int main(int argc, char ** argv)
       phenotypes.push_back( x+y );
     }
   phenostream.close();
+
+  //The real work starts here
+
+  //1. get mean, sd, and upper quantile of pheno distribution
+  double cutoff;
+  pair<double,double> mean_sd = phenosums(phenotypes,options.case_proportion,&cutoff);
+
+
   //obtain file lock on index ASAP
   // FILE * ai_fh = fopen(anova_indexfile,"a");
   // int ai_fd = fileno(ai_fh);
@@ -249,4 +258,14 @@ params process_command_line(int argc, char ** argv)
   params rv;
 
   return rv;
+}
+
+std::pair<double,double> phenosums(const vector<double> & phenos, const double & case_proportion, double * cutoff)
+{
+  vector<double> pcopy(phenos);
+  sort(pcopy.begin(),pcopy.end());
+  return std::make_pair( gsl_stats_mean(&pcopy[0],1,pcopy.size()),
+			 gsl_stats_sd(&pcopy[0],1,pcopy.size()) );
+  //get the upper case_proportion-th'd quantile from the pheno dist
+  *cutoff =  gsl_stats_quantile_from_sorted_data(&pcopy[0],1,pcopy.size(),1.-case_proportion);
 }
