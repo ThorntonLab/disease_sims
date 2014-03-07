@@ -129,15 +129,17 @@ int main(int argc, char ** argv)
   //Read in the phenotype data
   ifstream phenostream( options.phenofile.c_str() );
   phenostream.seekg( pheno_offset );
-  vector< std::pair<double,double> > phenotypes;
+  vector< double > phenotypes;
   unsigned nphenos;
   phenostream.read( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
   for( unsigned i = 0 ; i < nphenos ; ++i )
     {
+      //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
+      //Phenotype of the individual is x+y
       double x,y;
       phenostream.read( reinterpret_cast<char *>(&x), sizeof(double) );
       phenostream.read( reinterpret_cast<char *>(&y), sizeof(double) );
-      phenotypes.push_back( std::make_pair(x,y) );
+      phenotypes.push_back( x+y );
     }
   phenostream.close();
   //obtain file lock on index ASAP
