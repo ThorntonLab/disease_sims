@@ -2,7 +2,9 @@
 #define __MUTATION_WITH_AGE_HPP__
 
 #include <fwdpp/forward_types.hpp>
-
+#include <cmath>
+#include <iosfwd>
+#include <sstream>
 struct mutation_with_age : public KTfwd::mutation_base
 {
   mutable unsigned o;
@@ -16,7 +18,7 @@ struct mutation_with_age : public KTfwd::mutation_base
   }
   bool operator==(const mutation_with_age & rhs) const
   {
-    return( fabs(this->pos-rhs.pos) <= std::numeric_limits<double>::epsilon() &&
+    return( std::fabs(this->pos-rhs.pos) <= std::numeric_limits<double>::epsilon() &&
 	    this->s == rhs.s );
   }	
 };
