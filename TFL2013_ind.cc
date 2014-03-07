@@ -14,9 +14,6 @@
 #include <boost/function.hpp>
 
 #include <boost/unordered_set.hpp>
-#include <boost/container/list.hpp>
-#include <boost/container/vector.hpp>
-#include <boost/pool/pool_alloc.hpp>
 #include <boost/program_options.hpp>
 
 #include <fcntl.h>
@@ -30,23 +27,6 @@ using namespace boost::iostreams;
 using namespace boost::program_options;
 using namespace KTfwd;
 
-
-//boost containers
-#ifndef USE_STANDARD_CONTAINERS
-typedef boost::pool_allocator<TFLmtype> mut_allocator;
-typedef boost::container::list<TFLmtype,mut_allocator > mlist;
-typedef KTfwd::gamete_base<TFLmtype,mlist> gtype;
-typedef boost::pool_allocator<gtype> gam_allocator;
-typedef boost::container::list<gtype,gam_allocator > glist;
-typedef boost::container::vector<TFLmtype> mvector;
-typedef boost::container::vector<unsigned> ftvector;
-#else
-typedef std::list<TFLmtype > mlist;
-typedef gamete_base<TFLmtype, mlist> gtype;
-typedef std::list<gtype> glist;
-typedef vector<TFLmtype> mvector;
-typedef vector<unsigned> ftvector;
-#endif
 
 typedef boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps > lookup_table_type;
 
