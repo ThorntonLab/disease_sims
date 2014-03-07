@@ -401,12 +401,23 @@ int main(int argc, char ** argv)
 
 
   //write the haplotype data
-  ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size());
+  if ( ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size()) == -1 )
+    {
+      cerr << "Error writing to " << params.hapfile << '\n';
+      exit(errno);
+    }
   //write the phenotype data
-  ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() );
+  if( ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() ) == -1 )
+    {
+      cerr << "Error writing to " << params.phenofile << '\n';
+      exit(errno);
+    }
   //write the effects
-  ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() );
-  //clear buffer
+  if( ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() ) == -1 )
+    {
+      cerr << "Error writing to " << params.effectsfile << '\n';
+      exit(errno);
+    }
 
   //release the locks
   index_flock.l_type = F_UNLCK;
