@@ -10,9 +10,9 @@
 
   2. anovafile: This fine is written in binary format.  It contains a 
   series of records of case/control panels.  Each record has the following format:
-  Four integers: number of cases, number of controls, NN = number of neutral mutations, NC = number of causative mutations
+  Four integers: number of controls, number of cases, NN = number of neutral mutations, NC = number of causative mutations
   NN + NC doubles, which are the positions of the mutations (neutral then causative mutations, respectively).
-  Then, for each case, and then each control, there are NN + NC short signed integers
+  Then, for each control, and then each case, there are NN + NC short signed integers
   corresponding to the genotypes and neutral and causative sites, resp. 
 
   A genotype can take on 1 of 3 values, and is equal to the # of copies of the minor allele:
@@ -35,8 +35,8 @@
  */
 
 #include <mutation_with_age.hpp>
-#include <locking_routines.hpp>
 #include <ccintermediate.hpp>
+#include <locking_routines.hpp>
 
 #include <Sequence/SimData.hpp>
 
@@ -67,29 +67,12 @@ using namespace KTfwd;
 
 struct params
 {
-  string indexfile,popfile,phenofile,anovafile,anovafile_index;
+  string indexfile,popfile,phenofile,anovafile,anova_indexfile;
   unsigned twoN,record_no,ncases,ncontrols,seed;
   double case_proportion;
 };
 
 params process_command_line(int argc, char ** argv);
-
-// void process_subset( vector< pair<double,string> > & datablock_neut,
-// 		     vector< pair<double,string> > & datablock_sel,
-// 		     vector< pair<double,double> > & ccphenos,
-// 		     const vector< pair<glist::iterator,glist::iterator> > & diploids,
-// 		     const vector<pair<double,double> > & popphenos,
-// 		     const vector<size_t> & indlist,
-// 		     const unsigned & maxnum,
-// 		     const unsigned & ttl,
-// 		     const unsigned & offset);
-
-// cc_intermediate process_population( const vector< pair<glist::iterator,glist::iterator> > & diploids,
-// 				    const vector<pair<double,double> > & phenotypes,
-// 				    const vector<size_t> & put_controls,
-// 				    const vector<size_t> & put_cases,
-// 				    const unsigned & ncontrols,
-// 				    const unsigned & ncases);
 
 std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, const double & case_proportion, double * cutoff);
 
@@ -194,113 +177,152 @@ int main(int argc, char ** argv)
   rand = boost::bind(&gsl_ran_flat, r, 0,double(put_controls.size()));
   random_shuffle(put_controls.begin(),put_controls.end(),rand);
 
-  cc_intermediate ccblocks = process_population(diploids,phenotypes,
-						put_controls,
-						put_cases,
-						options.ncontrols,
-						options.ncases);
+  cc_intermediate * ccblocks = new cc_intermediate;
+
+  *ccblocks = process_population(diploids,phenotypes,
+				 put_controls,
+				 put_cases,
+				 options.ncontrols,
+				 options.ncases);
+  //free up memory
+  diploids.clear();
+  gametes.clear();
+  mutations.clear();
+
+  //3. Output to buffers
+
+  //first, the ccdata to a buffer
+  ostringstream ccbuffer;
+  ccbuffer.write( reinterpret_cast<char *>(&options.ncontrols),sizeof(unsigned) );
+  ccbuffer.write( reinterpret_cast<char *>(&options.ncases),sizeof(unsigned) );
+  unsigned temp = ccblocks->neutral.numsites();
+  ccbuffer.write( reinterpret_cast<char *>(&temp),sizeof(unsigned) );
+  temp = ccblocks->causative.numsites();
+  ccbuffer.write( reinterpret_cast<char *>(&temp),sizeof(unsigned) );
+
+  for( SimData::const_pos_iterator p = ccblocks->neutral.pbegin() ; 
+       p < ccblocks->neutral.pend() ; ++p )
+    {
+      double x = *p;
+      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+    }
+
+  for( SimData::const_pos_iterator p = ccblocks->causative.pbegin() ; 
+       p < ccblocks->causative.pend() ; ++p )
+    {
+      double x = *p;
+      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+    }
+
+  //iterate over the diploids and write block for association tests
+  for( unsigned ind = 0 ; ind < ccblocks->neutral.size() ; ind += 2 ) 
+    {
+      //neutral genotypes for this individual
+      for( unsigned site = 0 ; site < ccblocks->neutral.numsites() ; ++site )
+	{
+	  //count # copies of minor allele at this site in this individual
+	  unsigned cminor = ( (ccblocks->neutral[ind][site] == ccblocks->min_n[site]) ? 1 : 0 ) +
+	    ( (ccblocks->neutral[ind+1][site] == ccblocks->min_n[site]) ? 1 : 0 );
+	  ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
+	}
+      //causative genotypes for this individual
+      for( unsigned site = 0 ; site < ccblocks->causative.numsites() ; ++site )
+	{
+	  //count # copies of minor allele at this site in this individual
+	  unsigned cminor = ( (ccblocks->causative[ind][site] == ccblocks->min_n[site]) ? 1 : 0 ) +
+	    ( (ccblocks->causative[ind+1][site] == ccblocks->min_n[site]) ? 1 : 0 );
+	  ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
+	}
+    }
+
+  //Now, output # of causative mutations on each haplotype carried by this diploid
+  for( unsigned ind = 0 ; ind < ccblocks->neutral.size() ; ind += 2 ) 
+    {
+      unsigned ncaus = count( ccblocks->causative[ind].begin(),
+			      ccblocks->causative[ind].end(),'1' );
+      ccbuffer.write( reinterpret_cast<char *>(&ncaus), sizeof(unsigned) );
+      ncaus = count( ccblocks->causative[ind+1].begin(),
+		     ccblocks->causative[ind+1].end(),'1' );
+      ccbuffer.write( reinterpret_cast<char *>(&ncaus), sizeof(unsigned) );
+    }
+  //Give phenos of controls & cases
+  for( vector< pair<double,double> >::const_iterator i = ccblocks->phenotypes.begin() ; 
+       i != ccblocks->phenotypes.end() ; ++i )
+    {
+      double x = i->first;
+      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+      x = i->second;
+      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+    }
+
+  //free up RAM
+  delete ccblocks;
+
+
   //obtain file lock on index ASAP
-  // FILE * ai_fh = fopen(anova_indexfile,"a");
-  // int ai_fd = fileno(ai_fh);
+  FILE * ai_fh = fopen(options.anova_indexfile.c_str(),"a");
+   int ai_fd = fileno(ai_fh);
 
-  // flock ai_lock = get_whole_flock();
+   flock ai_lock = get_whole_flock();
 
-  // //make sure our locking functions work...
-  // assert( ai_lock.l_type == F_WRLCK );
-  // assert( ai_lock.l_whence == SEEK_SET );
-  // assert( ai_lock.l_start == 0 );
-  // assert( ai_lock.l_len == 0 );
-  // if (fcntl(ai_fd,F_SETLKW,&ai_lock) == -1)
-  //   {
-  //     cerr << "ERROR: could not obtain lock on " << anova_indexfile << '\n';
-  //     exit(10);
-  //   }
+   //make sure our locking functions work...
+   assert( ai_lock.l_type == F_WRLCK );
+   assert( ai_lock.l_whence == SEEK_SET );
+   assert( ai_lock.l_start == 0 );
+   assert( ai_lock.l_len == 0 );
+   if (fcntl(ai_fd,F_SETLKW,&ai_lock) == -1)
+     {
+       cerr << "ERROR: could not obtain lock on " << options.anova_indexfile << '\n';
+       exit(10);
+     }
 
-  // FILE * a_fh = fopen(anovafile,"a");
-  // int a_fd = fileno(a_fh);
-  // flock a_lock = get_whole_flock();
-  // assert( a_lock.l_type == F_WRLCK );
-  // assert( a_lock.l_whence == SEEK_SET );
-  // assert( a_lock.l_start == 0 );
-  // assert( a_lock.l_len == 0 );
-  // if (fcntl(a_fd,F_SETLKW,&a_lock) == -1)
-  //   {
-  //     cerr << "ERROR: could not obtain lock on " << anovafile << '\n';
-  //     exit(10);
-  //   }
+   FILE * a_fh = fopen(options.anovafile.c_str(),"a");
+   int a_fd = fileno(a_fh);
+   flock a_lock = get_whole_flock();
+   assert( a_lock.l_type == F_WRLCK );
+   assert( a_lock.l_whence == SEEK_SET );
+   assert( a_lock.l_start == 0 );
+   assert( a_lock.l_len == 0 );
+   if (fcntl(a_fd,F_SETLKW,&a_lock) == -1)
+     {
+       cerr << "ERROR: could not obtain lock on " << options.anovafile << '\n';
+       exit(10);
+     }
 
-  // //buffer and write output
-
-  // //first, the index info.
-  // ostringstream buffer;
-  // buffer << record_no << ' ' << lseek( a_fd, 0, SEEK_CUR ) << '\n';
-  // write(ai_fd,buffer.str().c_str(),buffer.str().size());
-  // buffer.str(string());
-
-  // //now, the data that will be processed later for actual GWAS
-  // buffer.write(reinterpret_cast<const char *>(&ncontrols),sizeof(unsigned));
-  // buffer.write(reinterpret_cast<const char *>(&ncases),sizeof(unsigned));
-  // unsigned neutral_muts = neutral.numsites(),causative_muts=causative.numsites();
-  // buffer.write(reinterpret_cast<char *>(&neutral_muts),sizeof(unsigned));
-  // buffer.write(reinterpret_cast<char *>(&causative_muts),sizeof(unsigned));
-
-  // for(SimData::const_pos_iterator i = neutral.pbegin() ; i != neutral.pend() ; ++i)
-  //   {
-  //     double pos = *i;
-  //     buffer.write(reinterpret_cast<char *>(&pos),sizeof(double));
-  //   }
-  // for(SimData::const_pos_iterator i = causative.pbegin() ; i != causative.pend() ; ++i)
-  //   {
-  //     double pos = *i;
-  //     buffer.write(reinterpret_cast<char *>(&pos),sizeof(double));
-  //   }
-  // write(a_fd,buffer.str().c_str(),buffer.str().size());
-  // buffer.str(string());
-
-  // vector<char> minors_neutral = get_minors(neutral);
-  // assert(minors_neutral.size() == neutral.numsites());
-  // vector<char> minors_causative = get_minors(causative);
-  // assert(minors_causative.size() == causative.numsites());
-
-  // //write the data in binary to output file
-  // write_data(a_fd, 0, 2*(ncontrols+ncases),
-  // 	     neutral,causative,
-  // 	     minors_neutral,minors_causative,
-  // 	     phenodata);
-
-  // a_lock.l_type = F_UNLCK;
-  // if (fcntl(a_fd,F_UNLCK,&a_lock) == -1)
-  //   {
-  //     cerr << "ERROR: could not obtain lock on " << anovafile << '\n';
-  //     exit(10);
-  //   }
-  // fclose(a_fh);
-  // ai_lock.l_type = F_UNLCK;
-  // if (fcntl(ai_fd,F_UNLCK,&ai_lock) == -1)
-  //   {
-  //     cerr << "ERROR: could not release lock on " << anova_indexfile << '\n';
-  //     exit(10);
-  //   }
-  // fclose(ai_fh);
+   ostringstream buffer;
+   buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR ) << '\n';
+   if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
+     {
+       cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
+       exit(errno);
+     }
+   buffer.str(string());
+   
+   //write out the CC buffer
+   if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
+     {
+       cerr << "Error on writing buffer to " << options.anovafile << '\n';
+       exit(errno);
+     }
+   
+   //Unlock files
+   a_lock.l_type = F_UNLCK;
+   if (fcntl(a_fd,F_UNLCK,&a_lock) == -1)
+     {
+       cerr << "ERROR: could not relesae lock on " << options.anovafile << '\n';
+       exit(10);
+     }
+   fflush(a_fh);
+   fclose(a_fh);
+   ai_lock.l_type = F_UNLCK;
+   if (fcntl(ai_fd,F_UNLCK,&ai_lock) == -1)
+     {
+       cerr << "ERROR: could not release lock on " << options.anova_indexfile << '\n';
+       exit(10);
+      }
+   fflush(ai_fh);
+   fclose(ai_fh);
 }
-
-// void get_pheno_stats(const population & p,const double & case_proportion,
-// 		     double * pheno_cutoff,double * mean_pheno,
-// 		     double * sd_pheno)
-// {
-//   vector<double> phenos;
-//   for(unsigned i = 0 ; i < p.phenotypes.size() ; ++i )
-//     {
-//       phenos.push_back(p.phenotypes[i].first + p.phenotypes[i].second);
-//     }
-//   sort(phenos.begin(),phenos.end());
-//   *pheno_cutoff = gsl_stats_quantile_from_sorted_data(&phenos[0],1,
-// 						      phenos.size(),
-// 						      1. - case_proportion);
-//   *mean_pheno = gsl_stats_mean(&phenos[0],1,phenos.size());
-//   *sd_pheno = gsl_stats_sd(&phenos[0],1,phenos.size());
-// }
-
 
 params process_command_line(int argc, char ** argv)
 {
