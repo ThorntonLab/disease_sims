@@ -52,6 +52,7 @@
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/program_options.hpp>
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_rng.h>
@@ -64,6 +65,7 @@
 using namespace std;
 using namespace Sequence;
 using namespace KTfwd;
+using namespace boost::program_options;
 
 struct params
 {
@@ -328,6 +330,36 @@ int main(int argc, char ** argv)
 params process_command_line(int argc, char ** argv)
 {
   params rv;
+
+  options_description desc("Process output from TFL2013_ind and generate case/control panel");
+  /*
+    string indexfile,popfile,phenofile,anovafile,anova_indexfile;
+    unsigned twoN,record_no,ncases,ncontrols,seed;
+    double case_proportion;
+  */
+  desc.add_options()
+    ("help,h", "Produce help message")
+    ("indexfile,i",value<string>(&rv.indexfile)->default_value(string()),"Index file output by TFL2013_ind")
+    ("popfile,p",value<string>(&rv.popfile)->default_value(string()),"Population file output by TFL2013_ind")
+    ("phenofile,P",value<string>(&rv.phenofile)->default_value(string()),"Phenotypes file output by TFL2013_ind")
+    ("ccfile,c",value<string>(&rv.anovafile)->default_value(string()),"File to write case/control data")
+    ("ccindex,I",value<string>(&rv.anova_indexfile)->default_value(string()),"File to write index info for case/control data file")
+    ("recordno,r",value<unsigned>(&rv.record_no)->default_value(0),"Record number to look up in indexfile")
+    ("ncases,n",value<unsigned>(&rv.ncases)->default_value(0),"Number of cases to sample")
+    ("ncontrols,N",value<unsigned>(&rv.ncases)->default_value(0),"Number of controls to sample")
+    ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed")
+    ("threshold,t",value<double>(&rv.case_proportion)->default_value(-1.),"Proportion of population to be labelled as putative cases.  Value must be 0 < t < 1. E.g., individuals with phenotypic values larger than the (1-t)th quantile of phenotypic values in the entire population are potential cases.  For example, in Thornton, Foran, and Long (2013), we used t = 0.15, meaning that the upper 15% of phenotypic values were treated as possible cases.")
+    ;
+
+  variables_map vm;
+  store(parse_command_line(argc, argv, desc), vm);
+  notify(vm);
+
+  if(argc == 1 || vm.count("help"))
+    {
+      cerr << desc << '\n';
+      exit(0);
+    }
 
   return rv;
 }
