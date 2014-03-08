@@ -72,7 +72,43 @@ struct params
   string indexfile,popfile,phenofile,anovafile,anova_indexfile;
   unsigned twoN,record_no,ncases,ncontrols,seed;
   double case_proportion;
+
+  bool files_undef( void ) const;
+  void report_empty( std::ostream & out ) const;
 };
+
+bool params::files_undef( void ) const
+{
+  return ( indexfile.empty() ||
+	   popfile.empty() ||
+	   phenofile.empty() ||
+	   anovafile.empty() ||
+	   anova_indexfile.empty() );
+}
+
+void params::report_empty( std::ostream & out ) const
+{
+  if( indexfile.empty() )
+    {
+      out << "Error: index file for input data not defined.  Use -i option.\n";
+    }
+  if( popfile.empty() )
+    {
+      out << "Error: Population data file for input data not defined.  Use -p option.\n";
+    }
+  if( phenofile.empty() )
+    {
+      out << "Error: Phenotype data file for input data not defined.  Use -P option.\n";
+    }
+  if( anovafile.empty() )
+    {
+      out << "Error: Output data file for case/control genotypes not specified.  Use -c option.\n";
+    }
+  if( anova_indexfile.empty() )
+    {
+      out << "Error: Output file name for index file not specified.  Use -I option.\n";
+    }
+}
 
 params process_command_line(int argc, char ** argv);
 
@@ -359,6 +395,12 @@ params process_command_line(int argc, char ** argv)
     {
       cerr << desc << '\n';
       exit(0);
+    }
+
+  if (rv.files_undef())
+    {
+      rv.report_empty(cerr);
+      exit(10);
     }
 
   return rv;
