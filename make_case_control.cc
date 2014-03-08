@@ -258,6 +258,7 @@ int main(int argc, char ** argv)
   //free up RAM
   delete ccblocks;
 
+  //4. Output to files
 
   //obtain file lock on index ASAP
   FILE * ai_fh = fopen(options.anova_indexfile.c_str(),"a");
