@@ -280,15 +280,15 @@ int main(int argc, char ** argv)
 	{
 	  we_can_fix_this = false;
 	  wbuffer << "Warning: there are too few unique putative controls. "
-		  << "There are " << options.ncontrols << " desired, but only " << ucontrols.size() << " "
-		  << "do not overlap with list of putative cases.\n";
+		  << "There are " << options.ncontrols << " controls desired, but only " << ucontrols.size() << " "
+		  << "diploids do not overlap with list of putative cases.\n";
 	}
       if ( ucases.size() < options.ncases )
 	{
 	  we_can_fix_this = false;
 	  wbuffer << "Warning: there are too few unique putative cases. "
-		  << "There are " << options.ncases << " desired, but only " << ucases.size() << " "
-		  << "do not overlap with list of putative controls.\n";
+		  << "There are " << options.ncases << " cases desired, but only " << ucases.size() << " "
+		  << "diploids do not overlap with list of putative controls.\n";
 	}
       if ( we_can_fix_this )
 	{
