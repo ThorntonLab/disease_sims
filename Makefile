@@ -5,8 +5,8 @@ TARGETS=TFL2013_ind make_case_control esm_chisq_zscore
 
 all: TFL2013.o TFL2013_ind.o make_case_control.o readCC.o esm_chisq_zscore.o esm.o chisq_per_marker.o locking_routines.o esm_filter_sites.o ccintermediate.o
 	$(CXX) $(CXXFLAGS) -o TFL2013_ind TFL2013_ind.o -lboost_system -lboost_program_options -lgsl -lgslcblas $(LDFLAGS)
-	$(CXX) $(CXXFLAGS) -o make_case_control make_case_control.o ccintermediate.o locking_routines.o -lsequence -lz -lboost_program_options -lgsl -lgslcblas $(LDFLAGS)
-	$(CXX) $(CXXFLAGS) -o esm_chisq_zscore esm_chisq_zscore.o esm.o chisq_per_marker.o esm_filter_sites.o readCC.o locking_routines.o -lboost_thread -lgsl -lgslcblas $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o make_case_control make_case_control.o ccintermediate.o locking_routines.o -lsequence -lz -lboost_system -lboost_program_options -lgsl -lgslcblas $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o esm_chisq_zscore esm_chisq_zscore.o esm.o chisq_per_marker.o esm_filter_sites.o readCC.o locking_routines.o -lboost_system -lboost_thread -lgsl -lgslcblas $(LDFLAGS)
 clean: 
 	rm -f *.o $(TARGETS)
 
