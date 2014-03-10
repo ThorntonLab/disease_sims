@@ -465,11 +465,6 @@ params process_command_line(int argc, char ** argv)
   params rv;
 
   options_description desc("Process output from TFL2013_ind and generate case/control panel");
-  /*
-    string indexfile,popfile,phenofile,anovafile,anova_indexfile;
-    unsigned twoN,record_no,ncases,ncontrols,seed;
-    double case_proportion;
-  */
   desc.add_options()
     ("help,h", "Produce help message")
     ("indexfile,i",value<string>(&rv.indexfile)->default_value(string()),"Index file output by TFL2013_ind")
