@@ -49,6 +49,7 @@
 #include <cassert>
 #include <algorithm>
 #include <cstdlib> 
+#include <set>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -183,7 +184,7 @@ int main(int argc, char ** argv)
 
   if ( ! found )
     {
-      cerr << "Error: replicate number " << options.record_no << " not found in " << options.indexfile << '\n';
+      cerr << "Error: record number " << options.record_no << " not found in " << options.indexfile << '\n';
       exit(10);
     }
   index.close();
@@ -245,6 +246,65 @@ int main(int argc, char ** argv)
 	  put_controls.push_back(i);
 	}
     }
+
+  /*
+    Check: do putative cases and controls overlap?
+
+    If so, can we get rid of the overlap and still have sufficient #s in each category?
+
+    If not, we warn that the CC data may be invalid, as cases and controls will share individuals.
+  */
+  vector< size_t > isect;
+  sort( put_controls.begin(), put_controls.end() );
+  sort( put_cases.begin(), put_cases.end() );
+  set_intersection( put_controls.begin(),
+		    put_controls.end(),
+		    put_cases.begin(),
+		    put_cases.end(),
+		    std::back_inserter(isect) );
+  if ( ! isect.empty() )
+    {
+      //Then case & control lists overlap and share individuals
+      ostringstream wbuffer;
+      wbuffer << "Warning: list of putative cases and controls have individuals in common.\n"; 
+      //Get the set differences now
+      vector< size_t > ucontrols, ucases;
+      set_difference( put_controls.begin() , put_controls.end(),
+		      put_cases.begin(), put_cases.end(),
+		      std::back_inserter( ucontrols ) );
+      set_difference( put_cases.begin() , put_cases.end(),
+		      put_controls.begin(), put_controls.end(),
+		      std::back_inserter( ucases ) );
+      bool we_can_fix_this = true;
+      if ( ucontrols.size() < options.ncontrols )
+	{
+	  we_can_fix_this = false;
+	  wbuffer << "Warning: there are too few unique putative controls. "
+		  << "There are " << options.ncontrols << " desired, but only " << ucontrols.size() << " "
+		  << "do not overlap with list of putative cases.\n";
+	}
+      if ( ucases.size() < options.ncases )
+	{
+	  we_can_fix_this = false;
+	  wbuffer << "Warning: there are too few unique putative cases. "
+		  << "There are " << options.ncases << " desired, but only " << ucases.size() << " "
+		  << "do not overlap with list of putative controls.\n";
+	}
+      if ( we_can_fix_this )
+	{
+	  put_cases = ucases;
+	  put_controls = ucontrols;
+	  ucases.clear();
+	  ucontrols.clear();
+	}
+      else
+	{
+	  cerr << wbuffer.str()
+	       << "Warning: your cases and controls may share individuals for record number " << options.record_no << "\n."
+	       << "We are proceeding anyways...\n";
+	}
+    }
+
 
   //Randomize lists just for fun
   boost::function< size_t (size_t) > rand = boost::bind(&gsl_ran_flat, r, 0,double(put_cases.size()));
