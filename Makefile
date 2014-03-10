@@ -1,7 +1,7 @@
 CXX=c++
 CXXFLAGS=-O2 -Wall -W -I.
 
-TARGETS=TFL2013_ind
+TARGETS=TFL2013_ind make_case_control esm_chisq_zscore
 
 all: TFL2013.o TFL2013_ind.o make_case_control.o readCC.o esm_chisq_zscore.o esm.o chisq_per_marker.o locking_routines.o esm_filter_sites.o ccintermediate.o
 	$(CXX) $(CXXFLAGS) -o TFL2013_ind TFL2013_ind.o -lboost_system -lboost_program_options -lgsl -lgslcblas $(LDFLAGS)
