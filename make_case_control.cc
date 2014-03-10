@@ -75,6 +75,7 @@ struct params
 
   bool files_undef( void ) const;
   void report_empty( std::ostream & out ) const;
+  bool params_ok( void ) const;
 };
 
 bool params::files_undef( void ) const
@@ -108,6 +109,34 @@ void params::report_empty( std::ostream & out ) const
     {
       out << "Error: Output file name for index file not specified.  Use -I option.\n";
     }
+}
+
+bool params::params_ok( void ) const
+{
+  bool ok = true;
+
+  if ( ! ncases )
+    {
+      ok = false;
+      cerr << "Error: # of cases = " << ncases << '\n';
+    }
+  if ( ! ncontrols )
+    {
+      ok = false;
+      cerr << "Error: # of controls = " << ncontrols << '\n';
+    }
+
+  if ( ! (case_proportion > 0. && case_proportion < 1.) )
+    {
+      ok = false;
+      cerr << "Error: proportion of cases must be 0 < x < 1.  Input value was " << case_proportion << '\n';
+    }
+
+  if (! ok )
+    {
+      cerr << "Please use -h option to see help\n";
+    }
+  return ok;
 }
 
 params process_command_line(int argc, char ** argv);
@@ -163,6 +192,14 @@ int main(int argc, char ** argv)
   popstream.seekg( pop_offset );
   read_binary_pop( &gametes, &mutations, &diploids, boost::bind(mreader(),_1),popstream );
   popstream.close();
+
+  //Make sure that ncases + ncontrols < N
+  if ( (options.ncontrols + options.ncases) > diploids.size() )
+    {
+      std::cerr << "Error: population size is " << diploids.size() << " diploids. "
+		<< "Sum of cases and controls is " << (options.ncontrols + options.ncases) << '\n';
+      exit(10);
+    }
 
   //Read in the phenotype data
   ifstream phenostream( options.phenofile.c_str() );
@@ -400,6 +437,11 @@ params process_command_line(int argc, char ** argv)
   if (rv.files_undef())
     {
       rv.report_empty(cerr);
+      exit(10);
+    }
+
+  if (! rv.params_ok() )
+    {
       exit(10);
     }
 
