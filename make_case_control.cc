@@ -170,7 +170,7 @@ int main(int argc, char ** argv)
 
   long pop_offset,pheno_offset,effect_offset;
   unsigned ith_rep;
-  bool found = true;
+  bool found = false;
   //get offset of the population and the phenotypes from the indexfile
   ifstream index( options.indexfile.c_str() );
   while( !found && !index.eof() )
@@ -219,6 +219,7 @@ int main(int argc, char ** argv)
     }
   phenostream.close();
 
+  assert( phenotypes.size() == diploids.size() );
   //The real work starts here
 
   //1. get mean, sd, and upper quantile of pheno distribution
@@ -511,8 +512,8 @@ std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, 
       pcopy.push_back(phenos[i].first+phenos[i].second);
     }
   sort(pcopy.begin(),pcopy.end());
+  //get the upper case_proportion-th'd quantile from the pheno dist
+  *cutoff = gsl_stats_quantile_from_sorted_data(&pcopy[0],1,pcopy.size(),1.-case_proportion);
   return std::make_pair( gsl_stats_mean(&pcopy[0],1,pcopy.size()),
 			 gsl_stats_sd(&pcopy[0],1,pcopy.size()) );
-  //get the upper case_proportion-th'd quantile from the pheno dist
-  *cutoff =  gsl_stats_quantile_from_sorted_data(&pcopy[0],1,pcopy.size(),1.-case_proportion);
 }
