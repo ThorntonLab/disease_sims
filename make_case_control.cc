@@ -148,17 +148,6 @@ int main(int argc, char ** argv)
 {
   params options = process_command_line(argc,argv);
   int argn = 1;
-  // const char * indexfile = argv[argn++];
-  // const char * hapfile = argv[argn++];
-  // const char * phenofile = argv[argn++];
-  // const unsigned & twoN = atoi(argv[argn++]);
-  // const unsigned & record_no = atoi(argv[argn++]);
-  // const char * anovafile = argv[argn++];
-  // const char * anova_indexfile = argv[argn++];
-  // const double case_proportion = atof(argv[argn++]); //e.g., 0.1 means the top 10% of the population's phenotypes are considered "diseased"
-  // const unsigned ncases = atoi(argv[argn++]);
-  // const unsigned ncontrols = atoi(argv[argn++]);
-  // const unsigned seed = atoi(argv[argn++]);
 
   gsl_rng * r =  gsl_rng_alloc(gsl_rng_taus2);
   gsl_rng_set(r,options.seed);
