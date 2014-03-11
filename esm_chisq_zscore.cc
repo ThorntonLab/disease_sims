@@ -49,23 +49,8 @@ params parse_command_line(int argc, char ** argv);
 
 int main(int argc, char ** argv)
 {
-  // int argn = 1;
-  // //const char * ccindexfile = argv[argn++];
-  // //const char * ccfile = argv[argn++];
-  // const unsigned record_no = atoi(argv[argn++]);
-  // const double minfreq = atof(argv[argn++]);
-  // const double maxfreq = atof(argv[argn++]);
-  // const unsigned K = atoi(argv[argn++]);
-  // const double rsq_cutoff = atof(argv[argn++]);
-  // const unsigned max_controls = atoi(argv[argn++]);
-  // const unsigned max_cases = atoi(argv[argn++]);
-  // const unsigned nperms = atoi(argv[argn++]);
-  // //const char * outfile = argv[argn++];
-  // const unsigned nthreads = atoi(argv[argn++]);
-  // const unsigned seed = atoi(argv[argn++]);
-
   params options = parse_command_line(argc, argv);
-
+  
   bool fail = true;
   CCblock ccdata = read_CC_record(options.ccindexfile.c_str(),options.ccfile.c_str(),options.record_no,&fail,options.max_controls,options.max_cases,true);
   if(fail)
