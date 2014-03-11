@@ -2,10 +2,6 @@
 
 #gives case/control p-values for single-marker test under an additive model
 
-#SPATH="/data/users/krthornt/src/forward_src/supporting_code"
-#source(paste(SPATH,"/read_records.R",sep=""))
-#source(paste(SPATH,"/logit_pvals.R",sep=""))
-
 getPheno=function(con,N)
     {
         pheno=matrix( readBin(con,"numeric",2*N), ncol=2, byrow=TRUE,dimnames=list(NULL,c("G","E")))
