@@ -31,12 +31,13 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 			boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
 	  if( itr == datablock_neut.end() )
 	    {
-	      datablock_neut.push_back( make_pair(mutpos,string('0',ttl)) );
+	      datablock_neut.push_back( make_pair(mutpos,string(ttl,'0')) );
 	      datablock_neut[datablock_neut.size()-1].second[offset + 2*i] = '1';
 	    }
 	  else
 	    {
-	      itr->second[2*i] = '1';
+	      assert(offset+2*i < itr->second.size());
+	      itr->second[offset + 2*i] = '1';
 	    }
 	}
       for( unsigned mut = 0 ; mut < diploids[ indlist[i] ].second->mutations.size() ; ++mut )
@@ -47,11 +48,12 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 			boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
 	  if( itr == datablock_neut.end() )
 	    {
-	      datablock_neut.push_back( make_pair(mutpos,string('0',2*ttl)) );
+	      datablock_neut.push_back( make_pair(mutpos,string(ttl,'0')) );
 	      datablock_neut[datablock_neut.size()-1].second[2*i + 1] = '1';
 	    }
 	  else
 	    {
+	      assert( (offset + 2*i + 1) < itr->second.size() );
 	      itr->second[offset + 2*i + 1] = '1';
 	    }
 	}
@@ -64,12 +66,13 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 			boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
 	  if( itr == datablock_sel.end() )
 	    {
-	      datablock_sel.push_back( make_pair(mutpos,string('0',ttl)) );
+	      datablock_sel.push_back( make_pair(mutpos,string(ttl,'0')) );
 	      datablock_sel[datablock_sel.size()-1].second[offset + 2*i] = '1';
 	    }
 	  else
 	    {
-	      itr->second[2*i] = '1';
+	      assert( offset+2*i < itr->second.size() );
+	      itr->second[offset+2*i] = '1';
 	    }
 	}
       for( unsigned mut = 0 ; mut < diploids[ indlist[i] ].second->smutations.size() ; ++mut )
@@ -80,11 +83,12 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 			boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
 	  if( itr == datablock_sel.end() )
 	    {
-	      datablock_sel.push_back( make_pair(mutpos,string('0',2*ttl)) );
+	      datablock_sel.push_back( make_pair(mutpos,string(ttl,'0')) );
 	      datablock_sel[datablock_sel.size()-1].second[2*i + 1] = '1';
 	    }
 	  else
 	    {
+	      assert( (offset + 2*i + 1) < itr->second.size() );
 	      itr->second[offset + 2*i + 1] = '1';
 	    }
 	}
