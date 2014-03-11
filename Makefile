@@ -1,5 +1,7 @@
 CXX=c++
-CXXFLAGS=-O2 -Wall -W -I.
+OPT=-O2
+DEBUG=-DNDEBUG
+CXXFLAGS=$(OPT) $(DEBUG) -Wall -W -I.
 
 TARGETS=TFL2013_ind make_case_control esm_chisq_zscore atomic_locker/atomic_locker
 
