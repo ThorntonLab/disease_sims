@@ -224,7 +224,5 @@ params parse_command_line(int argc, char ** argv)
       exit(10);
     }
 
-  cerr <<"here\n";
-  exit(0);			   
   return rv;
 }
