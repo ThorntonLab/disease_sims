@@ -361,7 +361,7 @@ int main(int argc, char ** argv)
     }
 
   //Now, output # of causative mutations on each haplotype carried by this diploid
-  for( unsigned ind = 0 ; ind < ccblocks->neutral.size() ; ind += 2 ) 
+  for( unsigned ind = 0 ; ind < ccblocks->causative.size() ; ind += 2 ) 
     {
       unsigned ncaus = count( ccblocks->causative[ind].begin(),
 			      ccblocks->causative[ind].end(),'1' );
