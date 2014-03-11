@@ -26,7 +26,7 @@ struct disease_effect
 	e2 += (*itr)->s;
       }
     double effect = pow( e1*e2, 0.5 );
-    return std::make_pair(effect, gsl_ran_gaussian(r,sd));
+    return std::make_pair(effect, (sd>0.)?gsl_ran_gaussian(r,sd):0.);
   }
 };
 

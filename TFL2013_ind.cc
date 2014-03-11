@@ -273,7 +273,7 @@ int main(int argc, char ** argv)
 	  double x = multiplicative_phenotype()(diploids[i].first,
 						diploids[i].second);
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	  x = gsl_ran_gaussian(r,params.sd);
+	  x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
 	}
     }
