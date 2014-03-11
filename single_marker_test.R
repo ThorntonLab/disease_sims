@@ -4,9 +4,10 @@
 
 getPheno=function(con,N)
     {
-        pheno=matrix( readBin(con,"numeric",2*N), ncol=2, byrow=TRUE,dimnames=list(NULL,c("G","E")))
-        haps=matrix( readBin(con,"integer",2*N), ncol=2, byrow=TRUE,dimnames=list(NULL,c("h1","h2")))
-        return( list(pheno=pheno,haps=haps) )
+      nphenos=readBin(con,"integer",1)
+      pheno=matrix( readBin(con,"numeric",2*N), ncol=2, byrow=TRUE,dimnames=list(NULL,c("G","E")))
+      haps=matrix( readBin(con,"integer",2*N), ncol=2, byrow=TRUE,dimnames=list(NULL,c("h1","h2")))
+      return( list(pheno=pheno,haps=haps) )
     }
 
 getSpecificPheno=function(con,index,recordno,N)
