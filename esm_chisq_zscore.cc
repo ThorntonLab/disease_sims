@@ -181,7 +181,7 @@ params parse_command_line(int argc, char ** argv)
     ("nperms,n",value<unsigned>(&rv.nperms)->default_value(10000),"Number of permutations to perform")
     ("nthreads,t",value<unsigned>(&rv.nthreads)->default_value(1),"Number of permutations to perform")
     ("seed,s",value<unsigned>(&rv.seed)->default_value(0),"Random number seed")
-    ("minfreq,m",value<double>(&rv.minfreq)->default_value(0.),"Throw out a marker unless its minor allele frequency in controls is >= minfreq")
+    ("minfreq,m",value<double>(&rv.minfreq)->default_value(0.),"Throw out a marker unless its minor allele frequency in controls is > minfreq")
     ("maxfreq,m",value<double>(&rv.maxfreq)->default_value(0.05),"Throw out a marker unless its minor allele frequency in controls is < maxfreq")
     ("rsq-cutoff,R",value<double>(&rv.rsq_cutoff)->default_value(0.8),"The program calculates r^2 for all pairs of sites (based on diploid genotypes).  If r^2 >= rsq-cutoff, then only one of the two sites in a pair is retained for calculation of the ESM statistic")
     ;
