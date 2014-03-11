@@ -142,7 +142,7 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
       rv.min_n.push_back( (c <= ncontrols) ? '1' : '0' );
     }
   for( SimData::const_site_iterator i = rv.causative.sbegin() ; 
-       i < rv.neutral.send() ; ++i )
+       i < rv.causative.send() ; ++i )
     {
       size_t c = count(i->second.begin(),i->second.begin() + 2*ncontrols,'1');
       rv.min_c.push_back( (c <= ncontrols) ? '1' : '0' );
