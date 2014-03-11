@@ -57,18 +57,12 @@ struct mwriter
   typedef void result_type;
   result_type operator()( const TFLmtype & m, std::ostringstream & buffer ) const
   {
-    unsigned u = m.n;
-    buffer.write( reinterpret_cast< char * >(&u),sizeof(unsigned) );
-    u = m.o;
-    buffer.write( reinterpret_cast< char * >(&u),sizeof(unsigned) );
-    bool b = m.neutral;
-    buffer.write( reinterpret_cast< char * >(&b),sizeof(bool) );
-    double d = m.pos;
-    buffer.write( reinterpret_cast< char * >(&d),sizeof(double) );
-    d = m.s;
-    buffer.write( reinterpret_cast< char * >(&d),sizeof(double) );
-    char label = m.label;
-    buffer.write( reinterpret_cast< char * >(&label),sizeof(char) );
+    buffer.write( reinterpret_cast< const char * >(&m.n),sizeof(unsigned) );
+    buffer.write( reinterpret_cast< const char * >(&m.o),sizeof(unsigned) );
+    buffer.write( reinterpret_cast< const char * >(&m.neutral),sizeof(bool) );
+    buffer.write( reinterpret_cast< const char * >(&m.pos),sizeof(double) );
+    buffer.write( reinterpret_cast< const char * >(&m.s),sizeof(double) );
+    buffer.write( reinterpret_cast< const char * >(&m.label),sizeof(char) );
   }
 };
 
