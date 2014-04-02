@@ -1,0 +1,59 @@
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{listings}
+\author{Kevin R. Thornton}
+\title{Binary file formats}
+
+\lstset { %
+    language=R,
+    tabsize=4,
+%    backgroundcolor=\color{red}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
+}
+\begin{document}
+\maketitle
+
+\section*{Output from TFL2013\_ind}
+\subsection*{Phenotypes file}
+The format is:
+\begin{enumerate}
+\item n = An integer representing how many individuals phenotype data are recorded for.
+\item n pairs of doubles.  Each pair is the (genetic,random) component of phenotype.
+\end{enumerate}
+
+To read in \texttt{R}:
+
+\begin{lstlisting}
+f=file(``phenotypes.bin'',''rb'')
+#seek to position in f if needed
+
+#Read in the number of individuals
+n=readBin(f,''integer'',1)
+#Read in the phenotypes
+m=matrix(readBin(f,''numeric'',2*n),ncol=2,byrow=TRUE)
+\end{lstlisting}
+
+\subsection*{Effect sizes file}
+
+The format is:
+\begin{enumerate}
+\item n = An integer representing how many causative mutations for which there are records
+\item n sets of 4 doubles.  Each set is position, effect size, count in population, and age of allele
+\end{enumerate}
+
+To read in \texttt{R}:
+\begin{lstlisting}
+f=file(``phenotypes.bin'',''rb'')
+#seek to position in f if needed
+
+#Read in the number of causative mutations
+n=readBin(f,''integer'',1)
+#read in data
+m=matrix(readBin(f,"numeric",4*n),ncol=4,byrow=T)
+\end{lstlisting}
+
+\subsection*{The entire population}
+The population is written/read in C++ using the \texttt{fwdpp} function \texttt{write\_binary\_pop} and \texttt{read\_binary\_pop}, respectively.  The policies needed to read and write mutations are called \texttt{mwriter} and \texttt{mreader}, respectively, and are found in this project's header file \texttt{mutation\_with\_age.hpp}.
+
+One does \textbf{not} read in these files in \texttt{R}, especially if the population size is large!  The RAM required would be massive, and it would be slow.
+\end{document}
