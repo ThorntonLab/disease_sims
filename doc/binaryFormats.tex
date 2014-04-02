@@ -56,4 +56,22 @@ m=matrix(readBin(f,"numeric",4*n),ncol=4,byrow=T)
 The population is written/read in C++ using the \texttt{fwdpp} function \texttt{write\_binary\_pop} and \texttt{read\_binary\_pop}, respectively.  The policies needed to read and write mutations are called \texttt{mwriter} and \texttt{mreader}, respectively, and are found in this project's header file \texttt{mutation\_with\_age.hpp}.
 
 One does \textbf{not} read in these files in \texttt{R}, especially if the population size is large!  The RAM required would be massive, and it would be slow.
+
+\section*{The case/control blocks}
+
+(This is taken from the file \texttt{single\_marker\_test.R} in the repo.)
+
+To read one in using \texttt{R}:
+
+\begin{lstlisting}
+getCCblock=function(con)
+    {
+        d=readBin(con,"integer",4)
+        pos=readBin(con,"numeric",d[3]+d[4])
+        genos=matrix(readBin(con,"integer",(d[1]+d[2])*(d[3]+d[4])),ncol=d[3]+d[4],byrow=TRUE)
+        burdens=matrix(readBin(con,"integer",2*(d[1]+d[2])),ncol=2,byrow=TRUE)
+        phenos=matrix(readBin(con,"numeric",2*(d[1]+d[2])),ncol=2,byrow=TRUE)
+        return(list(pos=pos,genos=genos,burdens=burdens,phenos=phenos))
+    }
+\end{lstlisting}
 \end{document}
