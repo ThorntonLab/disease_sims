@@ -485,7 +485,7 @@ simparams parse_command_line(const int & argc,
     ("phenotypes,P",value<string>(&rv.phenofile)->default_value(string()),"Name of output file for phenotypes")
     ("effectsfile,E",value<string>(&rv.effectsfile)->default_value(string()),"Name of output file for effect sizes of causative mutations")
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed (unsigned integer)")
-    ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change");
+    ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.  Only applies to gene-based model.");
     ;
 
   variables_map vm;
@@ -517,5 +517,9 @@ simparams parse_command_line(const int & argc,
       exit(10);
     }
 
+  if ( rv.multiplicative && rv.optimum != 0. )
+    {
+      cerr << "Warning: multiplicative fitness model and change in optimum options both used.  Change in optimum will be ignored\n";
+    }
   return rv;
 }
