@@ -62,26 +62,56 @@ getPvalsCCstatus = function(genos,ncontrols,ncases)
         return(apply(genos,2,dologit,ncontrols,ncases))
     }
 
+readMutsFromPop=function(con,N=1)
+  {
+    nmuts=readBin(con,"integer",1)
+    m=matrix(data=NA,ncol=4,nrow=nmuts,dimnames=list(NULL,c("freq","origin","pos","esize")))
+    
+    for(i in 1:nmuts)
+      {
+        ID=readBin(f,"integer",1)
+        freq=readBin(f,"integer",1)/N
+        gen=readBin(f,"integer",1)
+        neutral=readBin(f,"integer",1,size=1)
+        pos=readBin(f,"numeric",1)
+        esize=readBin(f,"numeric",1)
+        label=readBin(f,integer(),1,size=1)
+        
+        m[i,1]=freq
+        m[i,2]=gen
+        m[i,3]=pos
+        m[i,4]=esize
+      }
+    return (as.data.frame(m))
+  }
+
+readSpecificMutsFromPop=function(con,N,index,recordno)
+  {
+    z=which(index$V1 == recordno)
+    seek(con,index$V2[z])
+    return (readMutsFromPop(con,N))
+  }
+
 makePVblock = function( ccdata, esizes, ncontrols,ncases )
     {
         output=matrix(data=NA,ncol=6,nrow=ncol(ccdata$genos),
-            dimnames=list(NULL,(c("pos","esize","mfcontrols","mfcases","popcount","score"))))
+            dimnames=list(NULL,(c("pos","esize","mfcontrols","mfcases","popfreq","score"))))
         output[,"pos"]=ccdata$pos
         output[,"mfcontrols"]=colSums(ccdata$genos[1:ncontrols,])/(2*ncases)
         output[,"mfcases"]=colSums(ccdata$genos[(ncontrols+1):nrow(ccdata$genos),])/(2*ncases)
         for( r in 1:nrow(output) )
             {
-                z=which(as.numeric(esizes[,"pos"]) == ccdata$pos[r]);
+                z=which(as.numeric(esizes$pos) == ccdata$pos[r]);
                 if(length(z)==0)
                     {
                         #mutation is neutral, get its frequency from the population
                         output[r,"esize"]=0
-                        output[r,"popcount"]=NA
+                        output[r,"popfreq"]=NA
                     }
                 else
                     {
-                      output[r,"esize"]=as.numeric(esizes[,"esize"][z])
-                      output[r,"popcount"]=as.numeric(esizes[,"count"][z])
+                      output[r,"esize"]=as.numeric(esizes$esize[z])
+                      output[r,"popfreq"]=as.numeric(esizes$freq[z])
                     }
             }
         output[,"score"]=-log10(getPvalsCCstatus(ccdata$genos, ncontrols,ncases))
@@ -92,7 +122,7 @@ n=commandArgs(trailing=T)
 
 indexfile=n[1]
 anovaindex=n[2]
-esizefile=n[3]
+popfile=n[3]
 recordno=n[4]
 anovafile=n[5]
 ncontrols=as.integer(n[6])
@@ -104,15 +134,15 @@ blocker=n[11]
 index=read.table(indexfile)
 aindex=read.table(anovaindex)
 
-f=file(esizefile,"rb")
-esizes=getSpecificEsizes(f,index,recordno)
+f=file(popfile,"rb")
+esizes=readSpecificMutsFromPop(f,2*N,index,recordno)
 close(f)
 f=file(anovafile,"rb")
 ccdata=getSpecificCCblock(f,aindex,recordno)
 close(f)
 pvblock=makePVblock(ccdata,esizes,ncontrols,ncases)
 
-pvblock[,"popcount"]=pvblock[,"popcount"]/(2*N)
+#pvblock[,"popcount"]=pvblock[,"popcount"]/(2*N)
 
 options(warn=-1)
 f=pipe(paste(blocker,recordno,outindex,outfile,as.integer(nrow(pvblock)),sep=" "))
