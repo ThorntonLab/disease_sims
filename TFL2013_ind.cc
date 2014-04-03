@@ -219,7 +219,7 @@ int main(int argc, char ** argv)
 					    recmap),
 				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,r),
+				boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r),
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
 	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
 	}
@@ -241,7 +241,7 @@ int main(int argc, char ** argv)
 					    recmap),
 				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,r),
+				boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r),
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
 	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
 	}
@@ -485,7 +485,7 @@ simparams parse_command_line(const int & argc,
     ("phenotypes,P",value<string>(&rv.phenofile)->default_value(string()),"Name of output file for phenotypes")
     ("effectsfile,E",value<string>(&rv.effectsfile)->default_value(string()),"Name of output file for effect sizes of causative mutations")
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed (unsigned integer)")
-    ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.  Only applies to gene-based model.");
+    ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.");
     ;
 
   variables_map vm;
@@ -517,9 +517,5 @@ simparams parse_command_line(const int & argc,
       exit(10);
     }
 
-  if ( rv.multiplicative && rv.optimum != 0. )
-    {
-      cerr << "Warning: multiplicative fitness model and change in optimum options both used.  Change in optimum will be ignored\n";
-    }
   return rv;
 }
