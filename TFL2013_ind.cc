@@ -63,7 +63,7 @@ struct mutation_model
 struct simparams
 {
   unsigned N,N2,ngens_burnin,ngens_evolve,ngens_evolve_growth,replicate_no,seed;
-  double mu_disease,mu_neutral,littler,s,sd,sd_s;
+  double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum;
   bool dist_effects,multiplicative ;//= atoi(argv[argument++]);
   string indexfile, hapfile, phenofile, effectsfile ;
   simparams(void);
@@ -81,6 +81,7 @@ simparams::simparams(void) : N(20000),N2(20000),
 			     s(0.1),
 			     sd(0.075),
 			     sd_s(1),
+			     optimum(0.),
 			     dist_effects(true),
 			     multiplicative(false),
 			     indexfile(string()),
@@ -172,7 +173,7 @@ int main(int argc, char ** argv)
 					    recmap),
 				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,r),
+				boost::bind(disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,0.,r),
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
 	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
 	}
@@ -195,7 +196,7 @@ int main(int argc, char ** argv)
 					    recmap),
 				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,r),
+				boost::bind(disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r),
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
 	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
 	}
@@ -484,6 +485,7 @@ simparams parse_command_line(const int & argc,
     ("phenotypes,P",value<string>(&rv.phenofile)->default_value(string()),"Name of output file for phenotypes")
     ("effectsfile,E",value<string>(&rv.effectsfile)->default_value(string()),"Name of output file for effect sizes of causative mutations")
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed (unsigned integer)")
+    ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change");
     ;
 
   variables_map vm;

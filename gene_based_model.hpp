@@ -36,10 +36,10 @@ struct disease_effect_to_fitness
   typedef double result_type;
   template< typename iterator_type >
   inline double operator()(const iterator_type & g1, const iterator_type & g2,
-			   const double & sd, const double & sd_s,gsl_rng * r) const
+			   const double & sd, const double & sd_s,const double & optimum,gsl_rng * r) const
   {
     std::pair<double,double> effect = disease_effect()(g1,g2,sd,r);
-    double fitness = exp( (-1. * pow(effect.first+effect.second,2.))/(2.*pow(sd_s,2)) );
+    double fitness = exp( (-1. * pow(effect.first+effect.second-optimum,2.))/(2.*pow(sd_s,2)) );
     return ( fitness );
   }
 };
