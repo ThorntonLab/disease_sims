@@ -51,6 +51,7 @@ SEED=`echo "$RANDOM*$SGE_TASK_ID"|bc -l`
 
 #$ -N SMARKER
 #$ -hold_jid MAKECC
+#$ -q krt,bio,pub64
 #$ -t 1-250
 
 module load R
@@ -66,6 +67,7 @@ R --no-save --slave --args simindex.txt ccindex.txt popfile.bin $SGE_TASK_ID ccf
 
 #$ -N ESM
 #$ -hold_jid MAKECC
+#$ -q krt,bio,pub64
 #$ -t 1-250
 
 module load krthornt/fwdpp/0.2.2
