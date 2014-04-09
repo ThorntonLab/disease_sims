@@ -37,6 +37,8 @@ SEED=`echo "$RANDOM*$SGE_TASK_ID"|bc -l`
 #$ -q krt,bio,pub64
 #$ -t 1-250
 
+module load krthornt/fwdpp/0.2.2
+
 cd /fast-scratch/krthornt/test_disease_sim
 
 SEED=`echo "$RANDOM*$SGE_TASK_ID"|bc -l`
