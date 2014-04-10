@@ -168,6 +168,7 @@ int main(int argc, char ** argv)
       if( ith_rep == options.record_no )
 	{
 	  found = true;
+	  break;
 	}
     }
 
