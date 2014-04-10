@@ -148,13 +148,6 @@ int main(int argc, char ** argv)
   int nreps=atoi(argv[argument++]);
   const unsigned seed = atoi(argv[argument++]);
 
-  cerr << '#';
-  for(unsigned i=0;i<argc;++i)
-    {
-      cerr << argv[i] << ' ';
-    }
-  cerr << endl;
-
   gsl_rng * r =  gsl_rng_alloc(gsl_rng_taus2);
   gsl_rng_set(r,seed);
 
