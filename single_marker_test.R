@@ -102,17 +102,17 @@ makePVblock = function( ccdata, esizes, ncontrols,ncases )
         for( r in 1:nrow(output) )
             {
                 z=which(as.numeric(esizes$pos) == ccdata$pos[r]);
-                if(length(z)==0)
-                    {
+                #if(length(z)==0)
+                #    {
                         #mutation is neutral, get its frequency from the population
-                        output[r,"esize"]=0
-                        output[r,"popfreq"]=NA
-                    }
-                else
-                    {
-                      output[r,"esize"]=as.numeric(esizes$esize[z])
-                      output[r,"popfreq"]=as.numeric(esizes$count[z])
-                    }
+                #        output[r,"esize"]=0
+                #        output[r,"popfreq"]=NA
+                #    }
+                #else
+                #    {
+                output[r,"esize"]=as.numeric(esizes$esize[z])
+                output[r,"popfreq"]=as.numeric(esizes$count[z])
+                #    }
             }
         output[,"score"]=-log10(getPvalsCCstatus(ccdata$genos, ncontrols,ncases))
         return(output)
