@@ -6,6 +6,14 @@
 
 using namespace std;
 
+cc_intermediate::cc_intermediate(void) : neutral(Sequence::SimData()),
+					 causative(Sequence::SimData()),
+					 min_n( vector<char>() ),
+					 min_c( vector<char>() ),
+					 phenotypes( vector<pair<double,double> >() )
+{
+}
+
 void process_subset( vector< pair<double,string> > & datablock_neut,
 		     vector< pair<double,string> > & datablock_sel,
 		     vector< pair<double,double> > & ccphenos,

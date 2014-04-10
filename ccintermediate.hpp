@@ -13,6 +13,8 @@ struct cc_intermediate
   Sequence::SimData neutral,causative;
   std::vector<char> min_n,min_c; //minor alleles
   std::vector<std::pair<double,double> > phenotypes;
+  
+  cc_intermediate(void);
 };
 
 cc_intermediate process_population( const std::vector< std::pair<glist::iterator,glist::iterator> > & diploids,
