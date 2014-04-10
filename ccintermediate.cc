@@ -104,8 +104,18 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 {
   cc_intermediate rv;
 
+  /*
+    vector of position,genotype pairs. 
+    For each position, there will be ncontrols + 
+    ncases genotypes.  Controls before cases.
+
+    neutral = neutral mutations in population
+    selected = causative mutation in population
+    We keep the 2 classes separate for easier
+    processing downstream.
+  */
   vector< pair<double,string> > neutral,selected;
-  vector< pair<double,string> >::iterator itr;
+
   //Go thru controls first
   process_subset( neutral, selected,
 		  rv.phenotypes,
