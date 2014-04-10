@@ -144,17 +144,38 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
   Sequence::RemoveInvariantColumns(&rv.causative);
 
   //Define the minor allele state
+
+  //The block below deterimines minor allele based on controls
+  /*
   for( Sequence::SimData::const_site_iterator i = rv.neutral.sbegin() ; 
        i < rv.neutral.send() ; ++i )
     {
       size_t c = count(i->second.begin(),i->second.begin() + 2*ncontrols,'1');
-      rv.min_n.push_back( (c <= ncontrols) ? '1' : '0' );
+      rv.min_n.push_back( (c < ncontrols) ? '1' : '0' );
     }
   for( Sequence::SimData::const_site_iterator i = rv.causative.sbegin() ; 
        i < rv.causative.send() ; ++i )
     {
       size_t c = count(i->second.begin(),i->second.begin() + 2*ncontrols,'1');
-      rv.min_c.push_back( (c <= ncontrols) ? '1' : '0' );
+      rv.min_c.push_back( (c < ncontrols) ? '1' : '0' );
+    }
+  */
+
+  /*
+    This block is based on whole case/control sample.
+    This is actually what was done in Thornton, Foran, and Long (2013)
+  */
+  for( Sequence::SimData::const_site_iterator i = rv.neutral.sbegin() ; 
+       i < rv.neutral.send() ; ++i )
+    {
+      size_t c = count(i->second.begin(),i->second.end(),'1');
+      rv.min_n.push_back( (c <= rv.neutral.size()/2) ? '1' : '0' );
+    }
+  for( Sequence::SimData::const_site_iterator i = rv.causative.sbegin() ; 
+       i < rv.causative.send() ; ++i )
+    {
+      size_t c = count(i->second.begin(),i->second.end(),'1');
+      rv.min_c.push_back( (c < rv.causative.size()/2) ? '1' : '0' );
     }
   return rv;
 }
