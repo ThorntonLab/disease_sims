@@ -308,6 +308,8 @@ int main(int argc, char ** argv)
 									put_cases,
 									options.ncontrols,
 									options.ncases) );
+  assert( ccblocks->min_n.size() == ccblocks->neutral.numsites() );
+  assert( ccblocks->min_c.size() == ccblocks->causative.numsites() );
   
   //free up memory
   diploids.clear();
@@ -339,8 +341,6 @@ int main(int argc, char ** argv)
       ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
     }
 
-  assert( ccblocks->min_n.size() == ccblocks->neutral.numsites() );
-  assert( ccblocks->min_c.size() == ccblocks->causative.numsites() );
   //iterate over the diploids and write block for association tests
   for( unsigned ind = 0 ; ind < ccblocks->neutral.size() ; ind += 2 ) 
     {
