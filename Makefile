@@ -1,6 +1,7 @@
 CXX=c++
 OPT=-O2
 DEBUG=-DNDEBUG
+#DEBUG=
 CXXFLAGS=$(OPT) $(DEBUG) -Wall -W -I.
 
 TARGETS=TFL2013_ind make_case_control esm_chisq_zscore atomic_locker/atomic_locker
@@ -17,7 +18,7 @@ clean:
 
 TFL2013_ind.o: mutation_with_age.hpp TFL_fitness_models.hpp gene_based_model.hpp multiplicative_model.hpp
 
-make_case_control.o: mutation_with_age.hpp
+make_case_control.o: mutation_with_age.hpp ccintermediate.hpp
 
 readCC.o: readCC.hpp
 
