@@ -339,6 +339,8 @@ int main(int argc, char ** argv)
       ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
     }
 
+  assert( ccblocks->min_n.size() == ccblocks->neutral.numsites() );
+  assert( ccblocks->min_c.size() == ccblocks->causative.numsites() );
   //iterate over the diploids and write block for association tests
   for( unsigned ind = 0 ; ind < ccblocks->neutral.size() ; ind += 2 ) 
     {
@@ -354,8 +356,8 @@ int main(int argc, char ** argv)
       for( unsigned site = 0 ; site < ccblocks->causative.numsites() ; ++site )
 	{
 	  //count # copies of minor allele at this site in this individual
-	  unsigned cminor = ( (ccblocks->causative[ind][site] == ccblocks->min_n[site]) ? 1 : 0 ) +
-	    ( (ccblocks->causative[ind+1][site] == ccblocks->min_n[site]) ? 1 : 0 );
+	  unsigned cminor = ( (ccblocks->causative[ind][site] == ccblocks->min_c[site]) ? 1 : 0 ) +
+	    ( (ccblocks->causative[ind+1][site] == ccblocks->min_c[site]) ? 1 : 0 );
 	  ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
 	}
     }
