@@ -22,7 +22,6 @@ void update_block( glist::iterator::value_type::mutation_container::const_iterat
 		   const unsigned & i,
 		   vector< pair<double,string> > & datablock,
 		   const vector<pair<double,double> > & popphenos,
-		   const vector<size_t> & indlist,
 		   const unsigned & maxnum,
 		   const unsigned & ttl,
 		   const unsigned & offset)
@@ -84,7 +83,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 		     diploids[ indlist[i] ].second->mutations.end(),
 		     i,
 		     datablock_neut,
-		     popphenos,indlist,maxnum,ttl,offset
+		     popphenos,maxnum,ttl,offset
 		     );
       update_block(  diploids[ indlist[i] ].first->smutations.begin(),
 		     diploids[ indlist[i] ].first->smutations.end(),
@@ -92,7 +91,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 		     diploids[ indlist[i] ].second->smutations.end(),
 		     i,
 		     datablock_sel,
-		     popphenos,indlist,maxnum,ttl,offset
+		     popphenos,maxnum,ttl,offset
 		     );
 
       /*
