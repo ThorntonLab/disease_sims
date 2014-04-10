@@ -64,7 +64,7 @@ struct simparams
 {
   unsigned N,N2,ngens_burnin,ngens_evolve,ngens_evolve_growth,replicate_no,seed;
   double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum;
-  bool dist_effects,multiplicative ;//= atoi(argv[argument++]);
+  bool dist_effects,multiplicative ;
   string indexfile, hapfile, phenofile, effectsfile ;
   simparams(void);
 };
