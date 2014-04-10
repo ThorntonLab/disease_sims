@@ -243,6 +243,7 @@ int main(int argc, char ** argv)
 	      ++i;
 	    }
 	}
+      assert( accumulate(gamcounts.begin(),gamcounts.end(),0u) == 0 );
       ofstream effectfile(ofn2);
       effectfile << buffer.str();
       effectfile.close();
