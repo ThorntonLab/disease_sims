@@ -107,13 +107,6 @@ int main(int argc, char ** argv)
       G = exp( (log(double(params.N2)) - log(double(params.N)))/double(params.ngens_evolve_growth)); 
     }
 
-  cerr << '#';
-  for(int i=0;i<argc;++i)
-    {
-      cerr << argv[i] << ' ';
-    }
-  cerr << endl;
-
   gsl_rng * r =  gsl_rng_alloc(gsl_rng_taus2);
   gsl_rng_set(r,params.seed);
 
@@ -281,32 +274,36 @@ int main(int argc, char ** argv)
 
   //Write out effects information for causative sites
   ostringstream effectstream;
-  unsigned ncausative=0;
-  for( typename mlist::const_iterator i = mutations.begin() ; i != mutations.end() ; ++i )
+  unsigned nmuts = mutations.size();
+  /*
+    unsigned ncausative=0;
+    for( typename mlist::const_iterator i = mutations.begin() ; i != mutations.end() ; ++i )
     {
-      if ( ! i->neutral )
-	{
-	  ++ncausative;
-	}
+    if ( ! i->neutral )
+    {
+    ++ncausative;
     }
-  effectstream.write( reinterpret_cast<char *>(&ncausative),sizeof(unsigned) );
+    }
+  */
+  //effectstream.write( reinterpret_cast<char *>(&ncausative),sizeof(unsigned) );
+  effectstream.write( reinterpret_cast<char *>(&nmuts),sizeof(unsigned) );
   for( typename mlist::const_iterator i = mutations.begin() ; i != mutations.end() ; ++i )
     {
-      if(!i->neutral)
+      //if(!i->neutral)
+      //{
+      if(! params.effectsfile.empty() )
 	{
-	  if(! params.effectsfile.empty() )
-	    {
-	      //position of causative mutation, effect size, count, age
-	      double pos = i->pos;
-	      double s = i->s;
-	      double count = double(i->n);
-	      double age = double(ttl_gen - i->o + 1);
-	      effectstream.write( reinterpret_cast<char *>(&pos), sizeof(double) );
-	      effectstream.write( reinterpret_cast<char *>(&s), sizeof(double) );
-	      effectstream.write( reinterpret_cast<char *>(&count), sizeof(double) );
-	      effectstream.write( reinterpret_cast<char *>(&age), sizeof(double) );
-	    }
+	  //position of causative mutation, effect size, count, age
+	  double pos = i->pos;
+	  double s = i->s;
+	  double count = double(i->n);
+	  double age = double(ttl_gen - i->o + 1);
+	  effectstream.write( reinterpret_cast<char *>(&pos), sizeof(double) );
+	  effectstream.write( reinterpret_cast<char *>(&s), sizeof(double) );
+	  effectstream.write( reinterpret_cast<char *>(&count), sizeof(double) );
+	  effectstream.write( reinterpret_cast<char *>(&age), sizeof(double) );
 	}
+      //}
     }
 
   /*
