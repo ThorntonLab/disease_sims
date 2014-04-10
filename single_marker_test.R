@@ -20,8 +20,8 @@ getSpecificPheno=function(con,index,recordno,N)
 getEsizes=function(con)
     {
         nm=readBin(con,"integer",1)
-        return( matrix( readBin(con,"numeric",4*nm), ncol=4,byrow=TRUE,
-                       dimnames=list(NULL,c("pos","esize","count","age"))) )
+        return( as.data.frame(matrix( readBin(con,"numeric",4*nm), ncol=4,byrow=TRUE,
+                                     dimnames=list(NULL,c("pos","esize","count","age")))) )
     }
 
 getSpecificEsizes=function(con,index,recordno)
@@ -111,7 +111,7 @@ makePVblock = function( ccdata, esizes, ncontrols,ncases )
                 else
                     {
                       output[r,"esize"]=as.numeric(esizes$esize[z])
-                      output[r,"popfreq"]=as.numeric(esizes$freq[z])
+                      output[r,"popfreq"]=as.numeric(esizes$count[z])
                     }
             }
         output[,"score"]=-log10(getPvalsCCstatus(ccdata$genos, ncontrols,ncases))
@@ -122,7 +122,7 @@ n=commandArgs(trailing=T)
 
 indexfile=n[1]
 anovaindex=n[2]
-popfile=n[3]
+effectfile=n[3]
 recordno=n[4]
 anovafile=n[5]
 ncontrols=as.integer(n[6])
@@ -134,15 +134,16 @@ blocker=n[11]
 index=read.table(indexfile)
 aindex=read.table(anovaindex)
 
-f=file(popfile,"rb")
-esizes=readSpecificMutsFromPop(f,2*N,index,recordno)
+f=file(effectfile,"rb")
+#esizes=readSpecificMutsFromPop(f,2*N,index,recordno)
+esizes=getSpecificEsizes(f,index,recordno)
 close(f)
 f=file(anovafile,"rb")
 ccdata=getSpecificCCblock(f,aindex,recordno)
 close(f)
 pvblock=makePVblock(ccdata,esizes,ncontrols,ncases)
 
-#pvblock[,"popcount"]=pvblock[,"popcount"]/(2*N)
+pvblock[,"popfreq"]=pvblock[,"popfreq"]/(2*N)
 
 options(warn=-1)
 f=pipe(paste(blocker,recordno,outindex,outfile,as.integer(nrow(pvblock)),sep=" "))
