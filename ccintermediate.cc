@@ -14,6 +14,55 @@ cc_intermediate::cc_intermediate(void) : neutral(Sequence::SimData()),
 {
 }
 
+//called by process_subset to update data blocks
+void update_block( glist::iterator::value_type::mutation_container::const_iterator beg,  //gamete1
+		   glist::iterator::value_type::mutation_container::const_iterator end,
+		   glist::iterator::value_type::mutation_container::const_iterator beg2, //gamete2
+		   glist::iterator::value_type::mutation_container::const_iterator end2,
+		   const unsigned & i,
+		   vector< pair<double,string> > & datablock,
+		   const vector<pair<double,double> > & popphenos,
+		   const vector<size_t> & indlist,
+		   const unsigned & maxnum,
+		   const unsigned & ttl,
+		   const unsigned & offset)
+{
+  for( ; beg < end ; ++beg )
+    {
+      double mutpos = (*beg)->pos;
+      vector< pair<double,string> >::iterator itr =  find_if(datablock.begin(),
+							     datablock.end(),
+							     boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
+      if( itr == datablock.end() )
+	{
+	  datablock.push_back( make_pair(mutpos,string(ttl,'0')) );
+	  datablock[datablock.size()-1].second[offset + 2*i] = '1';
+	}
+      else
+	{
+	  assert(offset+2*i < itr->second.size());
+	  itr->second[offset + 2*i] = '1';
+	}
+    }
+  for( ; beg2 < end2 ; ++beg2 )
+    {
+      double mutpos = (*beg2)->pos;
+      vector< pair<double,string> >::iterator itr =  find_if(datablock.begin(),
+							     datablock.end(),
+							     boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
+      if( itr == datablock.end() )
+	{
+	  datablock.push_back( make_pair(mutpos,string(ttl,'0')) );
+	  datablock[datablock.size()-1].second[offset + 2*i + 1] = '1';
+	}
+      else
+	{
+	  assert(offset+2*i + 1 < itr->second.size());
+	  itr->second[offset + 2*i + 1] = '1';
+	}
+    }
+}
+
 void process_subset( vector< pair<double,string> > & datablock_neut,
 		     vector< pair<double,string> > & datablock_sel,
 		     vector< pair<double,double> > & ccphenos,
@@ -29,6 +78,25 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
   for( unsigned i = 0 ; i < maxnum ; ++i )
     {
       ccphenos.push_back( popphenos[ indlist[i] ] );
+      update_block(  diploids[ indlist[i] ].first->mutations.begin(),
+		     diploids[ indlist[i] ].first->mutations.end(),
+		     diploids[ indlist[i] ].second->mutations.begin(),
+		     diploids[ indlist[i] ].second->mutations.end(),
+		     i,
+		     datablock_neut,
+		     popphenos,indlist,maxnum,ttl,offset
+		     );
+      update_block(  diploids[ indlist[i] ].first->smutations.begin(),
+		     diploids[ indlist[i] ].first->smutations.end(),
+		     diploids[ indlist[i] ].second->smutations.begin(),
+		     diploids[ indlist[i] ].second->smutations.end(),
+		     i,
+		     datablock_sel,
+		     popphenos,indlist,maxnum,ttl,offset
+		     );
+
+      /*
+      //Old code replaced by update_block
       //neutral
       for( unsigned mut = 0 ; mut < diploids[ indlist[i] ].first->mutations.size() ; ++mut )
 	{
@@ -99,6 +167,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 	      itr->second[offset + 2*i + 1] = '1';
 	    }
 	}
+      */
     }
 }
 
