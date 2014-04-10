@@ -302,13 +302,12 @@ int main(int argc, char ** argv)
   rand = boost::bind(&gsl_ran_flat, r, 0,double(put_controls.size()));
   random_shuffle(put_controls.begin(),put_controls.end(),rand);
 
-  cc_intermediate * ccblocks = new cc_intermediate;
-
-  *ccblocks = process_population(diploids,phenotypes,
-				 put_controls,
-				 put_cases,
-				 options.ncontrols,
-				 options.ncases);
+  cc_intermediate * ccblocks = new cc_intermediate(  process_population(diploids,phenotypes,
+									put_controls,
+									put_cases,
+									options.ncontrols,
+									options.ncases) );
+  
   //free up memory
   diploids.clear();
   gametes.clear();
