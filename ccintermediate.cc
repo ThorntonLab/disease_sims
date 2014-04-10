@@ -5,7 +5,6 @@
 #include <boost/bind.hpp>
 
 using namespace std;
-using namespace Sequence;
 
 void process_subset( vector< pair<double,string> > & datablock_neut,
 		     vector< pair<double,string> > & datablock_sel,
@@ -141,17 +140,17 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
   rv.neutral.assign( neutral.begin(), neutral.end() );  
   rv.causative.assign( selected.begin(), selected.end() );  
 
-  RemoveInvariantColumns(&rv.neutral);
-  RemoveInvariantColumns(&rv.causative);
+  Sequence::RemoveInvariantColumns(&rv.neutral);
+  Sequence::RemoveInvariantColumns(&rv.causative);
 
   //Define the minor allele state
-  for( SimData::const_site_iterator i = rv.neutral.sbegin() ; 
+  for( Sequence::SimData::const_site_iterator i = rv.neutral.sbegin() ; 
        i < rv.neutral.send() ; ++i )
     {
       size_t c = count(i->second.begin(),i->second.begin() + 2*ncontrols,'1');
       rv.min_n.push_back( (c <= ncontrols) ? '1' : '0' );
     }
-  for( SimData::const_site_iterator i = rv.causative.sbegin() ; 
+  for( Sequence::SimData::const_site_iterator i = rv.causative.sbegin() ; 
        i < rv.causative.send() ; ++i )
     {
       size_t c = count(i->second.begin(),i->second.begin() + 2*ncontrols,'1');
