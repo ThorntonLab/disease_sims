@@ -231,8 +231,17 @@ int main(int argc, char ** argv)
 	{
 	  put_cases.push_back(i);
 	}
-      else if ( P >= mean_sd.first - mean_sd.second &&
-		P <= mean_sd.first + mean_sd.second )
+      /*
+	Issue alert!!!
+	TFL (2013) claim that "controls are within 1 standard
+	deviation of the mean", by which they mean in terms of phenotype.
+	
+	Well, that was technically true, but a problem for reproducibility
+	because our code to make case/control panels required that a putative
+	control's phenotype be within 0.5*sd of population mean phenotype!!!
+      */
+      else if ( P >= mean_sd.first - 0.5*mean_sd.second &&
+		P <= mean_sd.first + 0.5*mean_sd.second )
 	{
 	  put_controls.push_back(i);
 	}
