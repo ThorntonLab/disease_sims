@@ -72,73 +72,12 @@ struct params
 {
   string indexfile,popfile,phenofile,anovafile,anova_indexfile;
   unsigned twoN,record_no,ncases,ncontrols,seed;
-  double case_proportion;
+  double case_proportion,crange;
 
   bool files_undef( void ) const;
   void report_empty( std::ostream & out ) const;
   bool params_ok( void ) const;
 };
-
-bool params::files_undef( void ) const
-{
-  return ( indexfile.empty() ||
-	   popfile.empty() ||
-	   phenofile.empty() ||
-	   anovafile.empty() ||
-	   anova_indexfile.empty() );
-}
-
-void params::report_empty( std::ostream & out ) const
-{
-  if( indexfile.empty() )
-    {
-      out << "Error: index file for input data not defined.  Use -i option.\n";
-    }
-  if( popfile.empty() )
-    {
-      out << "Error: Population data file for input data not defined.  Use -p option.\n";
-    }
-  if( phenofile.empty() )
-    {
-      out << "Error: Phenotype data file for input data not defined.  Use -P option.\n";
-    }
-  if( anovafile.empty() )
-    {
-      out << "Error: Output data file for case/control genotypes not specified.  Use -c option.\n";
-    }
-  if( anova_indexfile.empty() )
-    {
-      out << "Error: Output file name for index file not specified.  Use -I option.\n";
-    }
-}
-
-bool params::params_ok( void ) const
-{
-  bool ok = true;
-
-  if ( ! ncases )
-    {
-      ok = false;
-      cerr << "Error: # of cases = " << ncases << '\n';
-    }
-  if ( ! ncontrols )
-    {
-      ok = false;
-      cerr << "Error: # of controls = " << ncontrols << '\n';
-    }
-
-  if ( ! (case_proportion > 0. && case_proportion < 1.) )
-    {
-      ok = false;
-      cerr << "Error: proportion of cases must be 0 < x < 1.  Input value was " << case_proportion << '\n';
-    }
-
-  if (! ok )
-    {
-      cerr << "Please use -h option to see help\n";
-    }
-  return ok;
-}
 
 params process_command_line(int argc, char ** argv);
 
@@ -231,8 +170,17 @@ int main(int argc, char ** argv)
 	{
 	  put_cases.push_back(i);
 	}
-      else if ( P >= mean_sd.first - mean_sd.second &&
-		P <= mean_sd.first + mean_sd.second )
+      /*
+	Issue alert!!!
+	TFL (2013) claim that "controls are within 1 standard
+	deviation of the mean", by which they mean in terms of phenotype.
+	
+	Well, that was technically true, but a problem for reproducibility
+	because our code to make case/control panels required that a putative
+	control's phenotype be within 0.5*sd of population mean phenotype!!!
+      */
+      else if ( P >= mean_sd.first - options.crange*mean_sd.second &&
+		P <= mean_sd.first + options.crange*mean_sd.second )
 	{
 	  put_controls.push_back(i);
 	}
@@ -469,6 +417,7 @@ params process_command_line(int argc, char ** argv)
     ("maxcontrols,N",value<unsigned>(&rv.ncontrols)->default_value(0),"Maximum Number of controls to sample")
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed")
     ("threshold,t",value<double>(&rv.case_proportion)->default_value(-1.),"Proportion of population to be labelled as putative cases.  Value must be 0 < t < 1. E.g., individuals with phenotypic values larger than the (1-t)th quantile of phenotypic values in the entire population are potential cases.  For example, in Thornton, Foran, and Long (2013), we used t = 0.15, meaning that the upper 15% of phenotypic values were treated as possible cases.")
+    ("control-range",value<double>(&rv.crange)->default_value(0.5),"A putatitve control is defined as the population mean phenotype +/- control-range*SD, where SD is the standard deviation of the population phenotype.  Default is what was used in Thornton, Foran, and Long (2013)")
     ;
 
   variables_map vm;
@@ -493,6 +442,73 @@ params process_command_line(int argc, char ** argv)
     }
 
   return rv;
+}
+
+bool params::files_undef( void ) const
+{
+  return ( indexfile.empty() ||
+	   popfile.empty() ||
+	   phenofile.empty() ||
+	   anovafile.empty() ||
+	   anova_indexfile.empty() );
+}
+
+void params::report_empty( std::ostream & out ) const
+{
+  if( indexfile.empty() )
+    {
+      out << "Error: index file for input data not defined.  Use -i option.\n";
+    }
+  if( popfile.empty() )
+    {
+      out << "Error: Population data file for input data not defined.  Use -p option.\n";
+    }
+  if( phenofile.empty() )
+    {
+      out << "Error: Phenotype data file for input data not defined.  Use -P option.\n";
+    }
+  if( anovafile.empty() )
+    {
+      out << "Error: Output data file for case/control genotypes not specified.  Use -c option.\n";
+    }
+  if( anova_indexfile.empty() )
+    {
+      out << "Error: Output file name for index file not specified.  Use -I option.\n";
+    }
+}
+
+bool params::params_ok( void ) const
+{
+  bool ok = true;
+
+  if ( ! ncases )
+    {
+      ok = false;
+      cerr << "Error: # of cases = " << ncases << '\n';
+    }
+  if ( ! ncontrols )
+    {
+      ok = false;
+      cerr << "Error: # of controls = " << ncontrols << '\n';
+    }
+
+  if ( ! (case_proportion > 0. && case_proportion < 1.) )
+    {
+      ok = false;
+      cerr << "Error: proportion of cases must be 0 < x < 1.  Input value was " << case_proportion << '\n';
+    }
+
+  if ( crange <= 0. )
+    {
+      ok = false;
+      cerr << "Error: bounds on controls (--control-range) must be positive (> 0.).  You entered " << crange << '\n';
+    }
+
+  if (! ok )
+    {
+      cerr << "Please use -h option to see help\n";
+    }
+  return ok;
 }
 
 std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, const double & case_proportion, double * cutoff)

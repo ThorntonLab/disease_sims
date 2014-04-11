@@ -8,6 +8,7 @@ x=read.table(indexfile)
 f=file(pvalfile,"r")
 
 rejrate=0
+rejrateGWAS=0
 for(i in 1:nrow(x))
     {
         seek(f,x$V2[i])
@@ -16,5 +17,10 @@ for(i in 1:nrow(x))
             {
                 rejrate=rejrate+1
             }
+        z=which(data$popfreq >= 0.05 & data$popfreq <= 0.95)
+        if ( length(which(data$score[z] >= 8)) > 0 )
+            {
+                rejrateGWAS=rejrateGWAS+1
+            }
     }
-print(rejrate/nrow(x))
+print(paste(rejrate/nrow(x),rejrateGWAS/nrow(x)))
