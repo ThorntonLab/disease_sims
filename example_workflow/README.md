@@ -21,5 +21,5 @@ When the simulations are done, the power of a single-marker GWAS (logistic regre
 sh logit_power_table . > logit_power.txt
 ```
 
-executed from the folder containing all the lambda\* subfolders.  (__NOTE:__ you may need to edit paths in that shell script!
+executed from the folder containing all the lambda\* subfolders.  (__NOTE:__ you may need to edit paths in that shell script!)
 
