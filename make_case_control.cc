@@ -12,15 +12,22 @@
   series of records of case/control panels.  Each record has the following format:
   Four integers: number of controls, number of cases, NN = number of neutral mutations, NC = number of causative mutations
   NN + NC doubles, which are the positions of the mutations (neutral then causative mutations, respectively).
-  Then, for each control, and then each case, there are NN + NC short signed integers
-  corresponding to the genotypes and neutral and causative sites, resp. 
 
   A genotype can take on 1 of 3 values, and is equal to the # of copies of the minor allele:
   0 = homozygote for major allele
   1 = heterozygote
   2 = homozygote for minor allele
 
-  The genotypes are stored in the same order as the positions.
+  For each control and each case, the genotype info are recorded in the following format:
+  1.  N1 = An unsigned integer representing the number of 1 (het) genotypes
+  2.  N1 unsigned integers representing the indexes where the 1 values are located
+  3.  N2 = An unsigned integer representing the number of 2 (MA hom) genotypes
+  4.  N1 unsigned integers representing the indexes where the 2 values are located
+
+  These indexes are stored in the same order as the positions.
+
+  See single_marker_test.R that comes with this distribution for how to read these data files in 
+  in R.
 
   After the genotypes, there are 2*(# controls + # cases) integers.  For each case, and then
   for each control, there is a pair of integers representing the # of causative mutations
@@ -292,13 +299,22 @@ int main(int argc, char ** argv)
   //iterate over the diploids and write block for association tests
   for( unsigned ind = 0 ; ind < ccblocks->neutral.size() ; ind += 2 ) 
     {
+      vector<unsigned> ones,twos;
       //neutral genotypes for this individual
       for( unsigned site = 0 ; site < ccblocks->neutral.numsites() ; ++site )
 	{
 	  //count # copies of minor allele at this site in this individual
 	  unsigned cminor = ( (ccblocks->neutral[ind][site] == ccblocks->min_n[site]) ? 1 : 0 ) +
 	    ( (ccblocks->neutral[ind+1][site] == ccblocks->min_n[site]) ? 1 : 0 );
-	  ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
+	  if( cminor==1 )
+	    {
+	      ones.push_back(site);
+	    }
+	  else if ( cminor == 2 )
+	    {
+	      twos.push_back(site);
+	    }
+	  //ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
 	}
       //causative genotypes for this individual
       for( unsigned site = 0 ; site < ccblocks->causative.numsites() ; ++site )
@@ -306,8 +322,23 @@ int main(int argc, char ** argv)
 	  //count # copies of minor allele at this site in this individual
 	  unsigned cminor = ( (ccblocks->causative[ind][site] == ccblocks->min_c[site]) ? 1 : 0 ) +
 	    ( (ccblocks->causative[ind+1][site] == ccblocks->min_c[site]) ? 1 : 0 );
-	  ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
+	  //ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
+	  if( cminor==1 )
+	    {
+	      ones.push_back(ccblocks->neutral.numsites()+site);
+	    }
+	  else if ( cminor == 2 )
+	    {
+	      twos.push_back(ccblocks->neutral.numsites()+site);
+	    }
 	}
+      //update the buffer
+      unsigned n = ones.size();
+      ccbuffer.write( reinterpret_cast<char *>(&n),sizeof(unsigned) );
+      ccbuffer.write( reinterpret_cast<char *>(&ones[0]),n*sizeof(unsigned) );
+      n = twos.size();
+      ccbuffer.write( reinterpret_cast<char *>(&n),sizeof(unsigned) );
+      ccbuffer.write( reinterpret_cast<char *>(&twos[0]),n*sizeof(unsigned) );
     }
 
   //Now, output # of causative mutations on each haplotype carried by this diploid
