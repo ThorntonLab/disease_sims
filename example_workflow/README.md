@@ -15,3 +15,11 @@ sh setup.sh
 sh submit.sh
 ```
 
+When the simulations are done, the power of a single-marker GWAS (logistic regression of case/control status onto genotype under an additive model is obtained via
+
+```
+sh logit_power_table . > logit_power.txt
+```
+
+executed from the folder containing all the lambda\* subfolders.  (__NOTE:__ you may need to edit paths in that shell script!
+
