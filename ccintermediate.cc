@@ -15,10 +15,10 @@ cc_intermediate::cc_intermediate(void) : neutral(Sequence::SimData()),
 }
 
 //called by process_subset to update data blocks
-void update_block( glist::iterator::value_type::mutation_container::const_iterator beg,  //gamete1
-		   glist::iterator::value_type::mutation_container::const_iterator end,
-		   glist::iterator::value_type::mutation_container::const_iterator beg2, //gamete2
-		   glist::iterator::value_type::mutation_container::const_iterator end2,
+void update_block( glist::const_iterator::value_type::mutation_container::const_iterator beg,  //gamete1
+		   glist::const_iterator::value_type::mutation_container::const_iterator end,
+		   glist::const_iterator::value_type::mutation_container::const_iterator beg2, //gamete2
+		   glist::const_iterator::value_type::mutation_container::const_iterator end2,
 		   const unsigned & i,
 		   vector< pair<double,string> > & datablock,
 		   const unsigned & ttl,
