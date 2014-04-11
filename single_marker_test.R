@@ -35,7 +35,6 @@ getCCblock=function(con)
     {
         d=readBin(con,"integer",4)
         pos=readBin(con,"numeric",d[3]+d[4])
-        #genos=matrix(readBin(con,"integer",(d[1]+d[2])*(d[3]+d[4])),ncol=d[3]+d[4],byrow=TRUE)
         genos = matrix(data=0,ncol=d[3]+d[4],nrow=d[1]+d[2])
         for( i in 1:(d[1]+d[2]) )
             {
