@@ -65,11 +65,27 @@ CCblock read_CC_record( const char * ccindexfile,
   in.read( reinterpret_cast<char *>(&cpos[0]), SC*sizeof(double) );
 
   unsigned NCONT=min(ncont,max_controls),NCASE=min(ncase,max_cases);
-  vector<unsigned> buffer(SN+SC);
-  unsigned conts_stored=0,cases_stored=0;
+  unsigned conts_stored=0,cases_stored=0,nm;
   for( unsigned i=0; i<ncont+ncase ; ++i )
     {
-      in.read( reinterpret_cast<char *>(&buffer[0]),(SN+SC)*sizeof(unsigned) );
+      vector<unsigned> buffer(SN+SC,0u),idx;
+      //Read in genotype values of 1
+      in.read( reinterpret_cast<char *>(&nm),sizeof(unsigned) );
+      idx.resize(nm);
+      in.read( reinterpret_cast<char *>(&idx[0]),nm*sizeof(unsigned) );
+      for( unsigned j = 0 ; j < nm ; ++j )
+	{
+	  buffer[ idx[j] ] = 1;
+	}
+      //followed by genotype values of 2
+      in.read( reinterpret_cast<char *>(&nm),sizeof(unsigned) );
+      idx.resize(nm);
+      in.read( reinterpret_cast<char *>(&idx[0]),nm*sizeof(unsigned) );
+      for( unsigned j = 0 ; j < nm ; ++j )
+	{
+	  buffer[ idx[j] ] = 2;
+	}
+      //in.read( reinterpret_cast<char *>(&buffer[0]),(SN+SC)*sizeof(unsigned) );
       if( i < ncont && conts_stored < NCONT) 
 	{
 	  if(!rotate)
