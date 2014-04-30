@@ -443,7 +443,7 @@ int main(int argc, char ** argv)
     }
   fflush(ai_fh);
   fclose(ai_fh);
-  return 0;
+  exit(0);
 }
 
 params process_command_line(int argc, char ** argv)
