@@ -130,6 +130,13 @@ int main(int argc, char ** argv)
   read_binary_pop( &gametes, &mutations, &diploids, boost::bind(mreader(),_1),popstream );
   popstream.close();
 
+  if ( gametes.size() > 2*diploids.size() )
+    {
+      cerr << "Error: there are " << gametes.size() 
+	   << " gametes for only " << diploids.size() 
+	   << " diploids.  Uncool!\n";
+      exit(10);
+    }
   //Make sure that ncases + ncontrols < N
   if ( (options.ncontrols + options.ncases) > diploids.size() )
     {
@@ -251,7 +258,6 @@ int main(int argc, char ** argv)
 	}
     }
 
-
   //Randomize lists just for fun
   boost::function< size_t (size_t) > rand = boost::bind(&gsl_ran_flat, r, 0,double(put_cases.size()));
   random_shuffle(put_cases.begin(),put_cases.end(),rand);
@@ -267,10 +273,18 @@ int main(int argc, char ** argv)
   assert( ccblocks->min_c.size() == ccblocks->causative.numsites() );
   
   //free up memory
-  diploids.clear();
-  gametes.clear();
-  mutations.clear();
-
+  
+  /*
+  cerr << "deleting dips " << diploids.size() << ' ';
+  //diploids.clear();
+  cerr << "gams " << gametes.size() << ' ';
+  delete gametes;
+  //gametes.clear();
+  cerr << "muts ";
+  delete mutations;
+  //mutations.clear();
+  cerr << "done\n";
+  */
   //3. Output to buffers
 
   //first, the ccdata to a buffer
@@ -368,67 +382,68 @@ int main(int argc, char ** argv)
 
   //obtain file lock on index ASAP
   FILE * ai_fh = fopen(options.anova_indexfile.c_str(),"a");
-   int ai_fd = fileno(ai_fh);
-
-   flock ai_lock = get_whole_flock();
-
-   //make sure our locking functions work...
-   assert( ai_lock.l_type == F_WRLCK );
-   assert( ai_lock.l_whence == SEEK_SET );
-   assert( ai_lock.l_start == 0 );
-   assert( ai_lock.l_len == 0 );
-   if (fcntl(ai_fd,F_SETLKW,&ai_lock) == -1)
-     {
-       cerr << "ERROR: could not obtain lock on " << options.anova_indexfile << '\n';
-       exit(10);
-     }
-
-   FILE * a_fh = fopen(options.anovafile.c_str(),"a");
-   int a_fd = fileno(a_fh);
-   flock a_lock = get_whole_flock();
-   assert( a_lock.l_type == F_WRLCK );
-   assert( a_lock.l_whence == SEEK_SET );
-   assert( a_lock.l_start == 0 );
-   assert( a_lock.l_len == 0 );
-   if (fcntl(a_fd,F_SETLKW,&a_lock) == -1)
-     {
-       cerr << "ERROR: could not obtain lock on " << options.anovafile << '\n';
-       exit(10);
-     }
-
-   ostringstream buffer;
-   buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR ) << '\n';
-   if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
-     {
-       cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
-       exit(errno);
-     }
-   buffer.str(string());
-   
-   //write out the CC buffer
-   if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
-     {
-       cerr << "Error on writing buffer to " << options.anovafile << '\n';
-       exit(errno);
-     }
-   
-   //Unlock files
-   a_lock.l_type = F_UNLCK;
-   if (fcntl(a_fd,F_UNLCK,&a_lock) == -1)
-     {
-       cerr << "ERROR: could not relesae lock on " << options.anovafile << '\n';
-       exit(10);
-     }
-   fflush(a_fh);
-   fclose(a_fh);
-   ai_lock.l_type = F_UNLCK;
-   if (fcntl(ai_fd,F_UNLCK,&ai_lock) == -1)
-     {
-       cerr << "ERROR: could not release lock on " << options.anova_indexfile << '\n';
-       exit(10);
-      }
-   fflush(ai_fh);
-   fclose(ai_fh);
+  int ai_fd = fileno(ai_fh);
+  
+  flock ai_lock = get_whole_flock();
+  
+  //make sure our locking functions work...
+  assert( ai_lock.l_type == F_WRLCK );
+  assert( ai_lock.l_whence == SEEK_SET );
+  assert( ai_lock.l_start == 0 );
+  assert( ai_lock.l_len == 0 );
+  if (fcntl(ai_fd,F_SETLKW,&ai_lock) == -1)
+    {
+      cerr << "ERROR: could not obtain lock on " << options.anova_indexfile << '\n';
+      exit(10);
+    }
+  
+  FILE * a_fh = fopen(options.anovafile.c_str(),"a");
+  int a_fd = fileno(a_fh);
+  flock a_lock = get_whole_flock();
+  assert( a_lock.l_type == F_WRLCK );
+  assert( a_lock.l_whence == SEEK_SET );
+  assert( a_lock.l_start == 0 );
+  assert( a_lock.l_len == 0 );
+  if (fcntl(a_fd,F_SETLKW,&a_lock) == -1)
+    {
+      cerr << "ERROR: could not obtain lock on " << options.anovafile << '\n';
+      exit(10);
+    }
+  
+  ostringstream buffer;
+  buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR ) << '\n';
+  if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
+    {
+      cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
+      exit(errno);
+    }
+  buffer.str(string());
+  
+  //write out the CC buffer
+  if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
+    {
+      cerr << "Error on writing buffer to " << options.anovafile << '\n';
+      exit(errno);
+    }
+  
+  //Unlock files
+  a_lock.l_type = F_UNLCK;
+  if (fcntl(a_fd,F_UNLCK,&a_lock) == -1)
+    {
+      cerr << "ERROR: could not relesae lock on " << options.anovafile << '\n';
+      exit(10);
+    }
+  fflush(a_fh);
+  fclose(a_fh);
+  ai_lock.l_type = F_UNLCK;
+  if (fcntl(ai_fd,F_UNLCK,&ai_lock) == -1)
+    {
+      cerr << "ERROR: could not release lock on " << options.anova_indexfile << '\n';
+      exit(10);
+    }
+  fflush(ai_fh);
+  fclose(ai_fh);
+  return 0;
 }
 
 params process_command_line(int argc, char ** argv)
