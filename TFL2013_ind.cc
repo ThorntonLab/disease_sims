@@ -239,7 +239,7 @@ int main(int argc, char ** argv)
 	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
 	}
     }
-
+  cerr << gametes.size() << '\n';
 
   //Write out the population
   ostringstream popbuffer;
@@ -454,6 +454,8 @@ int main(int argc, char ** argv)
     }
   fflush( index_fh );
   fclose(index_fh);
+
+  exit(0);
 }
 
 simparams parse_command_line(const int & argc,
