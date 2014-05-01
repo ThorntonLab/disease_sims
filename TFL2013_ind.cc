@@ -146,7 +146,7 @@ int main(int argc, char ** argv)
 			    boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
       KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
     }
-
+  unsigned N_current = params.N;
   if (! params.multiplicative )
     {
       for( generation = 0; generation < params.ngens_evolve; ++generation,++ttl_gen )
@@ -178,7 +178,7 @@ int main(int argc, char ** argv)
 				&gametes,
 				&diploids,
 				&mutations,
-				params.N,
+				N_current,//params.N,
 				N_next,
 				params.mu_disease+params.mu_neutral,
 				boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
@@ -190,8 +190,10 @@ int main(int argc, char ** argv)
 				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
 				boost::bind(disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r),
-				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
-	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
+				boost::bind(KTfwd::mutation_remover(),_1,0,2*N_next));
+	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N_next);
+	  //update N
+	  N_current = N_next;
 	}
     }
   else //multiplicative phenotype model w/Gaussian stabilizing selection
@@ -223,7 +225,7 @@ int main(int argc, char ** argv)
 				&gametes,
 				&diploids,
 				&mutations,
-				params.N,
+				N_current,
 				N_next,
 				params.mu_disease+params.mu_neutral,
 				boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
@@ -235,8 +237,10 @@ int main(int argc, char ** argv)
 				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
 				boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r),
-				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
-	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
+				boost::bind(KTfwd::mutation_remover(),_1,0,2*N_next));
+	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N_next);
+	  //update N
+	  N_current = N_next;
 	}
     }
 
