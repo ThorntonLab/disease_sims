@@ -240,7 +240,6 @@ int main(int argc, char ** argv)
 	}
     }
 
-
   //Write out the population
   ostringstream popbuffer;
   write_binary_pop(&gametes,&mutations,&diploids,boost::bind(mwriter(),_1,_2),popbuffer);
@@ -454,6 +453,8 @@ int main(int argc, char ** argv)
     }
   fflush( index_fh );
   fclose(index_fh);
+
+  exit(0);
 }
 
 simparams parse_command_line(const int & argc,
