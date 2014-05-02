@@ -41,8 +41,6 @@ int main( int argc, char ** argv )
   params options = process_command_line(argc,argv);  
 
   //lookup the record
-
-
   long pop_offset,pheno_offset,effect_offset;
   unsigned ith_rep;
   bool found = false;
