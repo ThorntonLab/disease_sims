@@ -93,7 +93,6 @@ std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, 
 int main(int argc, char ** argv)
 {
   params options = process_command_line(argc,argv);
-  int argn = 1;
 
   gsl_rng * r =  gsl_rng_alloc(gsl_rng_taus2);
   gsl_rng_set(r,options.seed);
