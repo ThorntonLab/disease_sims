@@ -28,8 +28,9 @@ using namespace boost::program_options;
 
 struct params
 {
-  string popfile,phenofile,indexfile;
+  string popfile,phenofile,indexfile,ofile;
   unsigned record_no;
+  bool header;
 };
 
 params process_command_line(int argc, char ** argv);
@@ -91,12 +92,16 @@ int main( int argc, char ** argv )
 
   //output some stuff that may be useful
   ostringstream burdenbuffer;
-  burdenbuffer << "diploid haplo esize count\n";
+  if ( options.header )
+    {
+      burdenbuffer << "record diploid G E haplo esize count\n";
+    }
   for( unsigned i = 0 ; i < diploids.size() ; ++i )
     {
       if( diploids[i].first->smutations.empty() )
 	{
-	  burdenbuffer << i << '\t' 
+	  burdenbuffer << options.record_no << '\t'
+		       << i << '\t' 
 		       << phenotypes[i].first 
 		       << '\t' << phenotypes[i].second << '\t'
 		       << 0 << '\t' 
@@ -107,7 +112,8 @@ int main( int argc, char ** argv )
 	  for( gtype::mcont_const_iterator mitr = diploids[i].first->smutations.begin() ; 
 	       mitr != diploids[i].first->smutations.end() ; ++mitr )
 	    {
-	      burdenbuffer << i << '\t' 
+	      burdenbuffer << options.record_no << '\t'
+			   << i << '\t' 
 			   << phenotypes[i].first << '\t' 
 			   << phenotypes[i].second << '\t'
 			   << 0 << '\t' 
@@ -118,7 +124,8 @@ int main( int argc, char ** argv )
 
       if( diploids[i].second->smutations.empty() )
 	{
-	  burdenbuffer << i << '\t'
+	  burdenbuffer << options.record_no << '\t'
+		       << i << '\t'
 		       << phenotypes[i].first << '\t' 
 		       << phenotypes[i].second << '\t' 
 		       << 1 << '\t' 
@@ -129,9 +136,11 @@ int main( int argc, char ** argv )
 	  for( gtype::mcont_const_iterator mitr = diploids[i].second->smutations.begin() ; 
 	       mitr != diploids[i].second->smutations.end() ; ++mitr )
 	    {
-	      burdenbuffer << i << '\t' 
+	      burdenbuffer << options.record_no << '\t'
+			   << i << '\t' 
 			   << phenotypes[i].first << '\t' 
-			   << phenotypes[i].second << 1 << '\t' 
+			   << phenotypes[i].second << '\t'
+			   << 1 << '\t' 
 			   << (*mitr)->s << '\t'
 			   << (*mitr)->n << '\n';
 	    }
@@ -153,12 +162,22 @@ params process_command_line(int argc, char ** argv)
     ("popfile,p",value<string>(&rv.popfile)->default_value(string()),"Population file output by TFL2013_ind")
     ("phenofile,P",value<string>(&rv.phenofile)->default_value(string()),"Phenotypes file output by TFL2013_ind")
     ("recordno,r",value<unsigned>(&rv.record_no)->default_value(numeric_limits<unsigned>::max()),"Record value to look up from input files")
+    ("ofile,o",value<string>(&rv.ofile)->default_value(string()),"Name of output file")
+    ("noheader,N","If used, no header information will be output")
     ;
 
   variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
   notify(vm);
 
+  if (vm.count("noheader"))
+    {
+      rv.header=false;
+    }
+  else
+    {
+      rv.header=true;
+    }
   if(argc == 1 || vm.count("help"))
     {
       cerr << desc << '\n';
