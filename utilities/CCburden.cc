@@ -40,29 +40,6 @@ int main( int argc, char ** argv )
 {
   params options = process_command_line(argc,argv);  
 
-  //lookup the record
-  long pop_offset,pheno_offset,effect_offset;
-  unsigned ith_rep;
-  bool found = false;
-  //get offset of the population and the phenotypes from the indexfile
-  ifstream index( options.indexfile.c_str() );
-  while( !found && !index.eof() )
-    {
-      index >> ith_rep >> effect_offset >> pheno_offset >> pop_offset >> ws;
-      if( ith_rep == options.record_no )
-	{
-	  found = true;
-	  break;
-	}
-    }
-
-  if ( ! found )
-    {
-      cerr << "Error: record number " << options.record_no << " not found in " << options.indexfile << '\n';
-      exit(10);
-    }
-  index.close();
-
   //Read in the case/control data
   bool fail;
   CCblock data = read_CC_record(options.indexfile.c_str(),
@@ -70,7 +47,15 @@ int main( int argc, char ** argv )
 				options.record_no,
 				&fail);
 
-
+  
+  if ( fail )
+    {
+      cerr << "Error: could not read record " 
+	   << options.record_no
+	   << " from " << options.ccfile 
+	   << " using index file " << options.indexfile 
+	   << '\n';
+    }
   //output some stuff that may be useful
   ostringstream burdenbuffer;
   if ( options.header )
