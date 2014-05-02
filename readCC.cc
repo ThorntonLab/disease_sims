@@ -10,18 +10,21 @@ CCblock::CCblock( const unsigned & nco,
 		  const unsigned & nca,
 		  const vector<double> & np,
 		  const vector<double> & cp,
-		  const vector< vector<unsigned> > & gm ) : ncontrols(nco), ncases(nca), 
-							    SN(np.size()),SC(cp.size()),
-							    neutral_pos(np), caus_pos(cp),
-							    geno_matrix(gm)
-							    
+		  const vector< vector<unsigned> > & gm,
+		  const vector< std::pair<unsigned,unsigned> > & b,
+		  const vector< std::pair<double,double> > & p ) : ncontrols(nco), ncases(nca), 
+								   SN(np.size()),SC(cp.size()),
+								   neutral_pos(np), caus_pos(cp),
+								   geno_matrix(gm),
+								   burden(b),
+								   phenos(p)
 {
 }
 
 CCblock::CCblock(void) : ncontrols(0), ncases(0),
-		     neutral_pos( vector<double>() ),
-		     caus_pos( vector<double>() ),
-		     geno_matrix( vector<vector<unsigned> >() )
+			 neutral_pos( vector<double>() ),
+			 caus_pos( vector<double>() ),
+			 geno_matrix( vector<vector<unsigned> >() )
 {
 }
 
@@ -120,7 +123,23 @@ CCblock read_CC_record( const char * ccindexfile,
 	{
 	}
     }
+  //read in the number of causative mutations on each haplo
+  vector< std::pair<unsigned,unsigned> > burdens;
+  unsigned b[2];
+  for( unsigned i=0; i<ncont+ncase ; ++i )
+    {
+      in.read( reinterpret_cast<char *>(&b[0]),2*sizeof(unsigned) );
+      burdens.push_back( std::make_pair(b[0],b[1]) );
+    }
+  //read in the number of causative mutations on each haplo
+  vector< std::pair<double,double> > phenos;
+  double p[2];
+  for( unsigned i=0; i<ncont+ncase ; ++i )
+    {
+      in.read( reinterpret_cast<char *>(&p[0]),2*sizeof(double) );
+      phenos.push_back( std::make_pair(p[0],p[1]) );
+    }
   assert( conts_stored == NCONT );
   assert( cases_stored == NCASE );
-  return CCblock( NCONT,NCASE,npos,cpos,genos );
+  return CCblock( NCONT,NCASE,npos,cpos,genos,burdens,phenos );
 }
