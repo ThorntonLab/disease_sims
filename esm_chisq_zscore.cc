@@ -117,7 +117,7 @@ int main(int argc, char ** argv)
   FILE * fp = fopen(options.outfile.c_str(),"a");
   int fd = fileno(fp);
 
-  flock fd_lock = get_whole_flock();
+  struct flock fd_lock = get_whole_flock();
 
   if (fcntl(fd,F_SETLKW,&fd_lock) == -1)
     {

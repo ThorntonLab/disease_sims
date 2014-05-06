@@ -383,7 +383,7 @@ int main(int argc, char ** argv)
   FILE * ai_fh = fopen(options.anova_indexfile.c_str(),"a");
   int ai_fd = fileno(ai_fh);
   
-  flock ai_lock = get_whole_flock();
+  struct flock ai_lock = get_whole_flock();
   
   //make sure our locking functions work...
   assert( ai_lock.l_type == F_WRLCK );
@@ -398,7 +398,7 @@ int main(int argc, char ** argv)
   
   FILE * a_fh = fopen(options.anovafile.c_str(),"a");
   int a_fd = fileno(a_fh);
-  flock a_lock = get_whole_flock();
+  struct flock a_lock = get_whole_flock();
   assert( a_lock.l_type == F_WRLCK );
   assert( a_lock.l_whence == SEEK_SET );
   assert( a_lock.l_start == 0 );
