@@ -48,7 +48,7 @@ ncases = as.integer(a[7])
 model = a[8]
 blocker = a[9]
 
-if( model != "all" & model != "rare" & model != "gwas" )
+if( model != "all" & model != "reseq" & model != "rare" & model != "gwas" )
     {
         warn("Error: invalid model specified")
         q("no")
@@ -65,7 +65,7 @@ status = c(rep(0,ncontrols),rep(1,ncases))
 obj = SKAT_Null_Model( status ~ 1,out_type = "D") #dichotomous trait -- see SKAT help(SKAT_Null_Model)
 
 OPIPE=pipe(paste(blocker,recno,outindex,outfile,sep=" "))
-if ( model != "all" ) {
+if ( model != "all" & model != "reseq" ) {
                                         #Get minor allele freq (MAF), estimates from controls
     ccblock.maf = apply(ccblock$genos,2,mfreq,ncontrols)
     
