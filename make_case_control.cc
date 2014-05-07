@@ -549,6 +549,30 @@ bool params::params_ok( void ) const
       cerr << "Error: bounds on controls (--control-range) must be positive (> 0.).  You entered " << crange << '\n';
     }
 
+  ifstream in(indexfile.c_str());
+  if(!in)
+    {
+      cerr << "Error, could not open " << indexfile << " for reading\n";
+      ok = false;
+    }
+  in.close();
+
+  in.open(popfile.c_str());
+  if(!in)
+    {
+      cerr << "Error, could not open " << popfile << " for reading\n";
+      ok = false;
+    }
+  in.close();
+
+  in.open(phenofile.c_str());
+  if(!in)
+    {
+      cerr << "Error, could not open " << phenofile << " for reading\n";
+      ok = false;
+    }
+  in.close();
+
   if (! ok )
     {
       cerr << "Please use -h option to see help\n";
