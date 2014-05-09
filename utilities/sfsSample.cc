@@ -85,7 +85,23 @@ int main( int argc, char ** argv )
 	     << double(sfs_n[i])/double(rep) << '\t'
 	     << double(sfs_c[i])/double(rep) << '\n';
     }
-  cout << buffer.str();
+
+  if ( options.ofile.empty() )
+    {
+      cout << buffer.str();
+    }
+  else
+    {
+      ofstream out(options.ofile.c_str());
+      if(!out)
+	{
+	  cerr << "Error, " << options.ofile << " could not be opened for writing\n";
+	  exit(10);
+	}
+      out << buffer.str();
+      out.close();
+    }
+  exit(0);
 }
 
 params process_command_line(int argc, char ** argv)
