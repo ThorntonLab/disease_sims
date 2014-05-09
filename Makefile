@@ -7,10 +7,10 @@ CXXFLAGS=$(OPT) $(DEBUG) -Wall -W -I.
 TARGETS=TFL2013_ind make_case_control esm_chisq_zscore atomic_locker/atomic_locker
 
 all: TFL2013.o TFL2013_ind.o make_case_control.o readCC.o esm_chisq_zscore.o esm.o chisq_per_marker.o locking_routines.o esm_filter_sites.o ccintermediate.o
-	$(CXX) $(CXXFLAGS) -o TFL2013 TFL2013.o -lboost_system -lboost_iostreams -lgsl -lgslcblas -lsequence $(LDFLAGS)
-	$(CXX) $(CXXFLAGS) -o TFL2013_ind TFL2013_ind.o -lboost_system -lboost_program_options -lgsl -lgslcblas $(LDFLAGS)
-	$(CXX) $(CXXFLAGS) -o make_case_control make_case_control.o ccintermediate.o locking_routines.o -lsequence -lz -lboost_system -lboost_program_options -lgsl -lgslcblas $(LDFLAGS)
-	$(CXX) $(CXXFLAGS) -o esm_chisq_zscore esm_chisq_zscore.o esm.o chisq_per_marker.o esm_filter_sites.o readCC.o locking_routines.o -lboost_program_options -lboost_system -lboost_thread -lgsl -lgslcblas $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o TFL2013 TFL2013.o -lboost_system $(LDFLAGS) -lboost_iostreams -lgsl -lgslcblas -lsequence 
+	$(CXX) $(CXXFLAGS) -o TFL2013_ind TFL2013_ind.o $(LDFLAGS) -lboost_system -lboost_program_options -lgsl -lgslcblas 
+	$(CXX) $(CXXFLAGS) -o make_case_control make_case_control.o ccintermediate.o locking_routines.o $(LDFLAGS) -lsequence -lz -lboost_system -lboost_program_options -lgsl -lgslcblas 
+	$(CXX) $(CXXFLAGS) -o esm_chisq_zscore esm_chisq_zscore.o esm.o chisq_per_marker.o esm_filter_sites.o readCC.o locking_routines.o -lboost_program_options $(LDFLAGS) -lboost_system -lboost_thread -lgsl -lgslcblas 
 	git submodule init
 	git submodule update
 	cd atomic_locker && make
