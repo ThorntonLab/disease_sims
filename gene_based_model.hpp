@@ -7,7 +7,7 @@
 #include <utility>
 
 //Functions for the Thornton, Foran, and Long (2013) model
-struct disease_effect
+struct TFL2013_recessive_disease_effect
 {
   typedef double result_type;
   template< typename iterator_type >
@@ -31,14 +31,14 @@ struct disease_effect
 };
 
 //calculates the fitess of a diploid
-struct disease_effect_to_fitness
+struct TFL2013_recessive
 {
   typedef double result_type;
   template< typename iterator_type >
   inline double operator()(const iterator_type & g1, const iterator_type & g2,
 			   const double & sd, const double & sd_s,const double & optimum,gsl_rng * r) const
   {
-    std::pair<double,double> effect = disease_effect()(g1,g2,sd,r);
+    std::pair<double,double> effect = TFL2013_recessive_disease_effect()(g1,g2,sd,r);
     double fitness = exp( (-1. * pow(effect.first+effect.second-optimum,2.))/(2.*pow(sd_s,2)) );
     return ( fitness );
   }

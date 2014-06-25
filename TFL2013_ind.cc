@@ -7,12 +7,8 @@
 */
 #include <fwdpp/diploid.hh>
 #include <utility>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/device/file.hpp>
 
 #include <boost/function.hpp>
-
 #include <boost/unordered_set.hpp>
 #include <boost/program_options.hpp>
 
@@ -21,12 +17,9 @@
 #include <mutation_with_age.hpp>
 #include <TFL_fitness_models.hpp>
 
-
 using namespace std;
-using namespace boost::iostreams;
 using namespace boost::program_options;
 using namespace KTfwd;
-
 
 typedef boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps > lookup_table_type;
 
@@ -60,11 +53,15 @@ struct mutation_model
   }
 };
 
+//fitness models
+enum MODEL { GENE_RECESSIVE, MULTIPLICATIVE };
+
 struct simparams
 {
   unsigned N,N2,ngens_burnin,ngens_evolve,ngens_evolve_growth,replicate_no,seed;
   double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum;
-  bool dist_effects,multiplicative ;
+  bool dist_effects;
+  MODEL model;
   string indexfile, hapfile, phenofile, effectsfile ;
   simparams(void);
 };
@@ -83,7 +80,7 @@ simparams::simparams(void) : N(20000),N2(20000),
 			     sd_s(1),
 			     optimum(0.),
 			     dist_effects(true),
-			     multiplicative(false),
+			     model( GENE_RECESSIVE ),
 			     indexfile(string()),
 			     hapfile(string()),
 			     phenofile(string()),
@@ -93,8 +90,6 @@ simparams::simparams(void) : N(20000),N2(20000),
 
 simparams parse_command_line(const int & argc,
 			     char ** argv);
-
-
 
 int main(int argc, char ** argv)
 {
@@ -147,8 +142,19 @@ int main(int argc, char ** argv)
       KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
     }
   unsigned N_current = params.N;
+
+  //Fitness model for phase w/selection.  The default is the recessive model of TFL 2013
+  boost::function<double(glist::const_iterator &,
+			 glist::const_iterator &)> dipfit = boost::bind(TFL2013_recessive(),_1,_2,params.sd,params.sd_s,0.,r);
+
+  if( params.model == MULTIPLICATIVE )
+    {
+      dipfit = boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r);
+    }
+  /*
   if (! params.multiplicative )
     {
+  */
       for( generation = 0; generation < params.ngens_evolve; ++generation,++ttl_gen )
 	{
 	  //Evolve under the disease model from TFL2013
@@ -166,7 +172,7 @@ int main(int argc, char ** argv)
 					    recmap),
 				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,0.,r),
+				dipfit,
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
 	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
 	}
@@ -178,7 +184,7 @@ int main(int argc, char ** argv)
 				&gametes,
 				&diploids,
 				&mutations,
-				N_current,//params.N,
+				N_current,
 				N_next,
 				params.mu_disease+params.mu_neutral,
 				boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
@@ -189,12 +195,13 @@ int main(int argc, char ** argv)
 					    recmap),
 				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
 				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r),
+				dipfit,
 				boost::bind(KTfwd::mutation_remover(),_1,0,2*N_next));
 	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N_next);
 	  //update N
 	  N_current = N_next;
 	}
+      /*
     }
   else //multiplicative phenotype model w/Gaussian stabilizing selection
     {
@@ -243,6 +250,7 @@ int main(int argc, char ** argv)
 	  N_current = N_next;
 	}
     }
+      */
 
   //Write out the population
   ostringstream popbuffer;
@@ -254,18 +262,18 @@ int main(int argc, char ** argv)
   phenobuffer.write( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
   for( unsigned i = 0 ; i < diploids.size() ; ++i )
     {
-      if (! params.multiplicative) //TFL disease model
+      if (params.model == GENE_RECESSIVE) //TFL disease model
 	{
-	  pair<double,double> pheno = disease_effect()(diploids[i].first,
-						       diploids[i].second,
-						       params.sd,
-						       r);
+	  pair<double,double> pheno = TFL2013_recessive_disease_effect()(diploids[i].first,
+									 diploids[i].second,
+									 params.sd,
+									 r);
 	  double x = pheno.first;
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
 	  x = pheno.second;
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
 	}
-      else //Multiplicative model
+      else if (params.model == MULTIPLICATIVE) 
 	{
 	  double x = multiplicative_phenotype()(diploids[i].first,
 						diploids[i].second);
@@ -481,7 +489,7 @@ simparams parse_command_line(const int & argc,
     ("noise",value<double>(&rv.sd)->default_value(0.075),"Std. deviation in Gaussian noise to be added to phenotype")
     ("sigma",value<double>(&rv.sd_s)->default_value(1.0),"Std. deviation in Gaussian fitness function")
     ("dist,d",value<bool>(&rv.dist_effects)->default_value(true),"If true, model distribution of effect sizes.  Otherwise, constant effect size")
-    ("multiplicative,m",value<bool>(&rv.multiplicative)->default_value(false),"If true, use multiplicative phenotype model.  Default is Thornton, Foran & Long (2013) model")
+    ("multiplicative,m","Use multiplicative model of Risch and colleagues.  Default is Thornton, Foran & Long (2013) recessive model")
     ("indexfile,i",value<string>(&rv.indexfile)->default_value(string()),"Name of index file")
     ("popfile,p",value<string>(&rv.hapfile)->default_value(string()),"Name of output file for population")
     ("phenotypes,P",value<string>(&rv.phenofile)->default_value(string()),"Name of output file for phenotypes")
@@ -500,6 +508,10 @@ simparams parse_command_line(const int & argc,
       exit(0);
     }
 
+  if (vm.count("multiplicative"))
+    {
+      rv.model = MULTIPLICATIVE;
+    }
   if( rv.indexfile.empty() || rv.hapfile.empty() || rv.phenofile.empty() )
     {
       if (rv.indexfile.empty())
