@@ -54,7 +54,7 @@ struct mutation_model
 };
 
 //fitness models
-enum MODEL { GENE_RECESSIVE, MULTIPLICATIVE };
+enum MODEL { GENE_RECESSIVE, GENE_ADDITIVE, MULTIPLICATIVE };
 
 struct simparams
 {
@@ -147,7 +147,11 @@ int main(int argc, char ** argv)
   boost::function<double(glist::const_iterator &,
 			 glist::const_iterator &)> dipfit = boost::bind(TFL2013_recessive(),_1,_2,params.sd,params.sd_s,0.,r);
 
-  if( params.model == MULTIPLICATIVE )
+  if( params.model == GENE_ADDITIVE )
+    {
+      dipfit = boost::bind(TFL2013_additive(),_1,_2,params.sd,params.sd_s,0.,r);
+    }
+  else if( params.model == MULTIPLICATIVE )
     {
       dipfit = boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r);
     }
@@ -262,12 +266,23 @@ int main(int argc, char ** argv)
   phenobuffer.write( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
   for( unsigned i = 0 ; i < diploids.size() ; ++i )
     {
-      if (params.model == GENE_RECESSIVE) //TFL disease model
+      if (params.model == GENE_RECESSIVE) //TFL recessive disease model
 	{
 	  pair<double,double> pheno = TFL2013_recessive_disease_effect()(diploids[i].first,
 									 diploids[i].second,
 									 params.sd,
 									 r);
+	  double x = pheno.first;
+	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	  x = pheno.second;
+	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	}
+      if (params.model == GENE_ADDITIVE) //additive haplotype effects
+	{
+	  pair<double,double> pheno = TFL2013_additive_disease_effect()(diploids[i].first,
+									diploids[i].second,
+									params.sd,
+									r);
 	  double x = pheno.first;
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
 	  x = pheno.second;
@@ -511,6 +526,15 @@ simparams parse_command_line(const int & argc,
   if (vm.count("multiplicative"))
     {
       rv.model = MULTIPLICATIVE;
+    }
+  if (vm.count("additive"))
+    {
+      if( rv.model != GENE_RECESSIVE )
+	{
+	  cerr << "Error, it looks like multiple phenotype models have been chosen.  Please choose one!\n";
+	  exit(10);
+	}
+      rv.model = GENE_ADDITIVE;
     }
   if( rv.indexfile.empty() || rv.hapfile.empty() || rv.phenofile.empty() )
     {
