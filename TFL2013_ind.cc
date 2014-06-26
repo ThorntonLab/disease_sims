@@ -505,6 +505,7 @@ simparams parse_command_line(const int & argc,
     ("sigma",value<double>(&rv.sd_s)->default_value(1.0),"Std. deviation in Gaussian fitness function")
     ("dist,d",value<bool>(&rv.dist_effects)->default_value(true),"If true, model distribution of effect sizes.  Otherwise, constant effect size")
     ("multiplicative,m","Use multiplicative model of Risch and colleagues.  Default is Thornton, Foran & Long (2013) recessive model")
+    ("additive,a","Use additive model to calculate phenotype.  Default is Thornton, Foran & Long (2013) recessive model")
     ("indexfile,i",value<string>(&rv.indexfile)->default_value(string()),"Name of index file")
     ("popfile,p",value<string>(&rv.hapfile)->default_value(string()),"Name of output file for population")
     ("phenotypes,P",value<string>(&rv.phenofile)->default_value(string()),"Name of output file for phenotypes")
