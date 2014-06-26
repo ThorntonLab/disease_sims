@@ -503,7 +503,7 @@ simparams parse_command_line(const int & argc,
     ("esize,e",value<double>(&rv.s)->default_value(0.1),"Effect size of causative mutation.  Mean of exponential dist by default.  Constant effect size if dist 0 or -d 0 is used")
     ("noise",value<double>(&rv.sd)->default_value(0.075),"Std. deviation in Gaussian noise to be added to phenotype")
     ("sigma",value<double>(&rv.sd_s)->default_value(1.0),"Std. deviation in Gaussian fitness function")
-    ("dist,d",value<bool>(&rv.dist_effects)->default_value(true),"If true, model distribution of effect sizes.  Otherwise, constant effect size")
+    ("constant,C","Model constant effect size.  Otherwise, exponential distribution is used")
     ("multiplicative,m","Use multiplicative model of Risch and colleagues.  Default is Thornton, Foran & Long (2013) recessive model")
     ("additive,a","Use additive model to calculate phenotype.  Default is Thornton, Foran & Long (2013) recessive model")
     ("indexfile,i",value<string>(&rv.indexfile)->default_value(string()),"Name of index file")
@@ -536,6 +536,11 @@ simparams parse_command_line(const int & argc,
 	  exit(10);
 	}
       rv.model = GENE_ADDITIVE;
+    }
+
+  if( vm.count("constant") )
+    {
+      rv.dist_effects = false;
     }
   if( rv.indexfile.empty() || rv.hapfile.empty() || rv.phenofile.empty() )
     {
