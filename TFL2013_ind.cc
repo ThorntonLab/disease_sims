@@ -334,7 +334,7 @@ int main(int argc, char ** argv)
 	       << params.hapfile << '\n';
 	  exit(10);
 	}
-      gzflush(gzout,Z_FINISH);
+      //gzflush(gzout,Z_FINISH);
       gzclose(gzout);
 
       gzout = gzopen(params.phenofile.c_str(),"a");
@@ -345,7 +345,7 @@ int main(int argc, char ** argv)
 	       << params.phenofile << '\n';
 	  exit(10);
 	}
-      gzflush(gzout,Z_FINISH);
+      //gzflush(gzout,Z_FINISH);
       gzclose(gzout);
 
       gzout = gzopen(params.effectsfile.c_str(),"a");
@@ -356,7 +356,7 @@ int main(int argc, char ** argv)
 	       << params.effectsfile << '\n';
 	  exit(10);
 	}
-      gzflush(gzout,Z_FINISH);
+      //gzflush(gzout,Z_FINISH);
       gzclose(gzout);
 
       //Now we can write to the index file
@@ -629,7 +629,7 @@ n";
     {
       if (rv.indexfile.empty())
 	{
-	  cerr << "Error: indef file name required.  Use -h to see options\n";
+	  cerr << "Error: index file name required.  Use -h to see options\n";
 	}
 
       if( rv.hapfile.empty() )
