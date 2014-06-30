@@ -73,9 +73,9 @@ simindex::simindex(const char * filename) : e(mul()),
 	    }
 	  else
 	    {
-	      e[recs[i]]=accumulate(eis.begin(),eis.begin()+i-1,0l);
-	      p[recs[i]]=accumulate(pis.begin(),pis.begin()+i-1,0l);
-	      h[recs[i]]=accumulate(his.begin(),his.begin()+i-1,0l);
+	      e[recs[i]]=accumulate(eis.begin(),eis.begin()+i,0l[);
+	      p[recs[i]]=accumulate(pis.begin(),pis.begin()+i,0l);
+	      h[recs[i]]=accumulate(his.begin(),his.begin()+i,0l);
 	    }
 	}
     }
