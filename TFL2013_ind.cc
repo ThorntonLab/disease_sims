@@ -412,6 +412,12 @@ int main(int argc, char ** argv)
 	  cerr << "Error writing to " << params.effectsfile << '\n';
 	  exit(errno);
 	}
+      fflush( haps_fh );
+      fclose( haps_fh );
+      fflush( pheno_fh );
+      fclose( pheno_fh );
+      fflush( effect_fh );
+      fclose( effect_fh );
     }
 
   
