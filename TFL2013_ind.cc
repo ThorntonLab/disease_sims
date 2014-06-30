@@ -304,7 +304,7 @@ int main(int argc, char ** argv)
     Then, unlock output files first, releasing lock on index last.
   */
   //get file descriptors and grab locks in desired order
-  struct flock index_flock, hapfile_flock, phenofile_flock, effects_flock;
+  struct flock index_flock;//, hapfile_flock, phenofile_flock, effects_flock;
   index_flock.l_type = F_WRLCK;/*Write lock*/
   index_flock.l_whence = SEEK_SET;
   index_flock.l_start = 0;
@@ -324,21 +324,22 @@ int main(int argc, char ** argv)
       exit(10);
     }
 
-  hapfile_flock.l_type = F_WRLCK;/*Write lock*/
-  hapfile_flock.l_whence = SEEK_SET;
-  hapfile_flock.l_start = 0;
-  hapfile_flock.l_len = 0;/*Lock whole file*/
+  
+  // hapfile_flock.l_type = F_WRLCK;/*Write lock*/
+  // hapfile_flock.l_whence = SEEK_SET;
+  // hapfile_flock.l_start = 0;
+  // hapfile_flock.l_len = 0;/*Lock whole file*/
 
-  phenofile_flock.l_type = F_WRLCK;/*Write lock*/
-  phenofile_flock.l_whence = SEEK_SET;
-  phenofile_flock.l_start = 0;
-  phenofile_flock.l_len = 0;/*Lock whole file*/
+  // phenofile_flock.l_type = F_WRLCK;/*Write lock*/
+  // phenofile_flock.l_whence = SEEK_SET;
+  // phenofile_flock.l_start = 0;
+  // phenofile_flock.l_len = 0;/*Lock whole file*/
 
-  effects_flock.l_type = F_WRLCK;/*Write lock*/
-  effects_flock.l_whence = SEEK_SET;
-  effects_flock.l_start = 0;
-  effects_flock.l_len = 0;/*Lock whole file*/
-
+  // effects_flock.l_type = F_WRLCK;/*Write lock*/
+  // effects_flock.l_whence = SEEK_SET;
+  // effects_flock.l_start = 0;
+  // effects_flock.l_len = 0;/*Lock whole file*/
+  
   FILE * haps_fh = fopen(params.hapfile.c_str(),"a");
   int hapfile_fd = fileno(haps_fh);
 
@@ -347,12 +348,13 @@ int main(int argc, char ** argv)
       std::cerr << "ERROR: could not open " << params.hapfile << '\n';
       exit(10);
     }
-  if (fcntl(index_fd, F_SETLKW,&index_flock) == -1) 
+  /*
+  if (fcntl(index_fd, F_SETLKW,&hapfile_flock) == -1) 
     {
       std::cerr << "ERROR: could not obtain lock on " << params.hapfile << '\n';
       exit(10);
     }
-
+  */
   FILE * pheno_fh = fopen(params.phenofile.c_str(),"a");
   int pheno_fd = fileno(pheno_fh);
   if ( pheno_fd == -1 ) 
@@ -360,12 +362,13 @@ int main(int argc, char ** argv)
       std::cerr << "ERROR: could not open " << params.phenofile << '\n';
       exit(10);
     }
-  if (fcntl(pheno_fd, F_SETLKW,&index_flock) == -1) 
+  /*
+  if (fcntl(pheno_fd, F_SETLKW,&phenofile_flock) == -1) 
     {
       std::cerr << "ERROR: could not obtain lock on " << params.phenofile << '\n';
       exit(10);
     }
-
+  */
   FILE * effect_fh = NULL;
   int effect_fd = 0;
   effect_fh = fopen(params.effectsfile.c_str(),"a");
@@ -375,12 +378,13 @@ int main(int argc, char ** argv)
       std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
       exit(10);
     }
-  if (fcntl(effect_fd, F_SETLKW,&index_flock) == -1) 
+  /*
+  if (fcntl(effect_fd, F_SETLKW,&effects_flock) == -1) 
     {
       std::cerr << "ERROR: could not obtain lock on " << params.effectsfile << '\n';
       exit(10);
     }
-
+  */
   //Write the index data
   std::ostringstream indexstream;
   indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
@@ -409,10 +413,11 @@ int main(int argc, char ** argv)
 
   //release the locks
   index_flock.l_type = F_UNLCK;
-  hapfile_flock.l_type = F_UNLCK;
-  phenofile_flock.l_type = F_UNLCK;
-  effects_flock.l_type = F_UNLCK;
+  //hapfile_flock.l_type = F_UNLCK;
+  //phenofile_flock.l_type = F_UNLCK;
+  //effects_flock.l_type = F_UNLCK;
 
+  /*
   if (fcntl(effect_fd, F_UNLCK,&effects_flock) == -1) 
     {
       std::cerr << "ERROR: could not release lock on " << params.effectsfile << '\n';
@@ -420,7 +425,7 @@ int main(int argc, char ** argv)
     }
   fflush(effect_fh);
   fclose(effect_fh);
-
+  
   if (fcntl(pheno_fd, F_UNLCK,&phenofile_flock) == -1) 
     {
       std::cerr << "ERROR: could not release lock on " << params.phenofile << '\n';
@@ -436,7 +441,7 @@ int main(int argc, char ** argv)
     }
   fflush( haps_fh );
   fclose(haps_fh);
-
+*/
   if (fcntl(index_fd, F_UNLCK,&index_flock) == -1) 
     {
       std::cerr << "ERROR: could not release lock on " << params.indexfile << '\n';
@@ -444,7 +449,7 @@ int main(int argc, char ** argv)
     }
   fflush( index_fh );
   fclose(index_fh);
-
+  
   exit(0);
 }
 
