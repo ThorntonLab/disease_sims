@@ -43,6 +43,7 @@
 
 #include <mutation_with_age.hpp>
 #include <ccintermediate.hpp>
+#include <simindex.hpp>
 #include <locking_routines.hpp>
 
 #include <Sequence/SimData.hpp>
@@ -80,12 +81,29 @@ struct params
   string indexfile,popfile,phenofile,anovafile,anova_indexfile;
   unsigned twoN,record_no,ncases,ncontrols,seed;
   double case_proportion,crange;
-
+  bool gzinput,gzoutput;
+  params();
   bool files_undef( void ) const;
   void report_empty( std::ostream & out ) const;
   bool params_ok( void ) const;
 };
 
+params::params() : indexfile(string()),
+		   popfile(string()),
+		   phenofile(string()),
+		   anovafile(string()),
+		   anova_indexfile(string()),
+		   twoN(0),
+		   record_no(std::numeric_limits<unsigned>::max()),
+		   ncases(0),
+		   ncontrols(0),
+		   seed(0),
+		   case_proportion(1.),
+		   crange(0.5),
+		   gzinput(false),
+		   gzoutput(false)
+{
+}
 params process_command_line(int argc, char ** argv);
 
 std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, const double & case_proportion, double * cutoff);
@@ -102,32 +120,56 @@ int main(int argc, char ** argv)
   mlist mutations;
   vector< pair< glist::iterator,glist::iterator > > diploids;
 
+  /*
   long pop_offset,pheno_offset,effect_offset;
   unsigned ith_rep;
+  */
   bool found = false;
   //get offset of the population and the phenotypes from the indexfile
-  ifstream index( options.indexfile.c_str() );
-  while( !found && !index.eof() )
+  simindex index(options.indexfile.c_str());
+
+  if( index.file_problem() )
     {
-      index >> ith_rep >> effect_offset >> pheno_offset >> pop_offset >> ws;
-      if( ith_rep == options.record_no )
-	{
-	  found = true;
-	  break;
-	}
+      cerr << "Error reading index file\n";
+      exit(10);
     }
+
+  if( index.eexists( options.record_no ) )
+    {
+      found = true;
+    }
+  // ifstream index( options.indexfile.c_str() );
+  // while( !found && !index.eof() )
+  //   {
+  //     index >> ith_rep >> effect_offset >> pheno_offset >> pop_offset >> ws;
+  //     if( ith_rep == options.record_no )
+  // 	{
+  // 	  found = true;
+  // 	  break;
+  // 	}
+  //   }
 
   if ( ! found )
     {
       cerr << "Error: record number " << options.record_no << " not found in " << options.indexfile << '\n';
       exit(10);
     }
-  index.close();
+  //index.close();
 
-  ifstream popstream( options.popfile.c_str() );
-  popstream.seekg( pop_offset );
-  read_binary_pop( &gametes, &mutations, &diploids, boost::bind(mreader(),_1),popstream );
-  popstream.close();
+  if ( options.gzinput )
+    {
+      gzFile gzin = gzopen(options.popfile.c_str(),"rb");
+      gzseek( gzin, index.hoffset(options.record_no), 0);
+      read_binary_pop( &gametes, &mutations, &diploids, boost::bind(gzmreader(),_1),gzin );
+      gzclose(gzin);
+    }
+  else
+    {
+      ifstream popstream( options.popfile.c_str() );
+      popstream.seekg( index.hoffset(options.record_no) );
+      read_binary_pop( &gametes, &mutations, &diploids, boost::bind(mreader(),_1),popstream );
+      popstream.close();
+    }
 
   if ( gametes.size() > 2*diploids.size() )
     {
@@ -145,21 +187,43 @@ int main(int argc, char ** argv)
     }
 
   //Read in the phenotype data
-  ifstream phenostream( options.phenofile.c_str() );
-  phenostream.seekg( pheno_offset );
   vector< pair<double,double> > phenotypes;
-  unsigned nphenos;
-  phenostream.read( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
-  for( unsigned i = 0 ; i < nphenos ; ++i )
+
+  if( options.gzinput )
     {
-      //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
-      //Phenotype of the individual is x+y
-      double x,y;
-      phenostream.read( reinterpret_cast<char *>(&x), sizeof(double) );
-      phenostream.read( reinterpret_cast<char *>(&y), sizeof(double) );
-      phenotypes.push_back( make_pair(x,y) );
+      gzFile gzin = gzopen( options.phenofile.c_str(),"rb" );
+      gzseek( gzin, index.poffset(options.record_no), 0);
+      unsigned nphenos;
+      gzread(gzin,&nphenos,sizeof(unsigned));
+      for(unsigned i = 0 ; i < nphenos ; ++i )
+	{
+	  //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
+	  //Phenotype of the individual is x+y
+	  double x,y;
+	  gzread(gzin,&x,sizeof(double));
+	  gzread(gzin,&y,sizeof(double)); 
+	  phenotypes.push_back( make_pair(x,y) );
+	}
+      gzclose(gzin);
     }
-  phenostream.close();
+  else
+    {
+      ifstream phenostream( options.phenofile.c_str() );
+      phenostream.seekg( index.poffset(options.record_no) );
+      
+      unsigned nphenos;
+      phenostream.read( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
+      for( unsigned i = 0 ; i < nphenos ; ++i )
+	{
+	  //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
+	  //Phenotype of the individual is x+y
+	  double x,y;
+	  phenostream.read( reinterpret_cast<char *>(&x), sizeof(double) );
+	  phenostream.read( reinterpret_cast<char *>(&y), sizeof(double) );
+	  phenotypes.push_back( make_pair(x,y) );
+	}
+      phenostream.close();
+    }
 
   assert( phenotypes.size() == diploids.size() );
   //The real work starts here
@@ -396,44 +460,89 @@ int main(int argc, char ** argv)
       exit(10);
     }
   
-  FILE * a_fh = fopen(options.anovafile.c_str(),"a");
-  int a_fd = fileno(a_fh);
-  struct flock a_lock = get_whole_flock();
-  assert( a_lock.l_type == F_WRLCK );
-  assert( a_lock.l_whence == SEEK_SET );
-  assert( a_lock.l_start == 0 );
-  assert( a_lock.l_len == 0 );
-  if (fcntl(a_fd,F_SETLKW,&a_lock) == -1)
+  if( options.gzoutput )
     {
-      cerr << "ERROR: could not obtain lock on " << options.anovafile << '\n';
-      exit(10);
+      gzFile gzout = gzopen( options.anovafile.c_str(),"a" );
+      int written = gzwrite( gzout, ccbuffer.str().c_str(), ccbuffer.str().size() );
+      if(!written)
+	{
+	  cerr << "Error writing to " << options.anovafile << '\n';
+	  exit(10);
+	}
+      gzflush(gzout,Z_FINISH);
+      gzclose(gzout);
+
+      ostringstream buffer;
+      buffer << options.record_no << ' ' << written << '\n';
+      if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
+	{
+	  cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
+	  exit(errno);
+	}
     }
+  else
+    {
+      FILE * a_fh = fopen(options.anovafile.c_str(),"a");
+      int a_fd = fileno(a_fh);
+      ostringstream buffer;
+      buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR ) << '\n';
+      if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
+	{
+	  cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
+	  exit(errno);
+	}
+      buffer.str(string());
+      
+      //write out the CC buffer
+      if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
+	{
+	  cerr << "Error on writing buffer to " << options.anovafile << '\n';
+	  exit(errno);
+	}
+      fflush(a_fh);
+      fclose(a_fh);
+    }
+
+  // FILE * a_fh = fopen(options.anovafile.c_str(),"a");
+  // int a_fd = fileno(a_fh);
+  // struct flock a_lock = get_whole_flock();
+  // assert( a_lock.l_type == F_WRLCK );
+  // assert( a_lock.l_whence == SEEK_SET );
+  // assert( a_lock.l_start == 0 );
+  // assert( a_lock.l_len == 0 );
+  // if (fcntl(a_fd,F_SETLKW,&a_lock) == -1)
+  //   {
+  //     cerr << "ERROR: could not obtain lock on " << options.anovafile << '\n';
+  //     exit(10);
+  //   }
   
-  ostringstream buffer;
-  buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR ) << '\n';
-  if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
-    {
-      cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
-      exit(errno);
-    }
-  buffer.str(string());
+  // ostringstream buffer;
+  // buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR ) << '\n';
+  // if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
+  //   {
+  //     cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
+  //     exit(errno);
+  //   }
+  // buffer.str(string());
   
-  //write out the CC buffer
-  if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
-    {
-      cerr << "Error on writing buffer to " << options.anovafile << '\n';
-      exit(errno);
-    }
+  // //write out the CC buffer
+  // if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
+  //   {
+  //     cerr << "Error on writing buffer to " << options.anovafile << '\n';
+  //     exit(errno);
+  //   }
   
-  //Unlock files
-  a_lock.l_type = F_UNLCK;
-  if (fcntl(a_fd,F_UNLCK,&a_lock) == -1)
-    {
-      cerr << "ERROR: could not relesae lock on " << options.anovafile << '\n';
-      exit(10);
-    }
-  fflush(a_fh);
-  fclose(a_fh);
+  // //Unlock files
+  // a_lock.l_type = F_UNLCK;
+  // if (fcntl(a_fd,F_UNLCK,&a_lock) == -1)
+  //   {
+  //     cerr << "ERROR: could not relesae lock on " << options.anovafile << '\n';
+  //     exit(10);
+  //   }
+  // fflush(a_fh);
+  // fclose(a_fh);
+
+  //release lock on index file
   ai_lock.l_type = F_UNLCK;
   if (fcntl(ai_fd,F_UNLCK,&ai_lock) == -1)
     {
@@ -463,6 +572,8 @@ params process_command_line(int argc, char ** argv)
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed")
     ("threshold,t",value<double>(&rv.case_proportion)->default_value(-1.),"Proportion of population to be labelled as putative cases.  Value must be 0 < t < 1. E.g., individuals with phenotypic values larger than the (1-t)th quantile of phenotypic values in the entire population are potential cases.  For example, in Thornton, Foran, and Long (2013), we used t = 0.15, meaning that the upper 15% of phenotypic values were treated as possible cases.")
     ("control-range",value<double>(&rv.crange)->default_value(0.5),"A putatitve control is defined as the population mean phenotype +/- control-range*SD, where SD is the standard deviation of the population phenotype.  Default is what was used in Thornton, Foran, and Long (2013)")
+    ("gzin","Input is gzipped.  Default is to assume uncompressed input.")
+    ("gzout","Write output as gzipped file.  Default is to write uncompressed output.")
     ;
 
   variables_map vm;
@@ -486,6 +597,14 @@ params process_command_line(int argc, char ** argv)
       exit(10);
     }
 
+  if( vm.count("gzin") )
+    {
+      rv.gzinput=true;
+    }
+  if(vm.count("gzout"))
+    {
+      rv.gzoutput = true;
+    }
   return rv;
 }
 
