@@ -324,6 +324,58 @@ int main(int argc, char ** argv)
       exit(10);
     }
 
+  if( params.gzoutput ) 
+    {
+    }
+  else
+    {
+      FILE * haps_fh = fopen(params.hapfile.c_str(),"a");
+      int hapfile_fd = fileno(haps_fh);
+      if ( hapfile_fd == -1 ) 
+	{ 
+	  std::cerr << "ERROR: could not open " << params.hapfile << '\n';
+	  exit(10);
+	}
+      FILE * pheno_fh = fopen(params.phenofile.c_str(),"a");
+      int pheno_fd = fileno(pheno_fh);
+      if ( pheno_fd == -1 ) 
+	{ 
+	  std::cerr << "ERROR: could not open " << params.phenofile << '\n';
+	  exit(10);
+	}
+      FILE * effect_fh = fopen(params.effectsfile.c_str(),"a");
+      int effect_fd = 0;
+      effect_fd = fileno(effect_fh);
+      if ( effect_fd == -1 ) 
+	{ 
+	  std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
+	  exit(10);
+	}
+      std::ostringstream indexstream;
+      indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
+		  << ftell(pheno_fh) << ' ' << ftell(haps_fh);
+      fprintf(index_fh,"%s\n",indexstream.str().c_str());
+
+      //write the haplotype data
+      if ( ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size()) == -1 )
+	{
+	  cerr << "Error writing to " << params.hapfile << '\n';
+	  exit(errno);
+	}
+      //write the phenotype data
+      if( ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() ) == -1 )
+	{
+	  cerr << "Error writing to " << params.phenofile << '\n';
+	  exit(errno);
+	}
+      //write the effects
+      if( ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() ) == -1 )
+	{
+	  cerr << "Error writing to " << params.effectsfile << '\n';
+	  exit(errno);
+	}
+    }
+
   
   // hapfile_flock.l_type = F_WRLCK;/*Write lock*/
   // hapfile_flock.l_whence = SEEK_SET;
@@ -340,14 +392,14 @@ int main(int argc, char ** argv)
   // effects_flock.l_start = 0;
   // effects_flock.l_len = 0;/*Lock whole file*/
   
-  FILE * haps_fh = fopen(params.hapfile.c_str(),"a");
-  int hapfile_fd = fileno(haps_fh);
+  // FILE * haps_fh = fopen(params.hapfile.c_str(),"a");
+  // int hapfile_fd = fileno(haps_fh);
 
-  if ( hapfile_fd == -1 ) 
-    { 
-      std::cerr << "ERROR: could not open " << params.hapfile << '\n';
-      exit(10);
-    }
+  // if ( hapfile_fd == -1 ) 
+  //   { 
+  //     std::cerr << "ERROR: could not open " << params.hapfile << '\n';
+  //     exit(10);
+  //   }
   /*
   if (fcntl(index_fd, F_SETLKW,&hapfile_flock) == -1) 
     {
@@ -355,13 +407,13 @@ int main(int argc, char ** argv)
       exit(10);
     }
   */
-  FILE * pheno_fh = fopen(params.phenofile.c_str(),"a");
-  int pheno_fd = fileno(pheno_fh);
-  if ( pheno_fd == -1 ) 
-    { 
-      std::cerr << "ERROR: could not open " << params.phenofile << '\n';
-      exit(10);
-    }
+  // FILE * pheno_fh = fopen(params.phenofile.c_str(),"a");
+  // int pheno_fd = fileno(pheno_fh);
+  // if ( pheno_fd == -1 ) 
+  //   { 
+  //     std::cerr << "ERROR: could not open " << params.phenofile << '\n';
+  //     exit(10);
+  //   }
   /*
   if (fcntl(pheno_fd, F_SETLKW,&phenofile_flock) == -1) 
     {
@@ -369,15 +421,15 @@ int main(int argc, char ** argv)
       exit(10);
     }
   */
-  FILE * effect_fh = NULL;
-  int effect_fd = 0;
-  effect_fh = fopen(params.effectsfile.c_str(),"a");
-  effect_fd = fileno(effect_fh);
-  if ( effect_fd == -1 ) 
-    { 
-      std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
-      exit(10);
-    }
+  // FILE * effect_fh = NULL;
+  // int effect_fd = 0;
+  // effect_fh = fopen(params.effectsfile.c_str(),"a");
+  // effect_fd = fileno(effect_fh);
+  // if ( effect_fd == -1 ) 
+  //   { 
+  //     std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
+  //     exit(10);
+  //   }
   /*
   if (fcntl(effect_fd, F_SETLKW,&effects_flock) == -1) 
     {
@@ -386,30 +438,30 @@ int main(int argc, char ** argv)
     }
   */
   //Write the index data
-  std::ostringstream indexstream;
-  indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
-	      << ftell(pheno_fh) << ' ' << ftell(haps_fh);
-  fprintf(index_fh,"%s\n",indexstream.str().c_str());
+  // std::ostringstream indexstream;
+  // indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
+  // 	      << ftell(pheno_fh) << ' ' << ftell(haps_fh);
+  // fprintf(index_fh,"%s\n",indexstream.str().c_str());
 
 
-  //write the haplotype data
-  if ( ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size()) == -1 )
-    {
-      cerr << "Error writing to " << params.hapfile << '\n';
-      exit(errno);
-    }
+  // //write the haplotype data
+  // if ( ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size()) == -1 )
+  //   {
+  //     cerr << "Error writing to " << params.hapfile << '\n';
+  //     exit(errno);
+  //   }
   //write the phenotype data
-  if( ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() ) == -1 )
-    {
-      cerr << "Error writing to " << params.phenofile << '\n';
-      exit(errno);
-    }
+  // if( ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() ) == -1 )
+  //   {
+  //     cerr << "Error writing to " << params.phenofile << '\n';
+  //     exit(errno);
+  //   }
   //write the effects
-  if( ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() ) == -1 )
-    {
-      cerr << "Error writing to " << params.effectsfile << '\n';
-      exit(errno);
-    }
+  // if( ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() ) == -1 )
+  //   {
+  //     cerr << "Error writing to " << params.effectsfile << '\n';
+  //     exit(errno);
+  //   }
 
   //release the locks
   index_flock.l_type = F_UNLCK;
