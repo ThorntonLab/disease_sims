@@ -6,6 +6,8 @@
 #include <iosfwd>
 #include <sstream>
 
+#include <zlib.h>
+
 #ifndef USE_STANDARD_CONTAINERS
 #include <boost/container/list.hpp>
 #include <boost/container/vector.hpp>
@@ -84,6 +86,28 @@ struct mreader
     in.read( reinterpret_cast< char * >(&s),sizeof(double) );
     char label;
     in.read( reinterpret_cast< char * >(&label),sizeof(char) );
+    return result_type(pos,s,n,o,label,neut);
+  }
+};
+
+//function object to read mutation data in binary format from a gzipped file
+struct gzmreader
+{
+  typedef TFLmtype result_type;
+  result_type operator()( gzFile gzin ) const
+  {
+    unsigned n;
+    gzread(gzin,&n,sizeof(unsigned));
+    unsigned o;
+    gzread(gzin,&o,sizeof(unsigned));
+    bool neut;
+    gzread(gzin,&neut,sizeof(bool));
+    double pos;
+    gzread(gzin,&pos,sizeof(double));
+    double s;
+    gzread(gzin,&s,sizeof(double));
+    char label;
+    gzread(gzin,&label,sizeof(char));
     return result_type(pos,s,n,o,label,neut);
   }
 };
