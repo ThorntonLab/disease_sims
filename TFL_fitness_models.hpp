@@ -4,5 +4,6 @@
 #include <mutation_with_age.hpp>
 #include <gene_based_model.hpp>
 #include <multiplicative_model.hpp>
+#include <popgen_model.hpp>
 
 #endif
