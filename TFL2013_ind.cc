@@ -14,6 +14,8 @@
 
 #include <fcntl.h>
 
+#include <zlib.h>
+
 #include <mutation_with_age.hpp>
 #include <TFL_fitness_models.hpp>
 
@@ -60,7 +62,7 @@ struct simparams
 {
   unsigned N,N2,ngens_burnin,ngens_evolve,ngens_evolve_growth,replicate_no,seed;
   double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum,dominance;
-  bool dist_effects;
+  bool dist_effects,gzoutput;
   MODEL model;
   string indexfile, hapfile, phenofile, effectsfile ;
   simparams(void);
@@ -81,6 +83,7 @@ simparams::simparams(void) : N(20000),N2(20000),
 			     optimum(0.),
 			     dominance(0.),
 			     dist_effects(true),
+			     gzoutput(false),
 			     model( GENE_RECESSIVE ),
 			     indexfile(string()),
 			     hapfile(string()),
@@ -338,7 +341,6 @@ int main(int argc, char ** argv)
 	}
       //}
     }
-
   /*
     OK, now we lock the index file first.  Then, the rest of the output files.
 
@@ -520,7 +522,8 @@ simparams parse_command_line(const int & argc,
     ("phenotypes,P",value<string>(&rv.phenofile)->default_value(string()),"Name of output file for phenotypes")
     ("effectsfile,E",value<string>(&rv.effectsfile)->default_value(string()),"Name of output file for effect sizes of causative mutations")
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed (unsigned integer)")
-    ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.");
+    ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.")
+    ("gzout","Output will be in compressed binary.  Default is plain binary.")
     ;
 
   variables_map vm;
@@ -555,6 +558,11 @@ n";
 	  exit(10);
 	}
       rv.model = POPGEN;
+    }
+
+  if(vm.count("gzout"))
+    {
+      rv.gzoutput=true;
     }
 
   if( vm.count("constant") )
