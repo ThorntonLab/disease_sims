@@ -326,6 +326,44 @@ int main(int argc, char ** argv)
 
   if( params.gzoutput ) 
     {
+      gzFile gzout = gzopen(params.hapfile.c_str(),"a");
+      int hapswritten = gzwrite(gzout,popbuffer.str().c_str(),popbuffer.str().size());
+      if ( ! hapswritten && !popbuffer.str().empty() )
+	{
+	  cerr << "Error writing population to " 
+	       << params.hapfile << '\n';
+	  exit(10);
+	}
+      gzflush(gzout,Z_FINISH);
+      gzclose(gzout);
+
+      gzout = gzopen(params.phenofile.c_str(),"a");
+      int phenowritten = gzwrite(gzout,phenobuffer.str().c_str(),phenobuffer.str().size());
+      if ( ! phenowritten && !phenobuffer.str().empty() )
+	{
+	  cerr << "Error writing population to " 
+	       << params.phenofile << '\n';
+	  exit(10);
+	}
+      gzflush(gzout,Z_FINISH);
+      gzclose(gzout);
+
+      gzout = gzopen(params.effectsfile.c_str(),"a");
+      int effectwritten = gzwrite(gzout,effectstream.str().c_str(),effectstream.str().size());
+      if ( ! effectwritten && !effectstream.str().empty() )
+	{
+	  cerr << "Error writing population to " 
+	       << params.effectsfile << '\n';
+	  exit(10);
+	}
+      gzflush(gzout,Z_FINISH);
+      gzclose(gzout);
+
+      //Now we can write to the index file
+      std::ostringstream indexstream;
+      indexstream << params.replicate_no << ' ' << effectwritten << ' '
+		  << phenowritten << ' ' << hapswritten << '\n';
+      fprintf(index_fh,"%s\n",indexstream.str().c_str());
     }
   else
     {
