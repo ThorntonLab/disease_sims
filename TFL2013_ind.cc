@@ -54,12 +54,12 @@ struct mutation_model
 };
 
 //fitness models
-enum MODEL { GENE_RECESSIVE, GENE_ADDITIVE, MULTIPLICATIVE };
+enum MODEL { GENE_RECESSIVE, GENE_ADDITIVE, MULTIPLICATIVE, POPGEN };
 
 struct simparams
 {
   unsigned N,N2,ngens_burnin,ngens_evolve,ngens_evolve_growth,replicate_no,seed;
-  double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum;
+  double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum,dominance;
   bool dist_effects;
   MODEL model;
   string indexfile, hapfile, phenofile, effectsfile ;
@@ -153,7 +153,13 @@ int main(int argc, char ** argv)
     }
   else if( params.model == MULTIPLICATIVE )
     {
-      dipfit = boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r);
+      dipfit = boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,
+			   params.sd,params.sd_s,params.optimum,r);
+    }
+  else if ( params.model == POPGEN )
+    {
+      dipfit = boost::bind(popgen_disease_effect_to_fitness(),_1,_2,params.dominance,
+			   params.sd,params.sd_s,params.optimum,r);
     }
   /*
   if (! params.multiplicative )
@@ -505,6 +511,7 @@ simparams parse_command_line(const int & argc,
     ("sigma",value<double>(&rv.sd_s)->default_value(1.0),"Std. deviation in Gaussian fitness function")
     ("constant,C","Model constant effect size.  Otherwise, exponential distribution is used")
     ("multiplicative,m","Use multiplicative model of Risch and colleagues.  Default is Thornton, Foran & Long (2013) recessive model")
+    ("popgen,F",value<double>(&rv.dominance)->default_value(1.0),"Use popgen-like multiplicative model to calculate trait value")
     ("additive,a","Use additive model to calculate phenotype.  Default is Thornton, Foran & Long (2013) recessive model")
     ("indexfile,i",value<string>(&rv.indexfile)->default_value(string()),"Name of index file")
     ("popfile,p",value<string>(&rv.hapfile)->default_value(string()),"Name of output file for population")
@@ -536,6 +543,11 @@ simparams parse_command_line(const int & argc,
 	  exit(10);
 	}
       rv.model = GENE_ADDITIVE;
+    }
+  if( vm.count("popgen") )
+    {
+      if( rv.model != GENE_RECESSIVE )                                                                           {                                                                                                         cerr << "Error, it looks like multiple phenotype models have been chosen.  Please choose one!\\
+n";                                                                                                                exit(10);                                                                                             }                                                                                                     rv.model = POPGEN;
     }
 
   if( vm.count("constant") )
