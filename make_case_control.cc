@@ -469,7 +469,7 @@ int main(int argc, char ** argv)
 	  cerr << "Error writing to " << options.anovafile << '\n';
 	  exit(10);
 	}
-      gzflush(gzout,Z_FINISH);
+      //gzflush(gzout,Z_FINISH);
       gzclose(gzout);
 
       ostringstream buffer;
