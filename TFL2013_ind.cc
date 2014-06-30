@@ -3,7 +3,7 @@
 
   Re-implemented using individual-based sampling routines.
 
-  Rewritten to use the fwdpp library v >= 0.2.0
+  Rewritten to use the fwdpp library v >= 0.2.4
 */
 #include <fwdpp/diploid.hh>
 #include <utility>
@@ -165,106 +165,53 @@ int main(int argc, char ** argv)
       dipfit = boost::bind(popgen_disease_effect_to_fitness(),_1,_2,params.dominance,
 			   params.sd,params.sd_s,params.optimum,r);
     }
-  /*
-  if (! params.multiplicative )
+
+  for( generation = 0; generation < params.ngens_evolve; ++generation,++ttl_gen )
     {
-  */
-      for( generation = 0; generation < params.ngens_evolve; ++generation,++ttl_gen )
-	{
-	  //Evolve under the disease model from TFL2013
-	  wbar = sample_diploid(r,
-				&gametes,
-				&diploids,
-				&mutations,
-				params.N,
-				params.mu_disease+params.mu_neutral,
-				boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
-				boost::bind(KTfwd::genetics101(),_1,_2,
-					    &gametes,
-					    params.littler,
-					    r,
-					    recmap),
-				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
-				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				dipfit,
-				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
-	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
-	}
-      //Exp. growth phase w/disease model
-      for( generation = 0 ; generation < params.ngens_evolve_growth ; ++generation,++ttl_gen )
-	{
-	  unsigned N_next = round( params.N*pow(G,generation+1) );
-	  wbar = sample_diploid(r,
-				&gametes,
-				&diploids,
-				&mutations,
-				N_current,
-				N_next,
-				params.mu_disease+params.mu_neutral,
-				boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
-				boost::bind(KTfwd::genetics101(),_1,_2,
-					    &gametes,
-					    params.littler,
-					    r,
-					    recmap),
-				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
-				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				dipfit,
-				boost::bind(KTfwd::mutation_remover(),_1,0,2*N_next));
-	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N_next);
-	  //update N
-	  N_current = N_next;
-	}
-      /*
+      //Evolve under the disease model from TFL2013
+      wbar = sample_diploid(r,
+			    &gametes,
+			    &diploids,
+			    &mutations,
+			    params.N,
+			    params.mu_disease+params.mu_neutral,
+			    boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
+			    boost::bind(KTfwd::genetics101(),_1,_2,
+					&gametes,
+					params.littler,
+					r,
+					recmap),
+			    boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
+			    boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
+			    dipfit,
+			    boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
+      KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
     }
-  else //multiplicative phenotype model w/Gaussian stabilizing selection
+  //Exp. growth phase w/disease model
+  for( generation = 0 ; generation < params.ngens_evolve_growth ; ++generation,++ttl_gen )
     {
-      for( generation = 0; generation < params.ngens_evolve; ++generation,++ttl_gen )
-	{
-	  wbar = sample_diploid(r,
-				&gametes,
-				&diploids,
-				&mutations,
-				params.N,
-				params.mu_disease+params.mu_neutral,
-				boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
-				boost::bind(KTfwd::genetics101(),_1,_2,
-					    &gametes,
-					    params.littler,
-					    r,
-					    recmap),
-				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
-				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r),
-				boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
-	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
-	}
-      for( generation = 0 ; generation < params.ngens_evolve_growth ; ++generation,++ttl_gen )
-	{
-	  unsigned N_next = round( params.N*pow(G,generation+1) );
-	  wbar = sample_diploid(r,
-				&gametes,
-				&diploids,
-				&mutations,
-				N_current,
-				N_next,
-				params.mu_disease+params.mu_neutral,
-				boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
-				boost::bind(KTfwd::genetics101(),_1,_2,
-					    &gametes,
-					    params.littler,
-					    r,
-					    recmap),
-				boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
-				boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-				boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,params.sd,params.sd_s,params.optimum,r),
-				boost::bind(KTfwd::mutation_remover(),_1,0,2*N_next));
-	  KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N_next);
-	  //update N
-	  N_current = N_next;
-	}
+      unsigned N_next = round( params.N*pow(G,generation+1) );
+      wbar = sample_diploid(r,
+			    &gametes,
+			    &diploids,
+			    &mutations,
+			    N_current,
+			    N_next,
+			    params.mu_disease+params.mu_neutral,
+			    boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
+			    boost::bind(KTfwd::genetics101(),_1,_2,
+					&gametes,
+					params.littler,
+					r,
+					recmap),
+			    boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
+			    boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
+			    dipfit,
+			    boost::bind(KTfwd::mutation_remover(),_1,0,2*N_next));
+      KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N_next);
+      //update N
+      N_current = N_next;
     }
-      */
 
   //Write out the population
   ostringstream popbuffer;
@@ -276,7 +223,7 @@ int main(int argc, char ** argv)
   phenobuffer.write( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
   for( unsigned i = 0 ; i < diploids.size() ; ++i )
     {
-      if (params.model == GENE_RECESSIVE) //TFL recessive disease model
+      if (params.model == GENE_RECESSIVE) 
 	{
 	  pair<double,double> pheno = TFL2013_recessive_disease_effect()(diploids[i].first,
 									 diploids[i].second,
@@ -287,7 +234,7 @@ int main(int argc, char ** argv)
 	  x = pheno.second;
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
 	}
-      if (params.model == GENE_ADDITIVE) //additive haplotype effects
+      if (params.model == GENE_ADDITIVE) 
 	{
 	  pair<double,double> pheno = TFL2013_additive_disease_effect()(diploids[i].first,
 									diploids[i].second,
@@ -302,6 +249,14 @@ int main(int argc, char ** argv)
 	{
 	  double x = multiplicative_phenotype()(diploids[i].first,
 						diploids[i].second);
+	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	  x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
+	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	}
+      else if (params.model == POPGEN)
+	{
+	  double x = popgen_phenotype()(diploids[i].first,
+					diploids[i].second,params.dominance);
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
 	  x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
