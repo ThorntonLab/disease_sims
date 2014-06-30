@@ -362,7 +362,7 @@ int main(int argc, char ** argv)
       //Now we can write to the index file
       std::ostringstream indexstream;
       indexstream << params.replicate_no << ' ' << effectwritten << ' '
-		  << phenowritten << ' ' << hapswritten << '\n';
+		  << phenowritten << ' ' << hapswritten;
       fprintf(index_fh,"%s\n",indexstream.str().c_str());
     }
   else
