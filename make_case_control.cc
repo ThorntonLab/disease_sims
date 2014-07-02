@@ -78,7 +78,7 @@ using namespace boost::program_options;
 
 struct params
 {
-  string indexfile,popfile,phenofile,anovafile,anova_indexfile;
+  string indexfile,popfile,phenofile,anovafile,anova_indexfile,idfile;
   unsigned twoN,record_no,ncases,ncontrols,seed;
   double case_proportion,crange;
   bool gzinput,gzoutput;
@@ -93,6 +93,7 @@ params::params() : indexfile(string()),
 		   phenofile(string()),
 		   anovafile(string()),
 		   anova_indexfile(string()),
+		   idfile(string()),
 		   twoN(0),
 		   record_no(std::numeric_limits<unsigned>::max()),
 		   ncases(0),
@@ -104,6 +105,7 @@ params::params() : indexfile(string()),
 		   gzoutput(false)
 {
 }
+
 params process_command_line(int argc, char ** argv);
 
 std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, const double & case_proportion, double * cutoff);
@@ -120,10 +122,6 @@ int main(int argc, char ** argv)
   mlist mutations;
   vector< pair< glist::iterator,glist::iterator > > diploids;
 
-  /*
-  long pop_offset,pheno_offset,effect_offset;
-  unsigned ith_rep;
-  */
   bool found = false;
   //get offset of the population and the phenotypes from the indexfile
   simindex index(options.indexfile.c_str());
@@ -138,23 +136,12 @@ int main(int argc, char ** argv)
     {
       found = true;
     }
-  // ifstream index( options.indexfile.c_str() );
-  // while( !found && !index.eof() )
-  //   {
-  //     index >> ith_rep >> effect_offset >> pheno_offset >> pop_offset >> ws;
-  //     if( ith_rep == options.record_no )
-  // 	{
-  // 	  found = true;
-  // 	  break;
-  // 	}
-  //   }
-
+ 
   if ( ! found )
     {
       cerr << "Error: record number " << options.record_no << " not found in " << options.indexfile << '\n';
       exit(10);
     }
-  //index.close();
 
   if ( options.gzinput )
     {
@@ -460,6 +447,21 @@ int main(int argc, char ** argv)
       exit(10);
     }
   
+  ostringstream idbuffer;
+  if( !options.idfile.empty() ) //then we want to write the individual id indexes
+    {
+      idbuffer.write( reinterpret_cast<char *>(&options.ncontrols), sizeof(unsigned) );  
+      idbuffer.write( reinterpret_cast<char *>(&options.ncases), sizeof(unsigned) );  
+      for(unsigned i = 0 ; i < options.ncontrols ; ++i )
+	{
+	  idbuffer.write( reinterpret_cast<char *>(&put_controls[i]), sizeof(unsigned) );  
+	}
+      for(unsigned i = 0 ; i < options.ncases ; ++i )
+	{
+	  idbuffer.write( reinterpret_cast<char *>(&put_cases[i]), sizeof(unsigned) );  
+	}
+    }
+
   if( options.gzoutput )
     {
       gzFile gzout = gzopen( options.anovafile.c_str(),"a" );
@@ -472,8 +474,28 @@ int main(int argc, char ** argv)
       //gzflush(gzout,Z_FINISH);
       gzclose(gzout);
 
+      int idwritten = 0;
+      if( !options.idfile.empty() ) //then we want to write the individual id indexes
+	{
+	  gzout = gzopen( options.idfile.c_str(), "a" );
+	  idwritten = gzwrite( gzout, idbuffer.str().c_str(), ccbuffer.str().size() );
+	  if(! idwritten)
+	    {
+	      cerr << "Error writing to " << options.idfile << '\n';
+	      exit(10);
+	    }
+	  gzclose(gzout);
+	}
       ostringstream buffer;
-      buffer << options.record_no << ' ' << written << '\n';
+      buffer << options.record_no << ' ' << written;
+      if( !options.idfile.empty() )
+	{
+	  buffer << ' ' << idwritten << '\n';
+	}
+      else 
+	{
+	  buffer << '\n';
+	}
       if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
 	{
 	  cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
@@ -482,10 +504,28 @@ int main(int argc, char ** argv)
     }
   else
     {
-      FILE * a_fh = fopen(options.anovafile.c_str(),"a");
-      int a_fd = fileno(a_fh);
+      FILE * a_fh = fopen(options.anovafile.c_str(),"a"),*id_fh=NULL;
+      int a_fd = fileno(a_fh),id_fd=-1;
       ostringstream buffer;
-      buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR ) << '\n';
+      buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR );
+      if (!options.idfile.empty())
+	{
+	  id_fh = fopen(options.idfile.c_str(),"a");
+	  id_fd = fileno(id_fh);
+	  buffer << lseek(id_fd,0,SEEK_CUR) << ' ';
+	  if(::write(id_fd,
+		     idbuffer.str().c_str(),
+		     idbuffer.str().size()) == -1 )
+	    {
+	      cerr << "Error on writing buffer to " << options.idfile << '\n';
+	      exit(10);
+	    }
+	  fclose(id_fh);
+	}
+      else
+	{
+	  buffer << '\n';
+	}
       if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
 	{
 	  cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
@@ -574,6 +614,7 @@ params process_command_line(int argc, char ** argv)
     ("control-range",value<double>(&rv.crange)->default_value(0.5),"A putatitve control is defined as the population mean phenotype +/- control-range*SD, where SD is the standard deviation of the population phenotype.  Default is what was used in Thornton, Foran, and Long (2013)")
     ("gzin","Input is gzipped.  Default is to assume uncompressed input.")
     ("gzout","Write output as gzipped file.  Default is to write uncompressed output.")
+    ("ids",value<string>(&rv.idfile)->default_value(string()),"Write individual identifiers to output file name.  Useful of you want to go back to the raw genotype info in the main population file later on.")
     ;
 
   variables_map vm;
