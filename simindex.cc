@@ -57,6 +57,7 @@ simindex::simindex(const char * filename) : e(mul()),
       pis.push_back(pi);
       his.push_back(hi);
     }
+  in.close();
 
   if ( !mono_increasing(eis) || 
        !mono_increasing(pis) ||
