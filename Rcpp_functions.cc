@@ -1,14 +1,10 @@
 //PKG_LIBS="$LDFLAGS -lz -lboost_system" PKG_CPPFLAGS="-I$HOME/src/disease_sims $CPPFLAGS" R --no-save < CompileTest.R
 
-//#define USE_STANDARD_CONTAINERS //get rid of dependency on -lboost_system
 #include <Rcpp.h>
-
 #include <zlib.h>
 #include <string>
 #include <fstream>
-// #include <mutation_with_age.hpp>
-// #include <fwdpp/diploid.hh>
-// #include <boost/bind.hpp>
+
 using namespace Rcpp;
 using namespace std;
 
@@ -29,8 +25,10 @@ DataFrame getEsizes( const char * filename,
 	    << " could not be opened for reading\n";
       return DataFrame::create();
     }
+  Rcerr << "seeking\n";
   gzseek( gzin, offset, 0 );
   gzread( gzin, &nmuts, sizeof(unsigned) );
+  Rcerr << nmuts << '\n';
   for( unsigned i = 0 ; i < nmuts ; ++i )
     {
       gzread( gzin,&row[0],4*sizeof(double) );
@@ -60,6 +58,7 @@ List getCCblock( const char * filename,
       return List::create();
     }
 
+  Rcerr << "seeking\n";
   gzseek( gzin,offset,0 );
 
   unsigned n[4];
