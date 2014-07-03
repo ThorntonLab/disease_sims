@@ -47,7 +47,7 @@ typedef boost::container::vector<TFLmtype> mvector;
 typedef boost::container::vector<unsigned> ftvector;
 #else
 typedef std::list<TFLmtype > mlist;
-typedef gamete_base<TFLmtype, mlist> gtype;
+typedef KTfwd::gamete_base<TFLmtype, mlist> gtype;
 typedef std::list<gtype> glist;
 typedef std::vector<TFLmtype> mvector;
 typedef std::vector<unsigned> ftvector;
