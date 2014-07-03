@@ -28,13 +28,13 @@ getEoffset = function(indexfile,recordno)
     {
         idx=read.table(indexfile);
         z=which(idx$V1==recordno)
-        print(z)
+        #print(z)
         if( z==1 )
             {
                 return (0);
             }
         ispos = if (length(which(diff(idx$V2[1:(z-1)])>0)) == z - 2) TRUE else FALSE
-        print(ispos)
+        #print(ispos)
         if( ispos )
             {
                 return (idx$V2[z])
@@ -48,7 +48,7 @@ getEoffset = function(indexfile,recordno)
 getSpecificEsizes=function(filename,index,recordno)
     {
         offset = getEoffset(index,recordno)
-        print(offset)
+        #print(offset)
         return ( getEsizes( filename,offset ) )
     }
 
@@ -80,7 +80,7 @@ getCCoffset = function(indexfile,recordno)
 getSpecificCCblock=function(filename,index,recordno)
     {
         offset = getCCoffset(index,recordno)
-        print(offset)
+        #print(offset)
         return( getCCblock(filename,offset) )
     }
 
