@@ -2,77 +2,86 @@
 
 #gives case/control p-values for single-marker test under an additive model
 
-getPheno=function(con,N)
-    {
-      nphenos=readBin(con,"integer",1)
-      pheno=matrix( readBin(con,"numeric",2*N), ncol=2, byrow=TRUE,dimnames=list(NULL,c("G","E")))
-      haps=matrix( readBin(con,"integer",2*N), ncol=2, byrow=TRUE,dimnames=list(NULL,c("h1","h2")))
-      return( list(pheno=pheno,haps=haps) )
-    }
+#getPheno=function(con,N)
+#    {
+#      nphenos=readBin(con,"integer",1)
+#      pheno=matrix( readBin(con,"numeric",2*N), ncol=2, byrow=TRUE,dimnames=list(NULL,c("G","E")))
+#      haps=matrix( readBin(con,"integer",2*N), ncol=2, byrow=TRUE,dimnames=list(NULL,c("h1","h2")))
+#      return( list(pheno=pheno,haps=haps) )
+#    }
 
-getSpecificPheno=function(con,index,recordno,N)
-    {
-        z=which(index$V1 == recordno)
-        seek(con,index$V3[z])
-        return (getPheno(con,N))
-    }
+#getSpecificPheno=function(con,index,recordno,N)
+#    {
+#        z=which(index$V1 == recordno)
+#        seek(con,index$V3[z])
+#        return (getPheno(con,N))
+#    }
 
-getEsizes=function(con)
-    {
-        nm=readBin(con,"integer",1)
-        return( as.data.frame(matrix( readBin(con,"numeric",4*nm), ncol=4,byrow=TRUE,
-                                     dimnames=list(NULL,c("pos","esize","count","age")))) )
-    }
+#getEsizes=function(con)
+#    {
+#        nm=readBin(con,"integer",1)
+#        return( as.data.frame(matrix( readBin(con,"numeric",4*nm), ncol=4,byrow=TRUE,
+#                                     dimnames=list(NULL,c("pos","esize","count","age")))) )
+#    }
 
-getSpecificEsizes=function(con,index,recordno)
+getEoffset = function(indexfile,recordno)
     {
-        z=which(index$V1 == recordno)
-        seek(con,index$V2[z])
-        return ( getEsizes( con ) )
-    }
-
-getSpecificEsizesGZ=function(con,index,recordno)
-    #Not a super-efficient function!
-    {
-        z=which(index$V1 == recordno)
-        if( z == 1 )
+        idx=read.table(indexfile);
+        z=which(idx$V1==recordno)
+        print(z)
+        if( z==1 )
             {
-                return( getEsizes(con) )
+                return (0);
+            }
+        ispos = if (length(which(diff(idx$V2[1:(z-1)])>0)) == z - 2) TRUE else FALSE
+        print(ispos)
+        if( ispos )
+            {
+                return (idx$V2[z])
             }
         else
             {
-                for(i in 1:(z-1) )
-                    {
-                        getEsizes(con)
-                    }
-                return ( getEsizes(con) )
+                return( sum(idx$V2[1:(z-1)]) )
             }
     }
 
-getCCblock=function(con)
+getSpecificEsizes=function(filename,index,recordno)
     {
-        d=readBin(con,"integer",4)
-        pos=readBin(con,"numeric",d[3]+d[4])
-        genos = matrix(data=0,ncol=d[3]+d[4],nrow=d[1]+d[2])
-        for( i in 1:(d[1]+d[2]) )
-            {
-                nones = readBin(con,"integer",1)
-                ones = readBin(con,"integer",nones) + 1
-                ntwos = readBin(con,"integer",1)
-                twos = readBin(con,"integer",ntwos) + 1
-                genos[i,ones] = 1
-                genos[i,twos] = 2
-            }
-        burdens=matrix(readBin(con,"integer",2*(d[1]+d[2])),ncol=2,byrow=TRUE)
-        phenos=matrix(readBin(con,"numeric",2*(d[1]+d[2])),ncol=2,byrow=TRUE)
-        return(list(pos=pos,genos=genos,burdens=burdens,phenos=phenos))
+        offset = getEoffset(index,recordno)
+        print(offset)
+        return ( getEsizes( filename,offset ) )
     }
 
-getSpecificCCblock=function(con,index,recordno)
+#getCCblock=function(con)
+#    {
+#        d=readBin(con,"integer",4)
+#        pos=readBin(con,"numeric",d[3]+d[4])
+#        genos = matrix(data=0,ncol=d[3]+d[4],nrow=d[1]+d[2])
+#        for( i in 1:(d[1]+d[2]) )
+#            {
+#                nones = readBin(con,"integer",1)
+#                ones = readBin(con,"integer",nones) + 1
+#                ntwos = readBin(con,"integer",1)
+#                twos = readBin(con,"integer",ntwos) + 1
+#                genos[i,ones] = 1
+#                genos[i,twos] = 2
+#            }
+#        burdens=matrix(readBin(con,"integer",2*(d[1]+d[2])),ncol=2,byrow=TRUE)
+#        phenos=matrix(readBin(con,"numeric",2*(d[1]+d[2])),ncol=2,byrow=TRUE)
+#        return(list(pos=pos,genos=genos,burdens=burdens,phenos=phenos))
+#    }
+
+getCCoffset = function(indexfile,recordno)
     {
-        z=which(index$V1 == recordno)
-        seek(con,index$V2[z])
-        return( getCCblock(con) )
+        #cheat: the relevant column is the second
+        return (getEoffset(indexfile,recordno))
+    }
+    
+getSpecificCCblock=function(filename,index,recordno)
+    {
+        offset = getCCoffset(index,recordno)
+        print(offset)
+        return( getCCblock(filename,offset) )
     }
 
 dologit=function(x,ncontrols,ncases)
@@ -89,35 +98,35 @@ getPvalsCCstatus = function(genos,ncontrols,ncases)
         return(apply(genos,2,dologit,ncontrols,ncases))
     }
 
-readMutsFromPop=function(con,N=1)
-  {
-    nmuts=readBin(con,"integer",1)
-    m=matrix(data=NA,ncol=4,nrow=nmuts,dimnames=list(NULL,c("freq","origin","pos","esize")))
+## readMutsFromPop=function(con,N=1)
+##   {
+##     nmuts=readBin(con,"integer",1)
+##     m=matrix(data=NA,ncol=4,nrow=nmuts,dimnames=list(NULL,c("freq","origin","pos","esize")))
     
-    for(i in 1:nmuts)
-      {
-        ID=readBin(f,"integer",1)
-        freq=readBin(f,"integer",1)/N
-        gen=readBin(f,"integer",1)
-        neutral=readBin(f,"integer",1,size=1)
-        pos=readBin(f,"numeric",1)
-        esize=readBin(f,"numeric",1)
-        label=readBin(f,integer(),1,size=1)
+##     for(i in 1:nmuts)
+##       {
+##         ID=readBin(f,"integer",1)
+##         freq=readBin(f,"integer",1)/N
+##         gen=readBin(f,"integer",1)
+##         neutral=readBin(f,"integer",1,size=1)
+##         pos=readBin(f,"numeric",1)
+##         esize=readBin(f,"numeric",1)
+##         label=readBin(f,integer(),1,size=1)
         
-        m[i,1]=freq
-        m[i,2]=gen
-        m[i,3]=pos
-        m[i,4]=esize
-      }
-    return (as.data.frame(m))
-  }
+##         m[i,1]=freq
+##         m[i,2]=gen
+##         m[i,3]=pos
+##         m[i,4]=esize
+##       }
+##     return (as.data.frame(m))
+##   }
 
-readSpecificMutsFromPop=function(con,N,index,recordno)
-  {
-    z=which(index$V1 == recordno)
-    seek(con,index$V2[z])
-    return (readMutsFromPop(con,N))
-  }
+## readSpecificMutsFromPop=function(con,N,index,recordno)
+##   {
+##     z=which(index$V1 == recordno)
+##     seek(con,index$V2[z])
+##     return (readMutsFromPop(con,N))
+##   }
 
 makePVblock = function( ccdata, esizes, ncontrols,ncases )
     {
@@ -158,18 +167,18 @@ N=as.integer(n[8])
 outfile=n[9]
 outindex=n[10]
 blocker=n[11]
-index=read.table(indexfile)
-aindex=read.table(anovaindex)
+#index=read.table(indexfile)
+#aindex=read.table(anovaindex)
 
-f=file(effectfile,"rb")
+#f=file(effectfile,"rb")
 #esizes=readSpecificMutsFromPop(f,2*N,index,recordno)
-esizes=if(grep("gz",effectfile)) getSpecificEsizesGZ(f,index,recordno) else getSpecificEsizes(f,index,recordno)
-close(f)
-f=file(anovafile,"rb")
-ccdata=getSpecificCCblock(f,aindex,recordno)
-close(f)
+#esizes=if(grep("gz",effectfile)) getSpecificEsizesGZ(f,index,recordno) else getSpecificEsizes(f,index,recordno)
+esizes=getSpecificEsizes(effectfile,indexfile,recordno)
+#close(f)
+#f=file(anovafile,"rb")
+ccdata=getSpecificCCblock(anovafile,anovaindex,recordno)
+#close(f)
 pvblock=makePVblock(ccdata,esizes,ncontrols,ncases)
-
 pvblock[,"popfreq"]=pvblock[,"popfreq"]/(2*N)
 
 options(warn=-1)
