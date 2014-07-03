@@ -512,7 +512,7 @@ int main(int argc, char ** argv)
 	{
 	  id_fh = fopen(options.idfile.c_str(),"a");
 	  id_fd = fileno(id_fh);
-	  buffer << lseek(id_fd,0,SEEK_CUR) << ' ';
+	  buffer <<' ' << lseek(id_fd,0,SEEK_CUR) << '\n';
 	  if(::write(id_fd,
 		     idbuffer.str().c_str(),
 		     idbuffer.str().size()) == -1 )
