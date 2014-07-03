@@ -31,6 +31,24 @@ getSpecificEsizes=function(con,index,recordno)
         return ( getEsizes( con ) )
     }
 
+getSpecificEsizesGZ=function(con,index,recordno)
+    #Not a super-efficient function!
+    {
+        z=which(index$V1 == recordno)
+        if( z == 1 )
+            {
+                return( getEsizes(con) )
+            }
+        else
+            {
+                for(i in 1:(z-1) )
+                    {
+                        getEsizes(con)
+                    }
+                return ( getEsizes(con) )
+            }
+    }
+
 getCCblock=function(con)
     {
         d=readBin(con,"integer",4)
@@ -145,7 +163,7 @@ aindex=read.table(anovaindex)
 
 f=file(effectfile,"rb")
 #esizes=readSpecificMutsFromPop(f,2*N,index,recordno)
-esizes=getSpecificEsizes(f,index,recordno)
+esizes=if(grep("gz",effectfile)) getSpecificEsizesGZ(f,index,recordno) else getSpecificEsizes(f,index,recordno)
 close(f)
 f=file(anovafile,"rb")
 ccdata=getSpecificCCblock(f,aindex,recordno)
