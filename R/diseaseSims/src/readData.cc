@@ -14,12 +14,13 @@
 
 #include <mutation_with_age.hpp>
 #include <fwdpp/IO.hpp>
+#include <boost/bind.hpp>
 
 using namespace Rcpp;
 using namespace std;
 
 //' Reads in the entire population
-// @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
+//' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 //' @param offset The size in bytes where the desired record begins
 // [[Rcpp::export]]		 
 DataFrame readPop(const char * filename,
@@ -27,7 +28,16 @@ DataFrame readPop(const char * filename,
 {
   mlist mutations;
   glist gametes;
-  boost::container::vector< glist::iterator,glist::iterator > diploids;
+  boost::container::vector< std::pair<glist::iterator,glist::iterator> > diploids;
+  gzFile gzin=gzopen(filename,"rb");
+  if(gzin==NULL)
+  {
+    Rcerr <<"Error: "
+	  << filename
+	  << " could not be opened for reading\n";
+    return DataFrame::create();
+  }
+  gzseek( gzin,offset,0 );
   KTfwd::read_binary_pop( &gametes, &mutations, &diploids, boost::bind(gzmreader(),_1),gzin );
 
   return DataFrame::create();
