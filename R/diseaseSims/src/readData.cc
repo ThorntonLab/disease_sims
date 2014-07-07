@@ -1,3 +1,10 @@
+//' @useDynLib diseaseSims, .registration=TRUE
+//' @exportPattern "^[[:alpha:]]+"
+//' @import methods
+//' @import inline
+//' @importFrom Rcpp evalCpp loadModule Module
+
+
 //PKG_LIBS="$LDFLAGS -lz -lboost_system" PKG_CPPFLAGS="-I$HOME/src/disease_sims $CPPFLAGS" R --no-save < CompileTest.R
 
 #include <Rcpp.h>
