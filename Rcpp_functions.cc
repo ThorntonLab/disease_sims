@@ -25,10 +25,10 @@ DataFrame getEsizes( const char * filename,
 	    << " could not be opened for reading\n";
       return DataFrame::create();
     }
-  Rcerr << "seeking\n";
+  //Rcerr << "seeking\n";
   gzseek( gzin, offset, 0 );
   gzread( gzin, &nmuts, sizeof(unsigned) );
-  Rcerr << nmuts << '\n';
+  //Rcerr << nmuts << '\n';
   for( unsigned i = 0 ; i < nmuts ; ++i )
     {
       gzread( gzin,&row[0],4*sizeof(double) );
@@ -58,7 +58,7 @@ List getCCblock( const char * filename,
       return List::create();
     }
 
-  Rcerr << "seeking\n";
+  //Rcerr << "seeking\n";
   gzseek( gzin,offset,0 );
 
   unsigned n[4];
