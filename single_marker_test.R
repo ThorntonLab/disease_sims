@@ -177,7 +177,24 @@ esizes=getSpecificEsizes(effectfile,indexfile,recordno)
 #close(f)
 #f=file(anovafile,"rb")
 ccdata=getSpecificCCblock(anovafile,anovaindex,recordno)
-#close(f)
+
+FAILFIND=array()
+FAILNO=0
+for( i in 1:length(ccdata$pos) )
+    {
+        if( length(which(esizes[,1] == ccdata$pos[i])) == 0 )
+            {
+                FAILNO=FAILNO+1
+                FAILFIND[FAILNO]=ccdata$pos[i]
+            }
+    }
+
+if(FAILNO>0)
+{
+    stop(paste("Fatal error: ", FAILNO," mutations in ",anovafile,
+               " were not found in ",effectfile))
+}
+
 pvblock=makePVblock(ccdata,esizes,ncontrols,ncases)
 pvblock[,"popfreq"]=pvblock[,"popfreq"]/(2*N)
 
