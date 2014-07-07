@@ -1,1 +1,1 @@
-PKG_LIBS+=$(LDFLAGS) -lz
+PKG_LIBS+=$(LDFLAGS) -lz -lboost_system
