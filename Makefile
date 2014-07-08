@@ -11,7 +11,7 @@ all: TFL2013.o TFL2013_ind.o make_case_control.o readCC.o esm_chisq_zscore.o esm
 	$(CXX) $(CXXFLAGS) -o TFL2013_ind TFL2013_ind.o $(LDFLAGS) -lboost_system -lboost_program_options -lgsl -lgslcblas -lz
 	$(CXX) $(CXXFLAGS) -o make_case_control make_case_control.o ccintermediate.o locking_routines.o simindex.o $(LDFLAGS) -lsequence -lz -lboost_system -lboost_program_options -lgsl -lgslcblas 
 	$(CXX) $(CXXFLAGS) -o esm_chisq_zscore esm_chisq_zscore.o esm.o chisq_per_marker.o esm_filter_sites.o readCC.o locking_routines.o -lboost_program_options $(LDFLAGS) -lboost_system -lboost_thread -lgsl -lgslcblas 
-	$(CXX) $(CXXFLAGS) -o chksimoutput chksimoutput.o simindex.o $(LDFLAGS) -lboost_system -lz
+	$(CXX) $(CXXFLAGS) -o chksimoutput chksimoutput.o simindex.o $(LDFLAGS) -lboost_program_options -lboost_system -lz
 	git submodule init
 	git submodule update
 	cd atomic_locker && make
