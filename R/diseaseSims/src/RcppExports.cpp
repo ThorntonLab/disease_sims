@@ -5,22 +5,6 @@
 
 using namespace Rcpp;
 
-// readPop
-DataFrame readPop(const char * filename, const unsigned long& offset);
-RcppExport SEXP diseaseSims_readPop(SEXP filenameSEXP, SEXP offsetSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< const char * >::type filename(filenameSEXP );
-        Rcpp::traits::input_parameter< const unsigned long& >::type offset(offsetSEXP );
-        DataFrame __result = readPop(filename, offset);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
 // getEsizes
 DataFrame getEsizes(const char * filename, const unsigned long& offset);
 RcppExport SEXP diseaseSims_getEsizes(SEXP filenameSEXP, SEXP offsetSEXP) {

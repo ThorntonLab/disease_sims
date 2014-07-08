@@ -22,45 +22,152 @@ using namespace std;
 class SimPopData
 {
 private:
+  void readPop(const char * filename,
+	       const unsigned long & offset);
 public:
   mlist mutations;
   glist gametes;
   typedef boost::container::vector< std::pair<glist::iterator,glist::iterator> > dips;
   dips diploids;
 
-  SimPopData( ) : mutations(mlist()),
-		  gametes(glist()),
-		  diploids(dips())
+  // SimPopData( ) : mutations(mlist()),
+  // 		  gametes(glist()),
+  // 		  diploids(dips())
+  // {
+  // }
+
+  SimPopData(const std::string & filename,
+	     const unsigned long & offset) : mutations(mlist()),
+					     gametes(glist()),
+					     diploids(dips())
   {
+    this->readPop(filename.c_str(),offset);
   }
 
-  void readPop(gzFile gzin)
-  {
-    KTfwd::read_binary_pop( &(this->gametes), 
-			    &(this->mutations),
-			    &(this->diploids), boost::bind(gzmreader(),_1),gzin );
-  }
-
-  DataFrame neutralGenotype(const size_t & i) const;
-  DataFrame selectedGenotype(const size_t & i) const;
+  List neutralGenotype(const size_t & i) const;
+  List selectedGenotype(const size_t & i) const;
+  dips::size_type popsize() const;
 };
 
-DataFrame SimPopData::neutralGenotype(const size_t & i) const
+void SimPopData::readPop(const char * filename,
+			 const unsigned long & offset)
 {
-  return DataFrame::create();
+  gzFile gzin=gzopen(filename,"rb");
+  if(gzin==NULL)
+    {
+      Rcerr <<"Error: "
+	    << filename
+	    << " could not be opened for reading\n";
+      return;
+    }
+  gzseek( gzin,offset,0 );
+  KTfwd::read_binary_pop( &(this->gametes), 
+			  &(this->mutations),
+			  &(this->diploids), boost::bind(gzmreader(),_1),gzin );
+  gzclose(gzin);
 }
 
-DataFrame SimPopData::selectedGenotype(const size_t & i) const
+/*
+  Returns the positions of neutral mutations on
+  the two haplotypes of the ith diploid
+*/
+List SimPopData::neutralGenotype(const size_t & i) const
 {
-  return DataFrame::create();
+  if( i == 0 || i > diploids.size() )
+    {
+      Rcerr << "Error: index " << i 
+	    << " out of bounds.  Returning empty list\n";
+      return List::create();
+    }
+  std::vector<double> hap1,hap2;
+  for(gtype::mcont_const_iterator itr = diploids[i-1].first->mutations.begin() ; 
+      itr < diploids[i-1].first->mutations.end() ; ++itr )
+    {
+      hap1.push_back( (*itr)->pos );
+    }
+
+  for(gtype::mcont_const_iterator itr = diploids[i-1].second->mutations.begin() ; 
+      itr < diploids[i-1].second->mutations.end() ; ++itr )
+    {
+      hap2.push_back( (*itr)->pos );
+    }
+  return List::create( Named("hap1") = hap1,
+		       Named("hap2") = hap2 );
 }
 
+/*
+  Returns the positions of selected mutations on
+  the two haplotypes of the ith diploid
+*/
+List SimPopData::selectedGenotype(const size_t & i) const
+{
+  if( i == 0 || i > diploids.size() )
+    {
+      Rcerr << "Error: index " << i 
+	    << " out of bounds.  Returning empty list\n";
+      return List::create();
+    }
+  std::vector<double> hap1,hap2;
+  for(gtype::mcont_const_iterator itr = diploids[i-1].first->smutations.begin() ; 
+      itr < diploids[i-1].first->smutations.end() ; ++itr )
+    {
+      hap1.push_back( (*itr)->pos );
+    }
 
-//' Reads in the entire population
-//' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
-//' @param offset The size in bytes where the desired record begins
-// [[Rcpp::export]]		 
-SimPopData readPop(const char * filename,
+  for(gtype::mcont_const_iterator itr = diploids[i-1].second->smutations.begin() ; 
+      itr < diploids[i-1].second->smutations.end() ; ++itr )
+    {
+      hap2.push_back( (*itr)->pos );
+    }
+  return List::create( Named("hap1") = hap1,
+		       Named("hap2") = hap2 );
+}
+
+SimPopData::dips::size_type SimPopData::popsize() const
+{
+  return diploids.size();
+}
+
+RCPP_MODULE(SimPopData)
+{
+  /*
+    Usage example:
+    #!sh
+    
+    module load R
+    
+    R_LIBS=$HOME/R_libs_dev:$R_LIBS R --no-save <<EOF
+    require(diseaseSims)
+    require(Rcpp)
+    require(inline)
+    DIR="/dfs1/test/bio/krthornt/does_model_matter/dist/nogrowth/recessive/lambda0.1"
+    PFILE=paste(DIR,"/pop.bin.gz",sep="")
+    OFFSET=7315936
+    spop=Module("SimPopData",getDynLib("diseaseSims"))
+    pop = new(spop\$SimPopData,PFILE,as.integer(OFFSET))
+    for( i in 1:pop\$popsize() )
+    {
+    cause=pop\$sgeno(i)
+    neut=pop\$ngeno(i)
+    print(paste(i,length(neut\$hap1),length(neut\$hap2),length(cause\$hap1),length(cause\$hap2)))
+    }
+    EOF
+  */
+
+  class_<SimPopData>( "SimPopData" )
+    .constructor<string,unsigned long>("Constructor takes a file name and an offset (in bytes")
+    .method("ngeno",&SimPopData::neutralGenotype,"Returns a list containing the positions of neutral markers on each haplotype of the i-th diploid.  The argument must be an integer in the range 1 <= x <= populaiton size.")
+    .method("sgeno",&SimPopData::selectedGenotype,"Returns a list containing the positions of selected markers on each haplotype of the i-th diploid.  The argument must be an integer in the range 1 <= x <= populaiton size.")
+    .method("popsize",&SimPopData::popsize,"Returns the number of diploids.")
+    ;
+}
+
+// Reads in the entire population
+// @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
+// @param offset The size in bytes where the desired record begins
+//SimPopData readPop(const char * filename,
+/*
+SEXP readPop(const char * filename,
 		  const unsigned long & offset)
 {
   SimPopData d;
@@ -76,8 +183,10 @@ SimPopData readPop(const char * filename,
    gzseek( gzin,offset,0 );
    d.readPop(gzin);
    gzclose(gzin);
-   return d;
+   //return d;
+   return wrap(d);
 }
+*/
 
 //' Read effect sizes from a file
 //' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
@@ -135,12 +244,13 @@ List getCCblock( const char * filename,
       return List::create();
     }
 
-  //Rcerr << "seeking\n";
+  Rcerr << "seeking to " << offset << "\n";
   gzseek( gzin,offset,0 );
 
   unsigned n[4];
   gzread(gzin,&n[0],4*sizeof(unsigned));
-
+  Rcerr << n[0] << ' ' << n[1] << ' '
+	<< n[2] << ' ' << n[3] << '\n';
   //Read in mutation positions
   NumericVector pos(n[2]+n[3]);
   gzread(gzin,&pos[0],(n[2]+n[3])*sizeof(double));//holy crap this compiles!?!?!?

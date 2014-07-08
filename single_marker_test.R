@@ -34,7 +34,6 @@ getEoffset = function(indexfile,recordno)
                 return (0);
             }
         ispos = if (length(which(diff(idx$V2[1:(z-1)])>0)) == z - 2) TRUE else FALSE
-        #print(ispos)
         if( ispos )
             {
                 return (idx$V2[z])
@@ -48,7 +47,7 @@ getEoffset = function(indexfile,recordno)
 getSpecificEsizes=function(filename,index,recordno)
     {
         offset = getEoffset(index,recordno)
-        #print(offset)
+        print(paste("e:",offset))
         return ( getEsizes( filename,offset ) )
     }
 
@@ -80,7 +79,7 @@ getCCoffset = function(indexfile,recordno)
 getSpecificCCblock=function(filename,index,recordno)
     {
         offset = getCCoffset(index,recordno)
-        #print(offset)
+        print(paste("cc:",offset))
         return( getCCblock(filename,offset) )
     }
 
@@ -174,6 +173,7 @@ blocker=n[11]
 #esizes=readSpecificMutsFromPop(f,2*N,index,recordno)
 #esizes=if(grep("gz",effectfile)) getSpecificEsizesGZ(f,index,recordno) else getSpecificEsizes(f,index,recordno)
 esizes=getSpecificEsizes(effectfile,indexfile,recordno)
+print(nrow(esizes))
 #close(f)
 #f=file(anovafile,"rb")
 ccdata=getSpecificCCblock(anovafile,anovaindex,recordno)
