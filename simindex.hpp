@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <cstddef>
 
 class simindex
 {
@@ -21,6 +22,9 @@ public:
   long eoffset(const unsigned & i) const;
   long poffset(const unsigned & i) const;
   long hoffset(const unsigned & i) const;
+
+  //std::map<unsigned,long>::size_type size() const;
+  size_t size() const;
 };
 
 #endif

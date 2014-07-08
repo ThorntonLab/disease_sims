@@ -68,9 +68,9 @@ simindex::simindex(const char * filename) : e(mul()),
 	{
 	  if(i == 0)
 	    {
-	      e[recs[i]]=eis[i];
-	      p[recs[i]]=pis[i];
-	      h[recs[i]]=his[i];
+	      e[recs[i]]=0;
+	      p[recs[i]]=0;
+	      h[recs[i]]=0;
 	    }
 	  else
 	    {
@@ -124,4 +124,9 @@ long simindex::poffset(const unsigned & i) const
 long simindex::hoffset(const unsigned & i) const
 {
   return h.find(i)->second;
+}
+
+size_t simindex::size() const
+{
+  return e.size();
 }
