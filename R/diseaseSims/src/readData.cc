@@ -19,28 +19,64 @@
 using namespace Rcpp;
 using namespace std;
 
+class SimPopData
+{
+private:
+public:
+  mlist mutations;
+  glist gametes;
+  typedef boost::container::vector< std::pair<glist::iterator,glist::iterator> > dips;
+  dips diploids;
+
+  SimPopData( ) : mutations(mlist()),
+		  gametes(glist()),
+		  diploids(dips())
+  {
+  }
+
+  void readPop(gzFile gzin)
+  {
+    KTfwd::read_binary_pop( &(this->gametes), 
+			    &(this->mutations),
+			    &(this->diploids), boost::bind(gzmreader(),_1),gzin );
+  }
+
+  DataFrame neutralGenotype(const size_t & i) const;
+  DataFrame selectedGenotype(const size_t & i) const;
+};
+
+DataFrame SimPopData::neutralGenotype(const size_t & i) const
+{
+  return DataFrame::create();
+}
+
+DataFrame SimPopData::selectedGenotype(const size_t & i) const
+{
+  return DataFrame::create();
+}
+
+
 //' Reads in the entire population
 //' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 //' @param offset The size in bytes where the desired record begins
 // [[Rcpp::export]]		 
-DataFrame readPop(const char * filename,
+SimPopData readPop(const char * filename,
 		  const unsigned long & offset)
 {
-  mlist mutations;
-  glist gametes;
-  boost::container::vector< std::pair<glist::iterator,glist::iterator> > diploids;
-  gzFile gzin=gzopen(filename,"rb");
-  if(gzin==NULL)
-  {
-    Rcerr <<"Error: "
-	  << filename
-	  << " could not be opened for reading\n";
-    return DataFrame::create();
-  }
-  gzseek( gzin,offset,0 );
-  KTfwd::read_binary_pop( &gametes, &mutations, &diploids, boost::bind(gzmreader(),_1),gzin );
+  SimPopData d;
 
-  return DataFrame::create();
+   gzFile gzin=gzopen(filename,"rb");
+   if(gzin==NULL)
+   {
+     Rcerr <<"Error: "
+   	  << filename
+   	  << " could not be opened for reading\n";
+     return d;
+   }
+   gzseek( gzin,offset,0 );
+   d.readPop(gzin);
+   gzclose(gzin);
+   return d;
 }
 
 //' Read effect sizes from a file
