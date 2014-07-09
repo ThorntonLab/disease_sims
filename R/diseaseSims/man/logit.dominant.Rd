@@ -10,6 +10,9 @@ logit.dominant(x, status)
 
 \item{status}{An array of 0 = control, 1 = case.  length(status) must equal length(x)}
 }
+\value{
+The p-value of a logistic regression of case/control status onto genotype.
+}
 \description{
 Association testing under a dominant model
 }

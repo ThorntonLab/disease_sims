@@ -53,3 +53,20 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// writePVblock
+void writePVblock(const char * outfilename, const char * indexfilename, const unsigned& recordno, DataFrame pvblock, const bool& append = true, const bool& gzip = false);
+RcppExport SEXP diseaseSims_writePVblock(SEXP outfilenameSEXP, SEXP indexfilenameSEXP, SEXP recordnoSEXP, SEXP pvblockSEXP, SEXP appendSEXP, SEXP gzipSEXP) {
+BEGIN_RCPP
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< const char * >::type outfilename(outfilenameSEXP );
+        Rcpp::traits::input_parameter< const char * >::type indexfilename(indexfilenameSEXP );
+        Rcpp::traits::input_parameter< const unsigned& >::type recordno(recordnoSEXP );
+        Rcpp::traits::input_parameter< DataFrame >::type pvblock(pvblockSEXP );
+        Rcpp::traits::input_parameter< const bool& >::type append(appendSEXP );
+        Rcpp::traits::input_parameter< const bool& >::type gzip(gzipSEXP );
+        writePVblock(outfilename, indexfilename, recordno, pvblock, append, gzip);
+    }
+    return R_NilValue;
+END_RCPP
+}

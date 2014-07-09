@@ -2,5 +2,16 @@
 
 find . -name "*.o" | xargs rm -f
 
+#Load the dependencies (this takes care of boost, zlib, libsequence, too, athough libsequence is not needed)
+module load R
+module load krthornt/fwdpp/0.2.4
+
+#make a personal directory for R libraries
+
+if [ ! -d ~/R_libs ]
+then
+    mkdir ~/R_libs
+fi
+
 echo $LDFLAGS
-R_LIBS="~/R_libs_dev:$R_LIBS" PKG_LIBS=$LDFLAGS PKG_CPPFLAGS="-I$HOME/src/disease_sims $CPPFLAGS" R CMD INSTALL diseaseSims
+R_LIBS="~/R_libs:$R_LIBS" PKG_LIBS=$LDFLAGS PKG_CPPFLAGS="-I`pwd`/.. $CPPFLAGS" R CMD INSTALL diseaseSims

@@ -8,24 +8,45 @@
 #' @importFrom Rcpp evalCpp loadModule Module
 NULL
 
-#' Read effect sizes from a file
+#' Read effect sizes from a file at a specific position
 #' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 #' @param offset The size in bytes where the desired record begins
 getEsizes <- function(filename, offset) {
     .Call('diseaseSims_getEsizes', PACKAGE = 'diseaseSims', filename, offset)
 }
 
-#' Read case/control panel from a file
+#' Read case/control panel from a file at a specific position
 #' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 #' @param offset The size in bytes where the desired record begins
 getCCblock <- function(filename, offset) {
     .Call('diseaseSims_getCCblock', PACKAGE = 'diseaseSims', filename, offset)
 }
 
-#' Read case/control panel from a file
+#' Read case/control panel from a file at a specific position
 #' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 #' @param offset The size in bytes where the desired record begins
 getPheno <- function(filename, offset) {
     .Call('diseaseSims_getPheno', PACKAGE = 'diseaseSims', filename, offset)
+}
+
+#' Write the results of an association test to a file
+#' @param outfilename Output file name
+#' @param indexfilename Index file name for the output
+#' @param recordno An unsigned integer to use as a label for pvblock.
+#' @param pvblock A data frame. The return value of \link[diseaseSims]{makePVblock}.
+#' @param append  Boolean: append to output files or not?
+#' @param gzip Boolean: write compressed data or not?
+#' @details If append == TRUE, then file output is handled by low-level 
+#' POSIX file locking via the C header
+#' <fcntl.h>.  In practice, most file systems support this, but if you get
+#' garbled output, yours may not.  The index file is locked, then the main
+#' output is written and outfilename is closed.  The index data are then written,
+#' and file locks are then released.
+#'
+#' If append == FALSE, then no file locking is done, which means
+#' different R processes should write to different output files,
+#' otherwise you'll be overwriting your data!!!!
+writePVblock <- function(outfilename, indexfilename, recordno, pvblock, append = TRUE, gzip = FALSE) {
+    invisible(.Call('diseaseSims_writePVblock', PACKAGE = 'diseaseSims', outfilename, indexfilename, recordno, pvblock, append, gzip))
 }
 

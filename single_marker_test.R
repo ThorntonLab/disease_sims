@@ -24,32 +24,31 @@
 #                                     dimnames=list(NULL,c("pos","esize","count","age")))) )
 #    }
 
-getEoffset = function(indexfile,recordno)
-    {
-        idx=read.table(indexfile);
-        z=which(idx$V1==recordno)
-        #print(z)
-        if( z==1 )
-            {
-                return (0);
-            }
-        ispos = if (length(which(diff(idx$V2[1:(z-1)])>0)) == z - 2) TRUE else FALSE
-        if( ispos )
-            {
-                return (idx$V2[z])
-            }
-        else
-            {
-                return( sum(idx$V2[1:(z-1)]) )
-            }
-    }
+## getEoffset = function(indexfile,recordno)
+##     {
+##         idx=read.table(indexfile);
+##         z=which(idx$V1==recordno)
+##         #print(z)
+##         if( z==1 )
+##             {
+##                 return (0);
+##             }
+##         ispos = if (length(which(diff(idx$V2[1:(z-1)])>0)) == z - 2) TRUE else FALSE
+##         if( ispos )
+##             {
+##                 return (idx$V2[z])
+##             }
+##         else
+##             {
+##                 return( sum(idx$V2[1:(z-1)]) )
+##             }
+##     }
 
-getSpecificEsizes=function(filename,index,recordno)
-    {
-        offset = getEoffset(index,recordno)
-        print(paste("e:",offset))
-        return ( getEsizes( filename,offset ) )
-    }
+## getSpecificEsizes=function(filename,index,recordno)
+##     {
+##         offset = getEoffset(index,recordno)
+##         return ( getEsizes( filename,offset ) )
+##     }
 
 #getCCblock=function(con)
 #    {
@@ -70,32 +69,31 @@ getSpecificEsizes=function(filename,index,recordno)
 #        return(list(pos=pos,genos=genos,burdens=burdens,phenos=phenos))
 #    }
 
-getCCoffset = function(indexfile,recordno)
-    {
-        #cheat: the relevant column is the second
-        return (getEoffset(indexfile,recordno))
-    }
+## getCCoffset = function(indexfile,recordno)
+##     {
+##         #cheat: the relevant column is the second
+##         return (getEoffset(indexfile,recordno))
+##     }
     
-getSpecificCCblock=function(filename,index,recordno)
-    {
-        offset = getCCoffset(index,recordno)
-        print(paste("cc:",offset))
-        return( getCCblock(filename,offset) )
-    }
+## getSpecificCCblock=function(filename,index,recordno)
+##     {
+##         offset = getCCoffset(index,recordno)
+##         return( getCCblock(filename,offset) )
+##     }
 
-dologit=function(x,ncontrols,ncases)
-{
-    status = c(array(dim=ncontrols,0),array(dim=ncases,1))
-    GLM=glm( status ~ x, family=binomial("logit") )
-    return( as.numeric( summary(GLM)$coefficients[,4][2] ) )
-}
+## dologit=function(x,ncontrols,ncases)
+## {
+##     status = c(array(dim=ncontrols,0),array(dim=ncases,1))
+##     GLM=glm( status ~ x, family=binomial("logit") )
+##     return( as.numeric( summary(GLM)$coefficients[,4][2] ) )
+## }
 
-getPvalsCCstatus = function(genos,ncontrols,ncases)
-  #logistic regression of case control status on
-  #genotype as an additive model, as per Goldstein's simulation study
-    {
-        return(apply(genos,2,dologit,ncontrols,ncases))
-    }
+## getPvalsCCstatus = function(genos,ncontrols,ncases)
+##   #logistic regression of case control status on
+##   #genotype as an additive model, as per Goldstein's simulation study
+##     {
+##         return(apply(genos,2,dologit,ncontrols,ncases))
+##     }
 
 ## readMutsFromPop=function(con,N=1)
 ##   {
@@ -127,31 +125,31 @@ getPvalsCCstatus = function(genos,ncontrols,ncases)
 ##     return (readMutsFromPop(con,N))
 ##   }
 
-makePVblock = function( ccdata, esizes, ncontrols,ncases )
-    {
-        output=matrix(data=NA,ncol=6,nrow=ncol(ccdata$genos),
-            dimnames=list(NULL,(c("pos","esize","mfcontrols","mfcases","popfreq","score"))))
-        output[,"pos"]=ccdata$pos
-        output[,"mfcontrols"]=colSums(ccdata$genos[1:ncontrols,])/(2*ncases)
-        output[,"mfcases"]=colSums(ccdata$genos[(ncontrols+1):nrow(ccdata$genos),])/(2*ncases)
-        for( r in 1:nrow(output) )
-            {
-                z=which(as.numeric(esizes$pos) == ccdata$pos[r]);
-                #if(length(z)==0)
-                #    {
-                        #mutation is neutral, get its frequency from the population
-                #        output[r,"esize"]=0
-                #        output[r,"popfreq"]=NA
-                #    }
-                #else
-                #    {
-                output[r,"esize"]=as.numeric(esizes$esize[z])
-                output[r,"popfreq"]=as.numeric(esizes$count[z])
-                #    }
-            }
-        output[,"score"]=-log10(getPvalsCCstatus(ccdata$genos, ncontrols,ncases))
-        return(output)
-    }
+## makePVblock = function( ccdata, esizes, ncontrols,ncases )
+##     {
+##         output=matrix(data=NA,ncol=6,nrow=ncol(ccdata$genos),
+##             dimnames=list(NULL,(c("pos","esize","mfcontrols","mfcases","popfreq","score"))))
+##         output[,"pos"]=ccdata$pos
+##         output[,"mfcontrols"]=colSums(ccdata$genos[1:ncontrols,])/(2*ncontrols)
+##         output[,"mfcases"]=colSums(ccdata$genos[(ncontrols+1):nrow(ccdata$genos),])/(2*ncases)
+##         for( r in 1:nrow(output) )
+##             {
+##                 z=which(as.numeric(esizes$pos) == ccdata$pos[r]);
+##                 #if(length(z)==0)
+##                 #    {
+##                         #mutation is neutral, get its frequency from the population
+##                 #        output[r,"esize"]=0
+##                 #        output[r,"popfreq"]=NA
+##                 #    }
+##                 #else
+##                 #    {
+##                 output[r,"esize"]=as.numeric(esizes$esize[z])
+##                 output[r,"popfreq"]=as.numeric(esizes$count[z])
+##                 #    }
+##             }
+##         output[,"score"]=-log10(getPvalsCCstatus(ccdata$genos, ncontrols,ncases))
+##         return(output)
+##     }
 
 n=commandArgs(trailing=T)
 
@@ -166,17 +164,20 @@ N=as.integer(n[8])
 outfile=n[9]
 outindex=n[10]
 blocker=n[11]
-#index=read.table(indexfile)
-#aindex=read.table(anovaindex)
+
+index=read.table(indexfile)
+aindex=read.table(anovaindex)
 
 #f=file(effectfile,"rb")
 #esizes=readSpecificMutsFromPop(f,2*N,index,recordno)
 #esizes=if(grep("gz",effectfile)) getSpecificEsizesGZ(f,index,recordno) else getSpecificEsizes(f,index,recordno)
-esizes=getSpecificEsizes(effectfile,indexfile,recordno)
-print(nrow(esizes))
+#esizes=getSpecificEsizes(effectfile,indexfile,recordno)
 #close(f)
 #f=file(anovafile,"rb")
-ccdata=getSpecificCCblock(anovafile,anovaindex,recordno)
+#ccdata=getSpecificCCblock(anovafile,anovaindex,recordno)
+
+esizes = getEsizes(effectfile,procIndex(index,2,recordno))
+ccdata = getCCblock(anovafile,procIndex(aindex,2,recordno))
 
 FAILFIND=array()
 FAILNO=0
@@ -195,11 +196,13 @@ if(FAILNO>0)
                " were not found in ",effectfile))
 }
 
-pvblock=makePVblock(ccdata,esizes,ncontrols,ncases)
+status=c(rep(0,ccdata$ncontrols),rep(1,ccdata$ncases))
+pvblock=makePVblock(ccdata,esizes,status)
 pvblock[,"popfreq"]=pvblock[,"popfreq"]/(2*N)
 
 options(warn=-1)
 f=pipe(paste(blocker,recordno,outindex,outfile,as.integer(nrow(pvblock)),sep=" "))
 write.table(pvblock,f,row.names=F,col.names=T,quote=F,append=T)
+#writePVblock(outfile,outindex,recordno,pvblock)
 
 

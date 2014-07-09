@@ -3,14 +3,17 @@
 \alias{ccpvals}
 \title{Obtain single-marker p-values for case/control data}
 \usage{
-ccpvals(x, status, model = "additive")
+ccpvals(genos, status, model = "additive")
 }
 \arguments{
-\item{x}{A matrix of genotypes, coded as number of copies of minor allele}
+\item{genos}{A matrix of genotypes, coded as number of copies of minor allele}
 
 \item{status}{An array of 0 = control, 1 = case.  length(status) must equal nrow(x)}
 
 \item{model}{One of "additive","recessive", or "dominant"}
+}
+\value{
+An array of p-values of logistic regressions of case/control status onto genotype.  The order of the p-values corresponds to the column order in x.
 }
 \description{
 Obtain single-marker p-values for case/control data

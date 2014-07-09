@@ -30,12 +30,6 @@ public:
   typedef boost::container::vector< std::pair<glist::iterator,glist::iterator> > dips;
   dips diploids;
 
-  // SimPopData( ) : mutations(mlist()),
-  // 		  gametes(glist()),
-  // 		  diploids(dips())
-  // {
-  // }
-
   SimPopData(const std::string & filename,
 	     const unsigned long & offset) : mutations(mlist()),
 					     gametes(glist()),
@@ -188,7 +182,7 @@ SEXP readPop(const char * filename,
 }
 */
 
-//' Read effect sizes from a file
+//' Read effect sizes from a file at a specific position
 //' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 //' @param offset The size in bytes where the desired record begins
 // [[Rcpp::export]]		 
@@ -228,7 +222,7 @@ DataFrame getEsizes( const char * filename,
 			    Named("age") = age );
 }
 
-//' Read case/control panel from a file
+//' Read case/control panel from a file at a specific position
 //' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 //' @param offset The size in bytes where the desired record begins
 // [[Rcpp::export]]	      
@@ -243,14 +237,11 @@ List getCCblock( const char * filename,
 	    << " could not be opened for reading\n";
       return List::create();
     }
-
-  Rcerr << "seeking to " << offset << "\n";
   gzseek( gzin,offset,0 );
 
   unsigned n[4];
   gzread(gzin,&n[0],4*sizeof(unsigned));
-  Rcerr << n[0] << ' ' << n[1] << ' '
-	<< n[2] << ' ' << n[3] << '\n';
+
   //Read in mutation positions
   NumericVector pos(n[2]+n[3]);
   gzread(gzin,&pos[0],(n[2]+n[3])*sizeof(double));//holy crap this compiles!?!?!?
@@ -309,10 +300,14 @@ List getCCblock( const char * filename,
   return List::create( Named("pos") = pos,
 		       Named("genos") = genos,
 		       Named("burdens") = burdens,
-		       Named("phenos") = phenos );
+		       Named("phenos") = phenos,
+		       Named("ncontrols") = n[0],
+		       Named("ncases") = n[1],
+		       Named("neutral") = n[2],
+		       Named("casative") = n[3]);
 }
 
-//' Read case/control panel from a file
+//' Read case/control panel from a file at a specific position
 //' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 //' @param offset The size in bytes where the desired record begins
 // [[Rcpp::export]]
