@@ -28,7 +28,7 @@ If the first three dependencies listed above are in standard locations (typicall
 
 ```
 PKG_CPPFLAGS="-I`pwd`/.. $CPPFLAGS" R CMD INSTALL diseaseSims
-``
+```
 
 For those who care, the expression preceeding the invocation of R does the following:
 
