@@ -11,6 +11,7 @@
 #include <zlib.h>
 #include <string>
 #include <fstream>
+#include <sstream>
 
 #include <mutation_with_age.hpp>
 #include <fwdpp/IO.hpp>
@@ -49,9 +50,11 @@ void SimPopData::readPop(const char * filename,
   gzFile gzin=gzopen(filename,"rb");
   if(gzin==NULL)
     {
-      Rcerr <<"Error: "
+      ostringstream error;
+      error <<"SimPopData::readPop error: "
 	    << filename
 	    << " could not be opened for reading\n";
+      Rcpp::stop( error.str() );
       return;
     }
   gzseek( gzin,offset,0 );
@@ -69,8 +72,10 @@ List SimPopData::neutralGenotype(const size_t & i) const
 {
   if( i == 0 || i > diploids.size() )
     {
-      Rcerr << "Error: index " << i 
+      ostringstream error;
+      error << "Error: index " << i 
 	    << " out of bounds.  Returning empty list\n";
+      Rcpp::stop(error.str());
       return List::create();
     }
   std::vector<double> hap1,hap2;
@@ -97,8 +102,10 @@ List SimPopData::selectedGenotype(const size_t & i) const
 {
   if( i == 0 || i > diploids.size() )
     {
-      Rcerr << "Error: index " << i 
+      ostringstream error;
+      error << "Error: index " << i 
 	    << " out of bounds.  Returning empty list\n";
+      Rcpp::stop( error.str() );
       return List::create();
     }
   std::vector<double> hap1,hap2;
@@ -156,32 +163,6 @@ RCPP_MODULE(SimPopData)
     ;
 }
 
-// Reads in the entire population
-// @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
-// @param offset The size in bytes where the desired record begins
-//SimPopData readPop(const char * filename,
-/*
-SEXP readPop(const char * filename,
-		  const unsigned long & offset)
-{
-  SimPopData d;
-
-   gzFile gzin=gzopen(filename,"rb");
-   if(gzin==NULL)
-   {
-     Rcerr <<"Error: "
-   	  << filename
-   	  << " could not be opened for reading\n";
-     return d;
-   }
-   gzseek( gzin,offset,0 );
-   d.readPop(gzin);
-   gzclose(gzin);
-   //return d;
-   return wrap(d);
-}
-*/
-
 //' Read effect sizes from a file at a specific position
 //' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 //' @param offset The size in bytes where the desired record begins
@@ -197,15 +178,17 @@ DataFrame getEsizes( const char * filename,
   gzFile gzin = gzopen(filename,"rb");
   if( gzin == NULL )
     {
-      Rcerr <<"Error: "
+      ostringstream error;
+      error <<"getEsizes error: "
 	    << filename 
 	    << " could not be opened for reading\n";
+      Rcpp::stop( error.str() );
       return DataFrame::create();
     }
-  //Rcerr << "seeking\n";
+
   gzseek( gzin, offset, 0 );
   gzread( gzin, &nmuts, sizeof(unsigned) );
-  //Rcerr << nmuts << '\n';
+
   for( unsigned i = 0 ; i < nmuts ; ++i )
     {
       gzread( gzin,&row[0],4*sizeof(double) );
@@ -232,9 +215,11 @@ List getCCblock( const char * filename,
   gzFile gzin = gzopen(filename,"rb");
   if( gzin == NULL )
     {
-      Rcerr <<"Error: "
+      ostringstream error;
+      error <<"getCCblock error: "
 	    << filename 
 	    << " could not be opened for reading\n";
+      Rcpp::stop( error.str() );
       return List::create();
     }
   gzseek( gzin,offset,0 );
@@ -317,9 +302,11 @@ NumericMatrix getPheno(const char * filename,
   gzFile gzin = gzopen(filename,"rb");
   if( gzin == NULL )
     {
-      Rcerr <<"Error: "
+      ostringstream error;
+      error <<"getPheno error: "
 	    << filename 
 	    << " could not be opened for reading\n";
+      Rcpp::stop( error.str() );
       return NumericMatrix();
     }
   gzseek( gzin,offset,0 );
