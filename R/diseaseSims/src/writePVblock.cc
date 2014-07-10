@@ -41,7 +41,7 @@ void writePVblock( const char * outfilename,
     popfreq = pvblock["popfreq"],
     score = pvblock["score"];
 
-  ostringstream out;
+  ostringstream out,error;
   out << "pos esize mfcontrols mfcases popfreq score\n";
 
   for( int i = 0 ; i < pvblock.nrows() ; ++i )//pos.size() ; ++i )
@@ -66,18 +66,24 @@ void writePVblock( const char * outfilename,
       int index_fd = fileno(index_fh);
       if ( index_fd == -1 ) 
 	{ 
-	  Rcerr << "ERROR: could not open " << indexfilename << '\n';
-	  exit(10);
+	  error << "ERROR: could not open " << indexfilename << '\n';
+	  Rcpp::stop(error.str());
 	}
       if (fcntl(index_fd, F_SETLKW,&index_flock) == -1) 
 	{
-	  Rcerr << "ERROR: could not obtain lock on " << indexfilename << '\n';
-	  exit(10);
+	  error << "ERROR: could not obtain lock on " << indexfilename << '\n';
+	  Rcpp::stop(error.str());
 	}
 
       if (gzip)
 	{
 	  gzFile ofile = gzopen(outfilename,"a");
+	  if( ofile == NULL )
+	    {
+	      error << "writePVblock error: could not open "
+		    << outfilename << " for writing in append mode";
+	      Rcpp::stop(error.str());
+	   } 
 	  int written = gzwrite( ofile, out.str().c_str(),out.str().size() );
 	  gzclose(ofile);
 
@@ -87,6 +93,12 @@ void writePVblock( const char * outfilename,
       else
 	{	  
 	  FILE * ofile = fopen(outfilename,"a");
+	  if( ofile == NULL )
+	    {
+	      error << "writePVblock error: could not open "
+		    << outfilename << " for writing in append mode\n";
+	      Rcpp::stop(error.str());
+	    }
 	  //write data to index file BEFORE writing
 	  fprintf(index_fh,"%ul %ld %d\n",recordno,ftell(ofile),pvblock.nrows());
 
@@ -98,8 +110,8 @@ void writePVblock( const char * outfilename,
       index_flock.l_type = F_UNLCK;
       if (fcntl(index_fd, F_UNLCK,&index_flock) == -1) 
 	{
-	  Rcerr << "ERROR: could not release lock on " << indexfilename << '\n';
-	  exit(10);
+	  error << "ERROR: could not release lock on " << indexfilename << '\n';
+	  Rcpp::stop(error.str());
 	}
       fflush( index_fh );
       fclose(index_fh);
@@ -109,20 +121,44 @@ void writePVblock( const char * outfilename,
       if( gzip )
 	{
 	  gzFile ofile = gzopen(outfilename,"w");
+	  if( ofile == NULL )
+	    {
+	      error << "writePVblock error: could not open "
+		    << outfilename << " for writing in append mode";
+	      Rcpp::stop(error.str());
+	    }
 	  int written = gzwrite( ofile, out.str().c_str(), out.str().size() );
 	  gzclose(ofile);
 
 	  FILE * idx = fopen(indexfilename,"w");
+	  if( idx == NULL )
+	    {
+	      error << "writePVblock error: could not open "
+		    << indexfilename << " for writing in append mode";
+	      Rcpp::stop(error.str());
+	    }
 	  fprintf( idx,"%ul %d %d\n",recordno,written,pvblock.nrows());
 	  fclose(idx);
 	}
       else
 	{
 	  FILE * idx = fopen(indexfilename,"w");
+	  if( idx == NULL )
+	    {
+	      error << "writePVblock error: could not open "
+		    << indexfilename << " for writing in append mode";
+	      Rcpp::stop(error.str());
+	    }
 	  fprintf( idx,"%ul 0 %d\n",recordno,pvblock.nrows() );
 	  fclose(idx);
 
 	  idx = fopen(outfilename,"w");
+	  if( idx == NULL )
+	    {
+	      error << "writePVblock error: could not open "
+		    << outfilename << " for writing in append mode";
+	      Rcpp::stop(error.str());
+	    }
 	  fprintf(idx,"%s",out.str().c_str());
 	  fclose(idx);
 	}
