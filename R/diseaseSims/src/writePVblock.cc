@@ -85,11 +85,11 @@ void writePVblock( const char * outfilename,
 	  fprintf(index_fh,"%ul %d %d\n",recordno,written,pvblock.nrows());
 	}
       else
-	{
-	  //write data to index file BEFORE writing
-	  fprintf(index_fh,"%ul %ld %d\n",recordno,ftell(index_fh),pvblock.nrows());
-	  
+	{	  
 	  FILE * ofile = fopen(outfilename,"a");
+	  //write data to index file BEFORE writing
+	  fprintf(index_fh,"%ul %ld %d\n",recordno,ftell(ofile),pvblock.nrows());
+
 	  fprintf(ofile,"%s",out.str().c_str());
 	  fclose(ofile);
 	}
