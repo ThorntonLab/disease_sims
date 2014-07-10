@@ -40,7 +40,7 @@ void writePVblock( const char * outfilename,
     mfcases = pvblock["mfcases"],
     popfreq = pvblock["popfreq"],
     score = pvblock["score"];
-    
+
   ostringstream out;
   out << "pos esize mfcontrols mfcases popfreq score\n";
 
@@ -81,11 +81,12 @@ void writePVblock( const char * outfilename,
 	  int written = gzwrite( ofile, out.str().c_str(),out.str().size() );
 	  gzclose(ofile);
 
-	  //write data to index file
+	  //write data to index file AFTER writing
 	  fprintf(index_fh,"%ul %d %d\n",recordno,written,pvblock.nrows());
 	}
       else
 	{
+	  //write data to index file BEFORE writing
 	  fprintf(index_fh,"%ul %ld %d\n",recordno,ftell(index_fh),pvblock.nrows());
 	  
 	  FILE * ofile = fopen(outfilename,"a");
