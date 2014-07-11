@@ -22,6 +22,14 @@ getCCblock <- function(filename, offset) {
     .Call('diseaseSims_getCCblock', PACKAGE = 'diseaseSims', filename, offset)
 }
 
+#' Read case/control ids from a file at a specific position
+#' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
+#' @param offset The size in bytes where the desired record begins
+#' @return A list of who the controls and cases were.  These are values between 1 and N, the population size.
+getCCids <- function(filename, offset) {
+    .Call('diseaseSims_getCCids', PACKAGE = 'diseaseSims', filename, offset)
+}
+
 #' Read case/control panel from a file at a specific position
 #' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 #' @param offset The size in bytes where the desired record begins

@@ -37,6 +37,22 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// getCCids
+List getCCids(const char * filename, const unsigned long& offset);
+RcppExport SEXP diseaseSims_getCCids(SEXP filenameSEXP, SEXP offsetSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< const char * >::type filename(filenameSEXP );
+        Rcpp::traits::input_parameter< const unsigned long& >::type offset(offsetSEXP );
+        List __result = getCCids(filename, offset);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // getPheno
 NumericMatrix getPheno(const char * filename, const unsigned long& offset);
 RcppExport SEXP diseaseSims_getPheno(SEXP filenameSEXP, SEXP offsetSEXP) {

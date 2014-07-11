@@ -292,6 +292,38 @@ List getCCblock( const char * filename,
 		       Named("casative") = n[3]);
 }
 
+//' Read case/control ids from a file at a specific position
+//' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
+//' @param offset The size in bytes where the desired record begins
+//' @return A list of who the controls and cases were.  These are values between 1 and N, the population size.
+// [[Rcpp::export]]
+List getCCids( const char * filename,
+	       const unsigned long & offset )
+{
+  gzFile gzin = gzopen(filename,"rb");
+  if( gzin == NULL )
+    {
+      ostringstream error;
+      error <<"getCCids error: "
+	    << filename 
+	    << " could not be opened for reading\n";
+      Rcpp::stop( error.str() );
+      return List::create();
+    }
+  gzseek( gzin,offset,0 );
+
+  unsigned ncontrols,ncases;
+  gzread(gzin,&ncontrols,sizeof(unsigned));
+  gzread(gzin,&ncases,sizeof(unsigned));
+
+  NumericVector controls(ncontrols),cases(ncases);
+  gzread( gzin, &controls[0], ncontrols*sizeof(unsigned) );
+  gzread( gzin, &cases[0], ncases*sizeof(unsigned) );
+
+  return( List::create( Named("controls") = controls,
+			Named("case") = cases ) );
+}
+
 //' Read case/control panel from a file at a specific position
 //' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 //' @param offset The size in bytes where the desired record begins
