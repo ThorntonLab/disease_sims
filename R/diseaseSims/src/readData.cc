@@ -131,30 +131,6 @@ SimPopData::dips::size_type SimPopData::popsize() const
 
 RCPP_MODULE(SimPopData)
 {
-  /*
-    Usage example:
-    #!sh
-    
-    module load R
-    
-    R_LIBS=$HOME/R_libs_dev:$R_LIBS R --no-save <<EOF
-    require(diseaseSims)
-    require(Rcpp)
-    require(inline)
-    DIR="/dfs1/test/bio/krthornt/does_model_matter/dist/nogrowth/recessive/lambda0.1"
-    PFILE=paste(DIR,"/pop.bin.gz",sep="")
-    OFFSET=7315936
-    spop=Module("SimPopData",getDynLib("diseaseSims"))
-    pop = new(spop\$SimPopData,PFILE,as.integer(OFFSET))
-    for( i in 1:pop\$popsize() )
-    {
-    cause=pop\$sgeno(i)
-    neut=pop\$ngeno(i)
-    print(paste(i,length(neut\$hap1),length(neut\$hap2),length(cause\$hap1),length(cause\$hap2)))
-    }
-    EOF
-  */
-
   class_<SimPopData>( "SimPopData" )
     .constructor<string,unsigned long>("Constructor takes a file name and an offset (in bytes")
     .method("ngeno",&SimPopData::neutralGenotype,"Returns a list containing the positions of neutral markers on each haplotype of the i-th diploid.  The argument must be an integer in the range 1 <= x <= populaiton size.")
