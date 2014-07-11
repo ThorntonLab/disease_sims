@@ -320,6 +320,8 @@ List getCCids( const char * filename,
   gzread( gzin, &controls[0], ncontrols*sizeof(unsigned) );
   gzread( gzin, &cases[0], ncases*sizeof(unsigned) );
 
+  gzclose( gzin );
+
   return( List::create( Named("controls") = controls,
 			Named("case") = cases ) );
 }
