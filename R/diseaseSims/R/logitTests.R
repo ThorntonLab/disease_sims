@@ -88,7 +88,7 @@ ccpvals = function(genos,status,model="additive")
 #' esize = the effect size of the mutation,
 #' mfcontrols = minor allele frequency in controls,
 #' mfcases = minor allele frequency in cases,
-#' popfreq = minor allele frequency in entire population,
+#' popfreq = DERIVED allele frequency in entire population (NOT minor allele frequency!!!)
 #' score = -log10(logistic regression p-value)
 #' @examples
 #' #This is a non-working example!
