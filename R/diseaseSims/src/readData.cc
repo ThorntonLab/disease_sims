@@ -13,36 +13,35 @@
 #include <fstream>
 #include <sstream>
 
-#include <mutation_with_age.hpp>
+#include <SimPopData.hpp>
 #include <fwdpp/IO.hpp>
 #include <boost/bind.hpp>
-
 using namespace Rcpp;
 using namespace std;
 
-class SimPopData
-{
-private:
-  void readPop(const char * filename,
-	       const unsigned long & offset);
-public:
-  mlist mutations;
-  glist gametes;
-  typedef boost::container::vector< std::pair<glist::iterator,glist::iterator> > dips;
-  dips diploids;
+// class SimPopData
+// {
+// private:
+//   void readPop(const char * filename,
+// 	       const unsigned long & offset);
+// public:
+//   mlist mutations;
+//   glist gametes;
+//   typedef boost::container::vector< std::pair<glist::iterator,glist::iterator> > dips;
+//   dips diploids;
 
-  SimPopData(const std::string & filename,
-	     const unsigned long & offset) : mutations(mlist()),
-					     gametes(glist()),
-					     diploids(dips())
-  {
-    this->readPop(filename.c_str(),offset);
-  }
+//   SimPopData(const std::string & filename,
+// 	     const unsigned long & offset) : mutations(mlist()),
+// 					     gametes(glist()),
+// 					     diploids(dips())
+//   {
+//     this->readPop(filename.c_str(),offset);
+//   }
 
-  List neutralGenotype(const size_t & i) const;
-  List selectedGenotype(const size_t & i) const;
-  dips::size_type popsize() const;
-};
+//   List neutralGenotype(const size_t & i) const;
+//   List selectedGenotype(const size_t & i) const;
+//   dips::size_type popsize() const;
+// };
 
 void SimPopData::readPop(const char * filename,
 			 const unsigned long & offset)
@@ -334,3 +333,4 @@ NumericMatrix getPheno(const char * filename,
   gzclose(gzin);
   return rv;
 }
+
