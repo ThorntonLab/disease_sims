@@ -13,5 +13,5 @@ then
     mkdir ~/R_libs
 fi
 
-echo $LDFLAGS
+
 R_LIBS="~/R_libs:$R_LIBS" PKG_LIBS=$LDFLAGS PKG_CPPFLAGS="-I`pwd`/.. $CPPFLAGS" R CMD INSTALL diseaseSims
