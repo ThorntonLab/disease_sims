@@ -109,7 +109,7 @@ int main(int argc, char ** argv)
     }
   sort(permstats.begin(),permstats.end());
   double perm_p = double( count_if(permstats.begin(),permstats.end(),
-				   boost::bind(greater<double>(),_1,obs_esm ) ) )/double(options.nperms);
+				   boost::bind(greater_equal<double>(),_1,obs_esm ) ) )/double(options.nperms);
   double mean = gsl_stats_mean(&permstats[0],1,permstats.size());
   double sd = gsl_stats_sd(&permstats[0],1,permstats.size());
   double z = (obs_esm-mean)/sd;
