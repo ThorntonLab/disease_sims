@@ -5,8 +5,6 @@
 //' @importFrom Rcpp evalCpp loadModule Module
 
 
-//PKG_LIBS="$LDFLAGS -lz -lboost_system" PKG_CPPFLAGS="-I$HOME/src/disease_sims $CPPFLAGS" R --no-save < CompileTest.R
-
 #include <Rcpp.h>
 #include <zlib.h>
 #include <string>
@@ -18,30 +16,6 @@
 #include <boost/bind.hpp>
 using namespace Rcpp;
 using namespace std;
-
-// class SimPopData
-// {
-// private:
-//   void readPop(const char * filename,
-// 	       const unsigned long & offset);
-// public:
-//   mlist mutations;
-//   glist gametes;
-//   typedef boost::container::vector< std::pair<glist::iterator,glist::iterator> > dips;
-//   dips diploids;
-
-//   SimPopData(const std::string & filename,
-// 	     const unsigned long & offset) : mutations(mlist()),
-// 					     gametes(glist()),
-// 					     diploids(dips())
-//   {
-//     this->readPop(filename.c_str(),offset);
-//   }
-
-//   List neutralGenotype(const size_t & i) const;
-//   List selectedGenotype(const size_t & i) const;
-//   dips::size_type popsize() const;
-// };
 
 void SimPopData::readPop(const char * filename,
 			 const unsigned long & offset)
@@ -264,7 +238,7 @@ List getCCblock( const char * filename,
 		       Named("ncontrols") = n[0],
 		       Named("ncases") = n[1],
 		       Named("neutral") = n[2],
-		       Named("casative") = n[3]);
+		       Named("causative") = n[3]);
 }
 
 //' Read case/control ids from a file at a specific position
