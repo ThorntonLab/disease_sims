@@ -1,6 +1,6 @@
 #!sh
 
-find . -name "*.o" | xargs rm -f
+#find . -name "*.o" | xargs rm -f
 
 #Load the dependencies (this takes care of boost, zlib, libsequence, too, athough libsequence is not needed)
 module load R
