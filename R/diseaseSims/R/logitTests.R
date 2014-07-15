@@ -92,20 +92,8 @@ ccpvals = function(genos,status,model="additive")
 #' score = -log10(logistic regression p-value)
 #' @examples
 #' #Make a random matrix of genotypes for 500 controls, 500 cases, 100 markers
-#' set.seed(100)
-#' ncases=500
-#' ncontrols=500
-#' nmarkers=100
-#' genos=matrix(data=replicate(nmarkers,rbinom(ncases+ncontrols,2,0.5)),nrow=ncases+ncontrols,ncol=nmarkers,byrow=FALSE)
-#' #Make a fake esizes block:
-#' pos=runif(nmarkers,0,1)
-#' esize=c(rep(0,80),rexp(20))
-#' count=as.integer(runif(nmarkers,1,1e3))
-#' ages=count
-#' esizes=list(pos=pos,esize=esize,count=count,age=ages)
-#' #This is an incomplete "ccblock", but good enough to run through this function:
-#' ccblock=list(genos=genos,pos=pos,ncases=ncases,ncontrols=ncontrols)
-#' ccblock.pvblock = makePVblock(ccblock,esizes,c(rep(0,ncontrols),rep(1,ncases)))
+#' data(ccblock)
+#' #NEED TO GET THE ESIZES, ETC. for this guy...
 makePVblock = function( ccdata,
     esizes,
     status,
