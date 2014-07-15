@@ -18,4 +18,10 @@ An array of p-values of logistic regressions of case/control status onto genotyp
 \description{
 Obtain single-marker p-values for case/control data
 }
+\examples{
+data(ccblock)
+#The function works on the genotype matrix
+#We assign discrete phenotypes based on number of controls & cases in ccblock$genos:
+ccblock.pvals = ccpvals(ccblock$genos,c(rep(0,ccblock$ncontrols),rep(1,ccblock$ncases)))
+}
 
