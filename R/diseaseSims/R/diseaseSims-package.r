@@ -7,3 +7,10 @@
 #' @importFrom Rcpp evalCpp loadModule Module
 
 NULL
+
+#' @title Example data
+#' @name ccblock
+#' @docType data
+#' @format A simulated case/control panel with 3,000 controls plus 3,000 cases.
+
+NULL
