@@ -16,4 +16,7 @@ which(rank(1/abs(x)) <= min(n,length(x))) )
 \description{
 Returns the indexes of the top n hits
 }
+\note{
+Used internally
+}
 

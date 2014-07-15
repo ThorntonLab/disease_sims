@@ -2,6 +2,7 @@
 #' @param x A vector
 #' @param n The number of top hits that you wish to return
 #' @return which(rank(1/abs(x)) <= min(n,length(x))) )
+#' @note Used internally
 bestHits = function(x,n)
     {
         return( which(rank(1/abs(x)) <= min(n,length(x))) )
