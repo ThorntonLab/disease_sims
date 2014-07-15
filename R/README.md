@@ -27,13 +27,8 @@ This is a little tricker than for a typical R package due to the dependency on a
 If the first three dependencies listed above are in standard locations (typically somewhere in /usr or /usr/local), then the following command will suffice to install the R library:
 
 ```
-PKG_CPPFLAGS="-I`pwd`/.. $CPPFLAGS" R CMD INSTALL diseaseSims
+PKG_CPPFLAGS=$CPPFLAGS R CMD INSTALL diseaseSims
 ```
-
-For those who care, the expression preceeding the invocation of R does the following:
-
-1. It sets the value of the PKG_CPPFLAGS to the directory containing the current directory plus the current value of CPPFLAGS, which is a shell variable containing paths where your compiler should look for header files.  The directory containing the current directory is the root of the disease_sims repository and contains a header file called mutation_with_age.hpp, which is needed for some of the C++ functions.  PKG_CPPFLAGS is R's version of CPPFLAGS, and R ignores the system variable.
-2. `pwd`/.. means "take the value of the pwd command, and stick /.. onto it.  pwd means "present working directory", so adding /.. to it means the preceeding directory
 
 ##More complex case: your libraries are in funny places and/or your system uses [modules](http://modules.sourceforge.net/) to make things like libraries available to users
 
@@ -49,13 +44,19 @@ LDFLAGS=-L$HOME/lib
 OK, we can work with that:
 
 ```
-PKG_LIBS=$LDFLAGS PKG_CPPFLAGS="-I`pwd`/.. $CPPFLAGS" R CMD INSTALL diseaseSims
+PKG_LIBS=$LDFLAGS PKG_CPPFLAGS=$CPPFLAGS R CMD INSTALL diseaseSims
 ```
 
 Basically, PKG_LIBS is a combo of LDFLAGS plus the individual -l flags uses to link libraries (those flags are already included in the diseaseSims Makevars file, so we don't have to specify them here).
 
 If you use the modules system, then the "module load XXXX" commands should be prepending the correct -L and -I paths to LDFLAGS and CPPFLAGS, respectively.  If so, then the above command will work for you.  If not, talk to your sysadmin because doing this right is the whole point of the module system.
 
-##Installation on the UCI HPC into a user's $HOME
+##Installation into user's $HOME/R_libs
+
+```
+R_LIBS=$HOME/R_libs:$R_LIBS PKG_LIBS=$LDFLAGS PKG_CPPFLAGS=$CPPFLAGS R CMD INSTALL diseaseSims
+```
+
+###Installation on the UCI HPC into a user's $HOME
 
 Execute the local_install_example.sh in disease_sims/R.
