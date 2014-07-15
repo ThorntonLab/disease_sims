@@ -84,8 +84,8 @@ ccLD=function(ccblock,pvblock,sig.threshold = 8,minrsq=0,maxvals=-1)
                     rsq = LD,
                     mx = rep(maxvals,length(sp)))
                 
-                rv.mx = plyr::ddply( rv,.(sigpos),
-                    summarise,
+                rv.mx = plyr::ddply( rv,plyr::.(sigpos),
+                    plyr::summarise,
                     cpos = cpos[ bestHits(rsq,mx) ],
                     sigfreqs = sigfreq[ bestHits(rsq,mx) ],
                     cfreq = cfreq[ bestHits(rsq,mx) ],
