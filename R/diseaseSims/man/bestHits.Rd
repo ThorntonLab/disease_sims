@@ -11,7 +11,7 @@ bestHits(x, n)
 \item{n}{The number of top hits that you wish to return}
 }
 \value{
-which(rank(1/abs(x)) <= min(n,length(r))) )
+which(rank(1/abs(x)) <= min(n,length(x))) )
 }
 \description{
 Returns the indexes of the top n hits
