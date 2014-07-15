@@ -3,7 +3,7 @@
 \alias{ccLD}
 \title{LD summaries of simulated case/control panels}
 \usage{
-ccLD(ccblock, pvblock, sig.threshold = 8, minrsq = 0)
+ccLD(ccblock, pvblock, sig.threshold = 8, minrsq = 0, maxvals = -1)
 }
 \arguments{
 \item{ccblock}{A case/control panel retured by diseaseSims::getCCblock}
@@ -13,9 +13,11 @@ ccLD(ccblock, pvblock, sig.threshold = 8, minrsq = 0)
 \item{sig.threshold}{The -log10(p-value) beyond which a single-marker test is considered "significant"}
 
 \item{minrsq}{Only include causative markers in the return value if their LD with the significant marker is >= minrsq}
+
+\item{maxvals}{If > 0, return the top maxvals records per marker.  In other words, return the maxvals highest associations per significant marker.  maxvals = 1 returns the top hit, 2 returns the top 2, etc.}
 }
 \value{
-A data frame summarizing LD beteween significant markers and causative markers.  Included are the population frequencies of the mutations and the effect sizes of the causative mutations.  The data frame contains: sp = position of the significant marker.  cp = position of causative marker.  sfreq = frequency of significant mutation in general population.  cfreq = frequency of causative mutation in general population. ce = effect size of causative mutation.  rsq = squared correlation coefficient between significant and causative marker genotype.
+A data frame summarizing LD beteween significant markers and causative markers.  Included are the population frequencies of the mutations and the effect sizes of the causative mutations.  The data frame contains: sp = position of the significant marker.  cp = position of causative marker.  sfreq = frequency of significant mutation in general population.  cfreq = frequency of causative mutation in general population. sesize = effect size of significant mutation. cesize = effect size of causative mutation.  rsq = squared correlation coefficient between significant and causative marker genotype.
 }
 \description{
 LD summaries of simulated case/control panels

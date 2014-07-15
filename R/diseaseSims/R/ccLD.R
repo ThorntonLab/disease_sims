@@ -1,10 +1,17 @@
+topRSQ = function(x,n)
+    {
+        r=rank(1/x)
+        return( which(r <= min(n,length(r))) )
+    }
+
 #' LD summaries of simulated case/control panels
 #' @param ccblock A case/control panel retured by diseaseSims::getCCblock
 #' @param pvblock Single-marker association results from diseaseSims::makePVblock
 #' @param sig.threshold The -log10(p-value) beyond which a single-marker test is considered "significant"
 #' @param minrsq Only include causative markers in the return value if their LD with the significant marker is >= minrsq
-#' @return A data frame summarizing LD beteween significant markers and causative markers.  Included are the population frequencies of the mutations and the effect sizes of the causative mutations.  The data frame contains: sp = position of the significant marker.  cp = position of causative marker.  sfreq = frequency of significant mutation in general population.  cfreq = frequency of causative mutation in general population. ce = effect size of causative mutation.  rsq = squared correlation coefficient between significant and causative marker genotype.
-ccLD=function(ccblock,pvblock,sig.threshold = 8,minrsq = 0 )
+#' @param maxvals If > 0, return the top maxvals records per marker.  In other words, return the maxvals highest associations per significant marker.  maxvals = 1 returns the top hit, 2 returns the top 2, etc.
+#' @return A data frame summarizing LD beteween significant markers and causative markers.  Included are the population frequencies of the mutations and the effect sizes of the causative mutations.  The data frame contains: sp = position of the significant marker.  cp = position of causative marker.  sfreq = frequency of significant mutation in general population.  cfreq = frequency of causative mutation in general population. sesize = effect size of significant mutation. cesize = effect size of causative mutation.  rsq = squared correlation coefficient between significant and causative marker genotype.
+ccLD=function(ccblock,pvblock,sig.threshold = 8,minrsq=0,maxvals=-1)
     {
         if( ncol(ccblock$genos) != nrow(pvblock) )
            {
@@ -25,6 +32,7 @@ ccLD=function(ccblock,pvblock,sig.threshold = 8,minrsq = 0 )
         cps=array()
         sfreq=array()
         cfreq=array()
+        se=array()
         ce=array()
         LD=array()
         DUMMY=1
@@ -42,17 +50,46 @@ ccLD=function(ccblock,pvblock,sig.threshold = 8,minrsq = 0 )
                                         cps[DUMMY]=pvblock$pos[causative[cp]]
                                         sfreq[DUMMY]=pvblock$popfreq[sigpos[sigp]]
                                         cfreq[DUMMY]=pvblock$popfreq[causative[cp]]
+                                        se[DUMMY]=pvblock$esize[sigpos[sigp]]
                                         ce[DUMMY]=pvblock$esize[causative[cp]]
-                                         LD[DUMMY]=rsq
+                                        LD[DUMMY]=rsq
                                         DUMMY=DUMMY+1
                                     }
                             }
                     }
             }
-        return( data.frame(sigpos = sp,
-                           cpos = cps,
-                           sigfreq = sfreq,
-                           cfreq = cfreq,
-                           esize = ce,
-                           rsq = LD ) )
+        
+        if( maxvals == -1 )
+            {
+                rv = data.frame(sigpos = sp,
+                    cpos = cps,
+                    sigfreq = sfreq,
+                    cfreq = cfreq,
+                    sesize = se,
+                    cesize = ce,
+                    rsq = LD )
+                return (rv);
+            }
+        else
+            {
+                require(plyr)
+                rv = data.frame(sigpos = sp,
+                    cpos = cps,
+                    sigfreq = sfreq,
+                    cfreq = cfreq,
+                    sesize = se,
+                    cesize = ce,
+                    rsq = LD,
+                    mx = rep(maxvals,length(sp)))
+                
+                rv.mx = ddply( rv,.(sigpos),
+                    summarise,
+                    cpos = cpos[ topRSQ(rsq,mx) ],
+                    sigfreqs = sigfreq[ topRSQ(rsq,mx) ],
+                    cfreq = cfreq[ topRSQ(rsq,mx) ],
+                    sesize = sesize[ topRSQ(rsq,mx) ],
+                    cesize = cesize[ topRSQ(rsq,mx) ],
+                    rsq = rsq[ topRSQ(rsq,mx) ] )
+                return(rv.mx)
+            }
     }

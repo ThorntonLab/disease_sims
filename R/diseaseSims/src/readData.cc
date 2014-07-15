@@ -1,10 +1,3 @@
-//' @useDynLib diseaseSims, .registration=TRUE
-//' @exportPattern "^[[:alpha:]]+"
-//' @import methods
-//' @import inline
-//' @importFrom Rcpp evalCpp loadModule Module
-
-
 #include <Rcpp.h>
 #include <zlib.h>
 #include <string>

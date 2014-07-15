@@ -3,8 +3,8 @@
 \name{diseaseSims}
 \alias{diseaseSims}
 \alias{diseaseSims-package}
-\title{diseaseSims.}
+\title{diseaseSims: a package for processing the output of simulations and case/control panels.}
 \description{
-diseaseSims.
+diseaseSims: a package for processing the output of simulations and case/control panels.
 }
 
