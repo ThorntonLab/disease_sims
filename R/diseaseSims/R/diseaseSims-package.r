@@ -3,9 +3,7 @@
 #' @name diseaseSims
 #' @docType package
 #' @useDynLib diseaseSims, .registration=TRUE
-#' @exportPattern "^[^\\.]+"
-# ' @import methods
-# ' @import inline
+#' @exportPattern "^[[:alpha:]]+"
 #' @importFrom Rcpp evalCpp loadModule Module
 
 NULL

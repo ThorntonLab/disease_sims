@@ -27,15 +27,20 @@ score = -log10(logistic regression p-value)
 Perform single-marker association test on simulated case/control data
 }
 \examples{
-#This is a non-working example!
-library(diseaseSims)
-fn="ccfilename.bin.gz"
-ccdata=getCCblock(fn,offset)
-fn2="esizefile.bin.gz"
-esizes=getEsizes(fn2,offset)
-#Run test under additive model
-pvblock=makePVblock( ccdata,esizes,c(rep(0,ccdata$ncontrols),rep(1,ccdata$ncases)) )
-#Manhattan plot
-plot( pvblock$pos,pvblock$score,xlab="Position",ylab=expression(paste("-log",[10],"(P-value)")))
+#Make a random matrix of genotypes for 500 controls, 500 cases, 100 markers
+set.seed(100)
+ncases=500
+ncontrols=500
+nmarkers=100
+genos=matrix(data=replicate(nmarkers,rbinom(ncases+ncontrols,2,0.5)),nrow=ncases+ncontrols,ncol=nmarkers,byrow=FALSE)
+#Make a fake esizes block:
+pos=runif(nmarkers,0,1)
+esize=c(rep(0,80),rexp(20))
+count=as.integer(runif(nmarkers,1,1e3))
+ages=count
+esizes=list(pos=pos,esize=esize,count=count,age=ages)
+#This is an incomplete "ccblock", but good enough to run through this function:
+ccblock=list(genos=genos,pos=pos,ncases=ncases,ncontrols=ncontrols)
+ccblock.pvblock = makePVblock(ccblock,esizes,c(rep(0,ncontrols),rep(1,ncases)))
 }
 

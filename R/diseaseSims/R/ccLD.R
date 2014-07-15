@@ -1,7 +1,10 @@
-topRSQ = function(x,n)
+#' Returns the indexes of the top n hits
+#' @param x A vector
+#' @param n The number of top hits that you wish to return
+#' @return which(rank(1/abs(x)) <= min(n,length(x))) )
+bestHits = function(x,n)
     {
-        r=rank(1/x)
-        return( which(r <= min(n,length(r))) )
+        return( which(rank(1/abs(x)) <= min(n,length(x))) )
     }
 
 #' LD summaries of simulated case/control panels
@@ -72,7 +75,6 @@ ccLD=function(ccblock,pvblock,sig.threshold = 8,minrsq=0,maxvals=-1)
             }
         else
             {
-                require(plyr)
                 rv = data.frame(sigpos = sp,
                     cpos = cps,
                     sigfreq = sfreq,
@@ -82,14 +84,14 @@ ccLD=function(ccblock,pvblock,sig.threshold = 8,minrsq=0,maxvals=-1)
                     rsq = LD,
                     mx = rep(maxvals,length(sp)))
                 
-                rv.mx = ddply( rv,.(sigpos),
+                rv.mx = plyr::ddply( rv,.(sigpos),
                     summarise,
-                    cpos = cpos[ topRSQ(rsq,mx) ],
-                    sigfreqs = sigfreq[ topRSQ(rsq,mx) ],
-                    cfreq = cfreq[ topRSQ(rsq,mx) ],
-                    sesize = sesize[ topRSQ(rsq,mx) ],
-                    cesize = cesize[ topRSQ(rsq,mx) ],
-                    rsq = rsq[ topRSQ(rsq,mx) ] )
+                    cpos = cpos[ bestHits(rsq,mx) ],
+                    sigfreqs = sigfreq[ bestHits(rsq,mx) ],
+                    cfreq = cfreq[ bestHits(rsq,mx) ],
+                    sesize = sesize[ bestHits(rsq,mx) ],
+                    cesize = cesize[ bestHits(rsq,mx) ],
+                    rsq = rsq[ bestHits(rsq,mx) ] )
                 return(rv.mx)
             }
     }

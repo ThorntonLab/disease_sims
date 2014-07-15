@@ -4,11 +4,11 @@ Version: 0.1
 Author: "Kevin Thornton <krthornt@uci.edu> [aut, cre]"
 Maintainer: Kevin Thornton <krthornt@uci.edu>
 Description: Provides helper functions for processing output of our simulations
-Depends:
-    R (>= 3.1.0)
 LazyData: true
 License: GPL
 Imports:
     Rcpp (>= 0.11.1)
 LinkingTo: Rcpp
+Depends:
+    plyr
 RcppModules: SimPopData
