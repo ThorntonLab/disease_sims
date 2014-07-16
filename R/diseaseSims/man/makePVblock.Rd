@@ -27,8 +27,8 @@ score = -log10(logistic regression p-value)
 Perform single-marker association test on simulated case/control data
 }
 \examples{
-#Make a random matrix of genotypes for 500 controls, 500 cases, 100 markers
-data(ccblock)
-#NEED TO GET THE ESIZES, ETC. for this guy...
+data(ccblock.dsdata)
+data(esizes.dsdata)
+pvblock = makePVblock(ccblock.dsdata,esizes.dsdata,c(rep(0,ccblock.dsdata$ncontrols),rep(1,ccblock.dsdata$ncases)))
 }
 

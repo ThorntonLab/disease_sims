@@ -53,10 +53,10 @@ logit.dominant=function(x,status)
 #' @param model One of "additive","recessive", or "dominant"
 #' @return An array of p-values of logistic regressions of case/control status onto genotype.  The order of the p-values corresponds to the column order in x.
 #' @examples
-#' data(ccblock)
+#' data(ccblock.dsdata)
 #' #The function works on the genotype matrix
-#' #We assign discrete phenotypes based on number of controls & cases in ccblock$genos:
-#' ccblock.pvals = ccpvals(ccblock$genos,c(rep(0,ccblock$ncontrols),rep(1,ccblock$ncases)))
+#' #We assign discrete phenotypes based on number of controls & cases in ccblock.dsdata$genos:
+#' ccblock.dsdata.pvals = ccpvals(ccblock.dsdata$genos,c(rep(0,ccblock.dsdata$ncontrols),rep(1,ccblock.dsdata$ncases)))
 ccpvals = function(genos,status,model="additive")
     {
         if( length(status) != nrow(genos) )
@@ -96,9 +96,9 @@ ccpvals = function(genos,status,model="additive")
 #' popfreq = DERIVED allele frequency in entire population (NOT minor allele frequency!!!)
 #' score = -log10(logistic regression p-value)
 #' @examples
-#' #Make a random matrix of genotypes for 500 controls, 500 cases, 100 markers
-#' data(ccblock)
-#' #NEED TO GET THE ESIZES, ETC. for this guy...
+#' data(ccblock.dsdata)
+#' data(esizes.dsdata)
+#' pvblock = makePVblock(ccblock.dsdata,esizes.dsdata,c(rep(0,ccblock.dsdata$ncontrols),rep(1,ccblock.dsdata$ncases)))
 makePVblock = function( ccdata,
     esizes,
     status,

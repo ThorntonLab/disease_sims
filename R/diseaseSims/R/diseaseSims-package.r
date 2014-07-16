@@ -9,8 +9,15 @@
 NULL
 
 #' @title Example data
-#' @name ccblock
+#' @name ccblock.dsdata
 #' @docType data
 #' @format A simulated case/control panel with 3,000 controls plus 3,000 cases.
+
+NULL
+
+#' @title Example data
+#' @name esizes.dsdata
+#' @docType data
+#' @format The effect size block corresponding to ccblock.dsdata
 
 NULL
