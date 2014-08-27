@@ -141,7 +141,7 @@ int main( int argc, char ** argv )
 	      double pos = data.caus_pos[mut - data.SN];
 	      vector<TFLmtype>::const_iterator mitr = find_if(mvector.begin(),
 							      mvector.end(),
-							      boost::bind(KTfwd::mutation_at_pos(),_1,pos));
+							      std::bind(KTfwd::mutation_at_pos(),std::placeholders::_1,pos));
 	      effectbuffer << i << '\t'
 			   << "co" << '\t'
 			   << 1 << 't'
@@ -180,7 +180,7 @@ int main( int argc, char ** argv )
 	      double pos = data.caus_pos[mut - data.SN];
 	      vector<TFLmtype>::const_iterator mitr = find_if(mvector.begin(),
 							      mvector.end(),
-							      boost::bind(KTfwd::mutation_at_pos(),_1,pos));
+							      std::bind(KTfwd::mutation_at_pos(),std::placeholders::_1,pos));
 	      effectbuffer << i << '\t'
 			   << "co" << '\t'
 			   << 1 << 't'

@@ -33,8 +33,8 @@ struct popgen_phenotype
 			   const double & dominance) const
   {
     return KTfwd::site_dependent_fitness()(g1,g2,
-					   boost::bind(popgen_phenotype_updater_hom(),_1,_2),
-					   boost::bind(popgen_phenotype_updater_het(),_1,_2,dominance),
+					   std::bind(popgen_phenotype_updater_hom(),std::placeholders::_1,std::placeholders::_2),
+					   std::bind(popgen_phenotype_updater_het(),std::placeholders::_1,std::placeholders::_2,dominance),
 					   1.);
   }
 };

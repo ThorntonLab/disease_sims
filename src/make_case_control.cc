@@ -147,14 +147,14 @@ int main(int argc, char ** argv)
     {
       gzFile gzin = gzopen(options.popfile.c_str(),"rb");
       gzseek( gzin, index.hoffset(options.record_no), 0);
-      read_binary_pop( &gametes, &mutations, &diploids, boost::bind(gzmreader(),_1),gzin );
+      read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
       gzclose(gzin);
     }
   else
     {
       ifstream popstream( options.popfile.c_str() );
       popstream.seekg( index.hoffset(options.record_no) );
-      read_binary_pop( &gametes, &mutations, &diploids, boost::bind(mreader(),_1),popstream );
+      read_binary_pop( &gametes, &mutations, &diploids, std::bind(mreader(),std::placeholders::_1),popstream );
       popstream.close();
     }
 
@@ -309,9 +309,9 @@ int main(int argc, char ** argv)
     }
 
   //Randomize lists just for fun
-  boost::function< size_t (size_t) > rand = boost::bind(&gsl_ran_flat, r, 0,double(put_cases.size()));
+  boost::function< size_t (size_t) > rand = std::bind(&gsl_ran_flat, r, 0,double(put_cases.size()));
   random_shuffle(put_cases.begin(),put_cases.end(),rand);
-  rand = boost::bind(&gsl_ran_flat, r, 0,double(put_controls.size()));
+  rand = std::bind(&gsl_ran_flat, r, 0,double(put_controls.size()));
   random_shuffle(put_controls.begin(),put_controls.end(),rand);
 
   cc_intermediate * ccblocks = new cc_intermediate(  process_population(diploids,phenotypes,

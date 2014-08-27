@@ -31,8 +31,8 @@ struct multiplicative_phenotype
   inline double operator()(const iterator_type & g1, const iterator_type & g2) const
   {
     return KTfwd::site_dependent_fitness()(g1,g2,
-					   boost::bind(multiplicative_phenotype_updater_hom(),_1,_2),
-					   boost::bind(multiplicative_phenotype_updater_het(),_1,_2),
+					   std::bind(multiplicative_phenotype_updater_hom(),std::placeholders::_1,std::placeholders::_2),
+					   std::bind(multiplicative_phenotype_updater_het(),std::placeholders::_1,std::placeholders::_2),
 					   1.);
   }
 };

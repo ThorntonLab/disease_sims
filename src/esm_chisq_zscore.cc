@@ -15,11 +15,12 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <thread>
 
 #include <boost/program_options.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include <boost/thread.hpp>
+
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
@@ -83,19 +84,25 @@ int main(int argc, char ** argv)
     {
       vector<vector<double> > permstats_thread(options.nthreads,vector<double>());
       unsigned nperms_thread = options.nperms/options.nthreads;
-      boost::thread_group tg;
+      vector<thread> threads;
       for( unsigned i=0;i<options.nthreads;++i)
 	{
 	  if( i == 0 && nperms_thread*options.nthreads < options.nperms )
 	    {
-	      tg.add_thread( new boost::thread( boost::bind(permute,&ccdata,options.K,&keep,nperms_thread + (options.nperms-nperms_thread*options.nthreads),gsl_rng_get(r),&permstats_thread[i]) ) );
+	      //tg.add_thread( new boost::thread( std::bind(permute,&ccdata,options.K,&keep,nperms_thread + (options.nperms-nperms_thread*options.nthreads),gsl_rng_get(r),&permstats_thread[i]) ) );
+	      threads.push_back( thread(std::bind(permute,&ccdata,options.K,&keep,nperms_thread + (options.nperms-nperms_thread*options.nthreads),gsl_rng_get(r),&permstats_thread[i]) ) );
 	    }
 	  else
 	    {
-	      tg.add_thread( new boost::thread( boost::bind(permute,&ccdata,options.K,&keep,nperms_thread,gsl_rng_get(r),&permstats_thread[i]) ) );
+	      //tg.add_thread( new boost::thread( std::bind(permute,&ccdata,options.K,&keep,nperms_thread,gsl_rng_get(r),&permstats_thread[i]) ) );
+	      threads.push_back(thread( std::bind(permute,&ccdata,options.K,&keep,nperms_thread,gsl_rng_get(r),&permstats_thread[i]) ) );
 	    }
 	}
-      tg.join_all();
+
+      for(unsigned i=0;i<options.nthreads;++i)
+	{
+	  threads[i].join();
+	}
       
       for(unsigned i=0;i<permstats_thread.size();++i)
 	{
@@ -109,7 +116,7 @@ int main(int argc, char ** argv)
     }
   sort(permstats.begin(),permstats.end());
   double perm_p = double( count_if(permstats.begin(),permstats.end(),
-				   boost::bind(greater_equal<double>(),_1,obs_esm ) ) )/double(options.nperms);
+				   std::bind(greater_equal<double>(),std::placeholders::_1,obs_esm ) ) )/double(options.nperms);
   double mean = gsl_stats_mean(&permstats[0],1,permstats.size());
   double sd = gsl_stats_sd(&permstats[0],1,permstats.size());
   double z = (obs_esm-mean)/sd;
@@ -150,7 +157,7 @@ void permute( const CCblock * ccdata,
     }
   gsl_rng * r =  gsl_rng_alloc(gsl_rng_taus2);
   gsl_rng_set(r,seed);
-  boost::function< size_t (size_t) > rand = boost::bind(&gsl_ran_flat, r, 0,double(ccstatus.size()));
+  boost::function< size_t (size_t) > rand = std::bind(&gsl_ran_flat, r, 0,double(ccstatus.size()));
   for(unsigned i=0;i<nperms;++i)
     {
       random_shuffle( ccstatus.begin(), ccstatus.end(), rand );

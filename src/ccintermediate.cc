@@ -24,12 +24,17 @@ void update_block( glist::const_iterator::value_type::mutation_container::const_
 		   const unsigned & ttl,
 		   const unsigned & offset)
 {
+  std::function<bool(const std::pair<double,std::string> &, const double &)> sitefinder = [](const std::pair<double,std::string> & site,
+											     const double & d ) 
+    {
+      return std::fabs(site.first-d) <= std::numeric_limits<double>::epsilon();
+    };
   for( ; beg < end ; ++beg )
     {
       double mutpos = (*beg)->pos;
       vector< pair<double,string> >::iterator itr =  find_if(datablock.begin(),
 							     datablock.end(),
-							     boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
+							     std::bind(sitefinder,std::placeholders::_1,mutpos));
       if( itr == datablock.end() )
 	{
 	  datablock.push_back( make_pair(mutpos,string(ttl,'0')) );
@@ -46,7 +51,7 @@ void update_block( glist::const_iterator::value_type::mutation_container::const_
       double mutpos = (*beg2)->pos;
       vector< pair<double,string> >::iterator itr =  find_if(datablock.begin(),
 							     datablock.end(),
-							     boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
+							     std::bind(sitefinder,std::placeholders::_1,mutpos));
       if( itr == datablock.end() )
 	{
 	  datablock.push_back( make_pair(mutpos,string(ttl,'0')) );
@@ -100,7 +105,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 	  double mutpos =  diploids[ indlist[i] ].first->mutations[mut]->pos;
 	  itr = find_if(datablock_neut.begin(),
 			datablock_neut.end(),
-			boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
+			std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
 	  if( itr == datablock_neut.end() )
 	    {
 	      datablock_neut.push_back( make_pair(mutpos,string(ttl,'0')) );
@@ -117,7 +122,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 	  double mutpos =  diploids[ indlist[i] ].second->mutations[mut]->pos;
 	  itr = find_if(datablock_neut.begin(),
 			datablock_neut.end(),
-			boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
+			std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
 	  if( itr == datablock_neut.end() )
 	    {
 	      datablock_neut.push_back( make_pair(mutpos,string(ttl,'0')) );
@@ -135,7 +140,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 	  double mutpos =  diploids[ indlist[i] ].first->smutations[mut]->pos;
 	  itr = find_if(datablock_sel.begin(),
 			datablock_sel.end(),
-			boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
+			std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
 	  if( itr == datablock_sel.end() )
 	    {
 	      datablock_sel.push_back( make_pair(mutpos,string(ttl,'0')) );
@@ -152,7 +157,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 	  double mutpos =  diploids[ indlist[i] ].second->smutations[mut]->pos;
 	  itr = find_if(datablock_sel.begin(),
 			datablock_sel.end(),
-			boost::bind(KTfwd::find_mut_pos(),_1,mutpos));
+			std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
 	  if( itr == datablock_sel.end() )
 	    {
 	      datablock_sel.push_back( make_pair(mutpos,string(ttl,'0')) );
@@ -208,8 +213,14 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 		  2*(ncontrols+ncases),
 		  2*ncontrols);
 
-  sort( neutral.begin(), neutral.end(), boost::bind(KTfwd::sortpos(),_1,_2) );
-  sort( selected.begin(), selected.end(), boost::bind(KTfwd::sortpos(),_1,_2) );
+  sort( neutral.begin(), neutral.end(), 
+		[](std::pair<double,std::string> lhs,
+		   std::pair<double,std::string> rhs) { return lhs.first < rhs.first; });
+  //std::bind(KTfwd::sortpos(),std::placeholders::_1,std::placeholders::_2) );
+  sort( selected.begin(), selected.end(), 
+	[](std::pair<double,std::string> lhs,
+	   std::pair<double,std::string> rhs) { return lhs.first < rhs.first; });
+  //std::bind(KTfwd::sortpos(),std::placeholders::_1,std::placeholders::_2) );
 
   rv.neutral.assign( neutral.begin(), neutral.end() );  
   rv.causative.assign( selected.begin(), selected.end() );  

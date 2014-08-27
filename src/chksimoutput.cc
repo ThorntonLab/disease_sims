@@ -42,7 +42,7 @@ int main( int argc, char ** argv )
 	  << idx.eoffset(i) 
 	  << '\n';
       gzseek( gzin, idx.hoffset(i), 0 );
-      KTfwd::read_binary_pop( &gametes, &mutations, &diploids, boost::bind(gzmreader(),_1),gzin );
+      KTfwd::read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
 
       gzseek( gzin2, idx.eoffset(i), 0 );
       unsigned nmuts;

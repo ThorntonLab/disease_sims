@@ -7,6 +7,7 @@
 */
 #include <fwdpp/diploid.hh>
 #include <utility>
+#include <iostream>
 
 #include <boost/function.hpp>
 #include <boost/unordered_set.hpp>
@@ -122,7 +123,7 @@ int main(int argc, char ** argv)
   unsigned ttl_gen = 0;
   double wbar=1;
 
-  boost::function<double(void)> recmap = boost::bind(gsl_rng_uniform,r);
+  boost::function<double(void)> recmap = std::bind(gsl_rng_uniform,r);
 
   for( generation = 0; generation < params.ngens_burnin; ++generation,++ttl_gen )
     {
@@ -133,36 +134,36 @@ int main(int argc, char ** argv)
 			    &mutations,
 			    params.N,
 			    params.mu_neutral,
-			    boost::bind(mutation_model(),r,ttl_gen,params.s,0.,params.mu_neutral,&mutations,&lookup,params.dist_effects),
-			    boost::bind(KTfwd::genetics101(),_1,_2,
+			    std::bind(mutation_model(),r,ttl_gen,params.s,0.,params.mu_neutral,&mutations,&lookup,params.dist_effects),
+			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 					&gametes,
 					params.littler,
 					r,
 					recmap),
-			    boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
-			    boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
-			    boost::bind(KTfwd::no_selection(),_1,_2),
-			    boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
+			    std::bind(KTfwd::insert_at_end<TFLmtype,mlist>,std::placeholders::_1,std::placeholders::_2),
+			    std::bind(KTfwd::insert_at_end<gtype,glist>,std::placeholders::_1,std::placeholders::_2),
+			    std::bind(KTfwd::no_selection(),std::placeholders::_1,std::placeholders::_2),
+			    std::bind(KTfwd::mutation_remover(),std::placeholders::_1,0,2*params.N));
       KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
     }
   unsigned N_current = params.N;
 
   //Fitness model for phase w/selection.  The default is the recessive model of TFL 2013
   boost::function<double(glist::const_iterator &,
-			 glist::const_iterator &)> dipfit = boost::bind(TFL2013_recessive(),_1,_2,params.sd,params.sd_s,0.,r);
+			 glist::const_iterator &)> dipfit = std::bind(TFL2013_recessive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
 
   if( params.model == GENE_ADDITIVE )
     {
-      dipfit = boost::bind(TFL2013_additive(),_1,_2,params.sd,params.sd_s,0.,r);
+      dipfit = std::bind(TFL2013_additive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
     }
   else if( params.model == MULTIPLICATIVE )
     {
-      dipfit = boost::bind(multiplicative_disease_effect_to_fitness(),_1,_2,
+      dipfit = std::bind(multiplicative_disease_effect_to_fitness(),std::placeholders::_1,std::placeholders::_2,
 			   params.sd,params.sd_s,params.optimum,r);
     }
   else if ( params.model == POPGEN )
     {
-      dipfit = boost::bind(popgen_disease_effect_to_fitness(),_1,_2,params.dominance,
+      dipfit = std::bind(popgen_disease_effect_to_fitness(),std::placeholders::_1,std::placeholders::_2,params.dominance,
 			   params.sd,params.sd_s,params.optimum,r);
     }
 
@@ -175,16 +176,16 @@ int main(int argc, char ** argv)
 			    &mutations,
 			    params.N,
 			    params.mu_disease+params.mu_neutral,
-			    boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
-			    boost::bind(KTfwd::genetics101(),_1,_2,
+			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
+			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 					&gametes,
 					params.littler,
 					r,
 					recmap),
-			    boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
-			    boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
+			    std::bind(KTfwd::insert_at_end<TFLmtype,mlist>,std::placeholders::_1,std::placeholders::_2),
+			    std::bind(KTfwd::insert_at_end<gtype,glist>,std::placeholders::_1,std::placeholders::_2),
 			    dipfit,
-			    boost::bind(KTfwd::mutation_remover(),_1,0,2*params.N));
+			    std::bind(KTfwd::mutation_remover(),std::placeholders::_1,0,2*params.N));
       KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
     }
   //Exp. growth phase w/disease model
@@ -198,16 +199,16 @@ int main(int argc, char ** argv)
 			    N_current,
 			    N_next,
 			    params.mu_disease+params.mu_neutral,
-			    boost::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
-			    boost::bind(KTfwd::genetics101(),_1,_2,
+			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
+			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 					&gametes,
 					params.littler,
 					r,
 					recmap),
-			    boost::bind(KTfwd::insert_at_end<TFLmtype,mlist>,_1,_2),
-			    boost::bind(KTfwd::insert_at_end<gtype,glist>,_1,_2),
+			    std::bind(KTfwd::insert_at_end<TFLmtype,mlist>,std::placeholders::_1,std::placeholders::_2),
+			    std::bind(KTfwd::insert_at_end<gtype,glist>,std::placeholders::_1,std::placeholders::_2),
 			    dipfit,
-			    boost::bind(KTfwd::mutation_remover(),_1,0,2*N_next));
+			    std::bind(KTfwd::mutation_remover(),std::placeholders::_1,0,2*N_next));
       KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N_next);
       //update N
       N_current = N_next;
@@ -215,7 +216,7 @@ int main(int argc, char ** argv)
 
   //Write out the population
   ostringstream popbuffer;
-  write_binary_pop(&gametes,&mutations,&diploids,boost::bind(mwriter(),_1,_2),popbuffer);
+  write_binary_pop(&gametes,&mutations,&diploids,std::bind(mwriter(),std::placeholders::_1,std::placeholders::_2),popbuffer);
 
   //Write out the phenotypes
   ostringstream phenobuffer;

@@ -70,7 +70,7 @@ int main( int argc, char ** argv )
 
   ifstream popstream( options.popfile.c_str() );
   popstream.seekg( pop_offset );
-  read_binary_pop( &gametes, &mutations, &diploids, boost::bind(mreader(),_1),popstream );
+  read_binary_pop( &gametes, &mutations, &diploids, std::bind(mreader(),std::placeholders::_1),popstream );
   popstream.close();
 
   //read in the phenotypes
