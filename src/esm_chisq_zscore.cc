@@ -86,12 +86,10 @@ int main(int argc, char ** argv)
 	{
 	  if( i == 0 && nperms_thread*options.nthreads < options.nperms )
 	    {
-	      //tg.add_thread( new boost::thread( std::bind(permute,&ccdata,options.K,&keep,nperms_thread + (options.nperms-nperms_thread*options.nthreads),gsl_rng_get(r),&permstats_thread[i]) ) );
 	      threads.push_back( thread(std::bind(permute,&ccdata,options.K,&keep,nperms_thread + (options.nperms-nperms_thread*options.nthreads),gsl_rng_get(r),&permstats_thread[i]) ) );
 	    }
 	  else
 	    {
-	      //tg.add_thread( new boost::thread( std::bind(permute,&ccdata,options.K,&keep,nperms_thread,gsl_rng_get(r),&permstats_thread[i]) ) );
 	      threads.push_back(thread( std::bind(permute,&ccdata,options.K,&keep,nperms_thread,gsl_rng_get(r),&permstats_thread[i]) ) );
 	    }
 	}

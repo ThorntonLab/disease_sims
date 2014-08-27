@@ -160,7 +160,7 @@ int main(int argc, char ** argv)
   else if ( params.model == POPGEN )
     {
       dipfit = std::bind(popgen_disease_effect_to_fitness(),std::placeholders::_1,std::placeholders::_2,params.dominance,
-			   params.sd,params.sd_s,params.optimum,r);
+			 params.sd,params.sd_s,params.optimum,r);
     }
 
   for( generation = 0; generation < params.ngens_evolve; ++generation,++ttl_gen )
