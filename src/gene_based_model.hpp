@@ -5,6 +5,7 @@
 #include <gsl/gsl_randist.h>
 #include <cmath>
 #include <utility>
+#include <algorithm>
 
 //Functions for the Thornton, Foran, and Long (2013) model
 struct TFL2013_recessive_disease_effect
@@ -16,15 +17,11 @@ struct TFL2013_recessive_disease_effect
   {
     //The effect of each allele is additive across mutations
     double e1 = 0.,e2=0.;
-    typename  iterator_type::value_type::mutation_container::const_iterator itr;
-    for(itr = g1->smutations.begin() ; itr != g1->smutations.end() ; ++itr)
-      {
-	e1 += (*itr)->s;
-      }
-    for(itr = g2->smutations.begin() ; itr != g2->smutations.end() ; ++itr)
-      {
-	e2 += (*itr)->s;
-      }
+    using itr = typename  iterator_type::value_type::mutation_container::const_iterator::value_type;
+    std::for_each(g1->smutations.cbegin(),g1->smutations.cend(),
+		  [&](const itr & __i) { e1 += __i->s; });
+    std::for_each(g2->smutations.cbegin(),g2->smutations.cend(),
+		  [&](const itr & __i) { e2 += __i->s; });
     double effect = pow( e1*e2, 0.5 );
     return std::make_pair(effect, (sd>0.)?gsl_ran_gaussian(r,sd):0.);
   }
@@ -39,15 +36,11 @@ struct TFL2013_additive_disease_effect
   {
     //The effect of each allele is additive across mutations
     double e1 = 0.,e2=0.;
-    typename  iterator_type::value_type::mutation_container::const_iterator itr;
-    for(itr = g1->smutations.begin() ; itr != g1->smutations.end() ; ++itr)
-      {
-	e1 += (*itr)->s;
-      }
-    for(itr = g2->smutations.begin() ; itr != g2->smutations.end() ; ++itr)
-      {
-	e2 += (*itr)->s;
-      }
+    using itr = typename  iterator_type::value_type::mutation_container::const_iterator::value_type;
+    std::for_each(g1->smutations.cbegin(),g1->smutations.cend(),
+		  [&](const itr & __i) { e1 += __i->s; });
+    std::for_each(g2->smutations.cbegin(),g2->smutations.cend(),
+		  [&](const itr & __i) { e2 += __i->s; });
     double effect = e1 + e2;
     return std::make_pair(effect, (sd>0.)?gsl_ran_gaussian(r,sd):0.);
   }
