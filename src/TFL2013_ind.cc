@@ -9,7 +9,6 @@
 #include <utility>
 #include <iostream>
 
-#include <boost/unordered_set.hpp>
 #include <boost/program_options.hpp>
 
 #include <fcntl.h>
@@ -22,8 +21,6 @@
 using namespace std;
 using namespace boost::program_options;
 using namespace KTfwd;
-
-typedef boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps > lookup_table_type;
 
 //The mutation model
 struct mutation_model

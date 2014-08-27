@@ -2,6 +2,7 @@
 #define __MUTATION_WITH_AGE_HPP__
 
 #include <fwdpp/forward_types.hpp>
+#include <fwdpp/fwd_functional.hpp>
 #include <cmath>
 #include <iosfwd>
 #include <sstream>
@@ -12,9 +13,13 @@
 #include <boost/container/list.hpp>
 #include <boost/container/vector.hpp>
 #include <boost/pool/pool_alloc.hpp>
+#include <boost/unordered_set.hpp>
+#include <boost/functional/hash.hpp>
 #else
 #include <vector>
 #include <list>
+#include <unordered_set>
+#include <functional>
 #endif
 
 struct mutation_with_age : public KTfwd::mutation_base
@@ -45,12 +50,14 @@ typedef boost::pool_allocator<gtype> gam_allocator;
 typedef boost::container::list<gtype,gam_allocator > glist;
 typedef boost::container::vector<TFLmtype> mvector;
 typedef boost::container::vector<unsigned> ftvector;
+typedef boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps > lookup_table_type;
 #else
 typedef std::list<TFLmtype > mlist;
 typedef KTfwd::gamete_base<TFLmtype, mlist> gtype;
 typedef std::list<gtype> glist;
 typedef std::vector<TFLmtype> mvector;
 typedef std::vector<unsigned> ftvector;
+typedef std::unordered_set<double,std::hash<double>,KTfwd::equal_eps > lookup_table_type;
 #endif
 
 //function object to write mutation data in binary format
