@@ -7,7 +7,7 @@ Description: Provides helper functions for processing output of our simulations
 LazyData: true
 License: GPL
 Imports:
-    Rcpp (>= 0.11.1),
+    Rcpp (>= 0.11.0),
     plyr (>= 1.8.1),
     buRden (>= 0.1.0)
 LinkingTo: Rcpp
