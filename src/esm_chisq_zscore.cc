@@ -18,9 +18,6 @@
 #include <thread>
 
 #include <boost/program_options.hpp>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
@@ -157,7 +154,7 @@ void permute( const CCblock * ccdata,
     }
   gsl_rng * r =  gsl_rng_alloc(gsl_rng_taus2);
   gsl_rng_set(r,seed);
-  boost::function< size_t (size_t) > rand = std::bind(&gsl_ran_flat, r, 0,double(ccstatus.size()));
+  std::function< size_t (size_t) > rand = std::bind(&gsl_ran_flat, r, 0,double(ccstatus.size()));
   for(unsigned i=0;i<nperms;++i)
     {
       random_shuffle( ccstatus.begin(), ccstatus.end(), rand );

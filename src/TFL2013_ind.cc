@@ -9,7 +9,6 @@
 #include <utility>
 #include <iostream>
 
-#include <boost/function.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/program_options.hpp>
 
@@ -123,7 +122,7 @@ int main(int argc, char ** argv)
   unsigned ttl_gen = 0;
   double wbar=1;
 
-  boost::function<double(void)> recmap = std::bind(gsl_rng_uniform,r);
+  std::function<double(void)> recmap = std::bind(gsl_rng_uniform,r);
 
   for( generation = 0; generation < params.ngens_burnin; ++generation,++ttl_gen )
     {
@@ -149,8 +148,8 @@ int main(int argc, char ** argv)
   unsigned N_current = params.N;
 
   //Fitness model for phase w/selection.  The default is the recessive model of TFL 2013
-  boost::function<double(const glist::const_iterator &,
-			 const glist::const_iterator &)> dipfit = std::bind(TFL2013_recessive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
+  std::function<double(const glist::const_iterator &,
+		       const glist::const_iterator &)> dipfit = std::bind(TFL2013_recessive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
 
   if( params.model == GENE_ADDITIVE )
     {

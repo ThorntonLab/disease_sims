@@ -59,8 +59,6 @@
 #include <cstdlib> 
 #include <set>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 #include <boost/program_options.hpp>
 
 #include <gsl/gsl_statistics.h>
@@ -309,7 +307,7 @@ int main(int argc, char ** argv)
     }
 
   //Randomize lists just for fun
-  boost::function< size_t (size_t) > rand = std::bind(&gsl_ran_flat, r, 0,double(put_cases.size()));
+  std::function< size_t (size_t) > rand = std::bind(&gsl_ran_flat, r, 0,double(put_cases.size()));
   random_shuffle(put_cases.begin(),put_cases.end(),rand);
   rand = std::bind(&gsl_ran_flat, r, 0,double(put_controls.size()));
   random_shuffle(put_controls.begin(),put_controls.end(),rand);
