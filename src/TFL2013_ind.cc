@@ -263,22 +263,11 @@ int main(int argc, char ** argv)
   //Write out effects information for causative sites
   ostringstream effectstream;
   unsigned nmuts = mutations.size();
-  /*
-    unsigned ncausative=0;
-    for( typename mlist::const_iterator i = mutations.begin() ; i != mutations.end() ; ++i )
-    {
-    if ( ! i->neutral )
-    {
-    ++ncausative;
-    }
-    }
-  */
+
   //effectstream.write( reinterpret_cast<char *>(&ncausative),sizeof(unsigned) );
   effectstream.write( reinterpret_cast<char *>(&nmuts),sizeof(unsigned) );
   for( typename mlist::const_iterator i = mutations.begin() ; i != mutations.end() ; ++i )
     {
-      //if(!i->neutral)
-      //{
       if(! params.effectsfile.empty() )
 	{
 	  //position of causative mutation, effect size, count, age
@@ -291,7 +280,6 @@ int main(int argc, char ** argv)
 	  effectstream.write( reinterpret_cast<char *>(&count), sizeof(double) );
 	  effectstream.write( reinterpret_cast<char *>(&age), sizeof(double) );
 	}
-      //}
     }
   /*
     OK, now we lock the index file first.  Then, the rest of the output files.
@@ -353,7 +341,6 @@ int main(int argc, char ** argv)
 	       << params.effectsfile << '\n';
 	  exit(10);
 	}
-      //gzflush(gzout,Z_FINISH);
       gzclose(gzout);
 
       //Now we can write to the index file
@@ -416,125 +403,8 @@ int main(int argc, char ** argv)
       fflush( effect_fh );
       fclose( effect_fh );
     }
-
-  
-  // hapfile_flock.l_type = F_WRLCK;/*Write lock*/
-  // hapfile_flock.l_whence = SEEK_SET;
-  // hapfile_flock.l_start = 0;
-  // hapfile_flock.l_len = 0;/*Lock whole file*/
-
-  // phenofile_flock.l_type = F_WRLCK;/*Write lock*/
-  // phenofile_flock.l_whence = SEEK_SET;
-  // phenofile_flock.l_start = 0;
-  // phenofile_flock.l_len = 0;/*Lock whole file*/
-
-  // effects_flock.l_type = F_WRLCK;/*Write lock*/
-  // effects_flock.l_whence = SEEK_SET;
-  // effects_flock.l_start = 0;
-  // effects_flock.l_len = 0;/*Lock whole file*/
-  
-  // FILE * haps_fh = fopen(params.hapfile.c_str(),"a");
-  // int hapfile_fd = fileno(haps_fh);
-
-  // if ( hapfile_fd == -1 ) 
-  //   { 
-  //     std::cerr << "ERROR: could not open " << params.hapfile << '\n';
-  //     exit(10);
-  //   }
-  /*
-  if (fcntl(index_fd, F_SETLKW,&hapfile_flock) == -1) 
-    {
-      std::cerr << "ERROR: could not obtain lock on " << params.hapfile << '\n';
-      exit(10);
-    }
-  */
-  // FILE * pheno_fh = fopen(params.phenofile.c_str(),"a");
-  // int pheno_fd = fileno(pheno_fh);
-  // if ( pheno_fd == -1 ) 
-  //   { 
-  //     std::cerr << "ERROR: could not open " << params.phenofile << '\n';
-  //     exit(10);
-  //   }
-  /*
-  if (fcntl(pheno_fd, F_SETLKW,&phenofile_flock) == -1) 
-    {
-      std::cerr << "ERROR: could not obtain lock on " << params.phenofile << '\n';
-      exit(10);
-    }
-  */
-  // FILE * effect_fh = NULL;
-  // int effect_fd = 0;
-  // effect_fh = fopen(params.effectsfile.c_str(),"a");
-  // effect_fd = fileno(effect_fh);
-  // if ( effect_fd == -1 ) 
-  //   { 
-  //     std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
-  //     exit(10);
-  //   }
-  /*
-  if (fcntl(effect_fd, F_SETLKW,&effects_flock) == -1) 
-    {
-      std::cerr << "ERROR: could not obtain lock on " << params.effectsfile << '\n';
-      exit(10);
-    }
-  */
-  //Write the index data
-  // std::ostringstream indexstream;
-  // indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
-  // 	      << ftell(pheno_fh) << ' ' << ftell(haps_fh);
-  // fprintf(index_fh,"%s\n",indexstream.str().c_str());
-
-
-  // //write the haplotype data
-  // if ( ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size()) == -1 )
-  //   {
-  //     cerr << "Error writing to " << params.hapfile << '\n';
-  //     exit(errno);
-  //   }
-  //write the phenotype data
-  // if( ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() ) == -1 )
-  //   {
-  //     cerr << "Error writing to " << params.phenofile << '\n';
-  //     exit(errno);
-  //   }
-  //write the effects
-  // if( ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() ) == -1 )
-  //   {
-  //     cerr << "Error writing to " << params.effectsfile << '\n';
-  //     exit(errno);
-  //   }
-
   //release the locks
   index_flock.l_type = F_UNLCK;
-  //hapfile_flock.l_type = F_UNLCK;
-  //phenofile_flock.l_type = F_UNLCK;
-  //effects_flock.l_type = F_UNLCK;
-
-  /*
-  if (fcntl(effect_fd, F_UNLCK,&effects_flock) == -1) 
-    {
-      std::cerr << "ERROR: could not release lock on " << params.effectsfile << '\n';
-      exit(10);
-    }
-  fflush(effect_fh);
-  fclose(effect_fh);
-  
-  if (fcntl(pheno_fd, F_UNLCK,&phenofile_flock) == -1) 
-    {
-      std::cerr << "ERROR: could not release lock on " << params.phenofile << '\n';
-      exit(10);
-    }
-  fflush( pheno_fh );
-  fclose( pheno_fh);
-
-  if (fcntl(hapfile_fd, F_UNLCK,&hapfile_flock) == -1) 
-    {
-      std::cerr << "ERROR: could not releaselock on " <<  params.hapfile << '\n';
-      exit(10);
-    }
-  fflush( haps_fh );
-  fclose(haps_fh);
-*/
   if (fcntl(index_fd, F_UNLCK,&index_flock) == -1) 
     {
       std::cerr << "ERROR: could not release lock on " << params.indexfile << '\n';
