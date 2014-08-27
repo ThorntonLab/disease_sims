@@ -33,7 +33,7 @@ int main( int argc, char ** argv )
     {
       mlist mutations;
       glist gametes;
-      boost::container::vector< pair<glist::iterator,glist::iterator> > diploids;
+      std::vector< pair<glist::iterator,glist::iterator> > diploids;
       cerr << "checking record "
 	  << i 
 	  << " at positions "

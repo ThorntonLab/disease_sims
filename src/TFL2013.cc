@@ -10,13 +10,19 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/device/file.hpp>
 
+#ifndef USE_STANDARD_CONTAINERS
 #include <boost/unordered_set.hpp>
 #include <boost/container/list.hpp>
 #include <boost/container/vector.hpp>
 #include <boost/pool/pool_alloc.hpp>
-
+#else
+#include <vector>
+#include <list>
+#include <unordered_set>
+#include <functional>
+#endif
 #include <iostream>
-
+#include <sstream>
 using namespace std;
 using namespace std::placeholders;
 using namespace boost::iostreams;
@@ -51,15 +57,17 @@ typedef boost::pool_allocator<gtype> gam_allocator;
 typedef boost::container::vector<gtype,gam_allocator > gvector;
 typedef boost::container::vector<mtype> mvector;
 typedef boost::container::vector<unsigned> ftvector;
+typedef boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps > lookup_table_type;
 #else
 typedef std::list<mtype > mlist;
 typedef gamete_base<mtype, mlist> gtype;
 typedef vector<gtype> gvector;
 typedef vector<mtype> mvector;
 typedef vector<unsigned> ftvector;
+typedef std::unordered_set<double,std::hash<double>,KTfwd::equal_eps > lookup_table_type;
 #endif
 
-typedef boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps > lookup_table_type;
+
 
 struct disease_effect
 {
