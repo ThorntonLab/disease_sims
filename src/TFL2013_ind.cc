@@ -149,8 +149,8 @@ int main(int argc, char ** argv)
   unsigned N_current = params.N;
 
   //Fitness model for phase w/selection.  The default is the recessive model of TFL 2013
-  boost::function<double(glist::const_iterator &,
-			 glist::const_iterator &)> dipfit = std::bind(TFL2013_recessive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
+  boost::function<double(const glist::const_iterator &,
+			 const glist::const_iterator &)> dipfit = std::bind(TFL2013_recessive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
 
   if( params.model == GENE_ADDITIVE )
     {
@@ -159,7 +159,7 @@ int main(int argc, char ** argv)
   else if( params.model == MULTIPLICATIVE )
     {
       dipfit = std::bind(multiplicative_disease_effect_to_fitness(),std::placeholders::_1,std::placeholders::_2,
-			   params.sd,params.sd_s,params.optimum,r);
+			 params.sd,params.sd_s,params.optimum,r);
     }
   else if ( params.model == POPGEN )
     {
