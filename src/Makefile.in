@@ -61,11 +61,11 @@ am_CCburden_OBJECTS = CCburden.$(OBJEXT) locking_routines.$(OBJEXT) \
 CCburden_OBJECTS = $(am_CCburden_OBJECTS)
 CCburden_LDADD = $(LDADD)
 CCburden_DEPENDENCIES =
-TFL2013_SOURCES = TFL2013.c
-TFL2013_OBJECTS = TFL2013.$(OBJEXT)
+am_TFL2013_OBJECTS = TFL2013.$(OBJEXT)
+TFL2013_OBJECTS = $(am_TFL2013_OBJECTS)
 TFL2013_DEPENDENCIES =
-TFL2013_ind_SOURCES = TFL2013_ind.c
-TFL2013_ind_OBJECTS = TFL2013_ind.$(OBJEXT)
+am_TFL2013_ind_OBJECTS = TFL2013_ind.$(OBJEXT)
+TFL2013_ind_OBJECTS = $(am_TFL2013_ind_OBJECTS)
 TFL2013_ind_LDADD = $(LDADD)
 TFL2013_ind_DEPENDENCIES =
 am_chksimoutput_OBJECTS = chksimoutput.$(OBJEXT) simindex.$(OBJEXT)
@@ -93,31 +93,27 @@ am_sfs_OBJECTS = sfs.$(OBJEXT) readSimOutput.$(OBJEXT)
 sfs_OBJECTS = $(am_sfs_OBJECTS)
 sfs_LDADD = $(LDADD)
 sfs_DEPENDENCIES =
-sfsSample_SOURCES = sfsSample.c
-sfsSample_OBJECTS = sfsSample.$(OBJEXT)
+am_sfsSample_OBJECTS = sfsSample.$(OBJEXT)
+sfsSample_OBJECTS = $(am_sfsSample_OBJECTS)
 sfsSample_LDADD = $(LDADD)
 sfsSample_DEPENDENCIES =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(CCburden_SOURCES) TFL2013.c TFL2013_ind.c \
-	$(chksimoutput_SOURCES) $(esm_chisq_zscore_SOURCES) \
-	$(make_case_control_SOURCES) $(phenoburden_SOURCES) \
-	$(sfs_SOURCES) sfsSample.c
-DIST_SOURCES = $(CCburden_SOURCES) TFL2013.c TFL2013_ind.c \
-	$(chksimoutput_SOURCES) $(esm_chisq_zscore_SOURCES) \
-	$(make_case_control_SOURCES) $(phenoburden_SOURCES) \
-	$(sfs_SOURCES) sfsSample.c
+SOURCES = $(CCburden_SOURCES) $(TFL2013_SOURCES) \
+	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
+	$(esm_chisq_zscore_SOURCES) $(make_case_control_SOURCES) \
+	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES)
+DIST_SOURCES = $(CCburden_SOURCES) $(TFL2013_SOURCES) \
+	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
+	$(esm_chisq_zscore_SOURCES) $(make_case_control_SOURCES) \
+	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -217,12 +213,15 @@ top_srcdir = @top_srcdir@
 #atomic_locker/atomic_locker
 
 #TFL2013_ind_SOURCES=
+TFL2013_SOURCES = TFL2013.cc
+TFL2013_ind_SOURCES = TFL2013_ind.cc
 make_case_control_SOURCES = make_case_control.cc ccintermediate.cc locking_routines.cc simindex.cc
 esm_chisq_zscore_SOURCES = esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc locking_routines.cc
 chksimoutput_SOURCES = chksimoutput.cc simindex.cc
 phenoburden_SOURCES = phenoburden.cc locking_routines.cc
 CCburden_SOURCES = CCburden.cc locking_routines.cc readCC.cc
 sfs_SOURCES = sfs.cc readSimOutput.cc
+sfsSample_SOURCES = sfsSample.cc
 # atomic_locker/atomic_locker
 AM_CPPFLAGS = -W -Wall -I. $(am__append_1) $(am__append_2) \
 	$(am__append_3)
@@ -231,7 +230,7 @@ TFL2013_LDADD = -lboost_iostreams
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cc .o .obj
+.SUFFIXES: .cc .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -304,10 +303,10 @@ CCburden$(EXEEXT): $(CCburden_OBJECTS) $(CCburden_DEPENDENCIES) $(EXTRA_CCburden
 	$(CXXLINK) $(CCburden_OBJECTS) $(CCburden_LDADD) $(LIBS)
 TFL2013$(EXEEXT): $(TFL2013_OBJECTS) $(TFL2013_DEPENDENCIES) $(EXTRA_TFL2013_DEPENDENCIES) 
 	@rm -f TFL2013$(EXEEXT)
-	$(LINK) $(TFL2013_OBJECTS) $(TFL2013_LDADD) $(LIBS)
+	$(CXXLINK) $(TFL2013_OBJECTS) $(TFL2013_LDADD) $(LIBS)
 TFL2013_ind$(EXEEXT): $(TFL2013_ind_OBJECTS) $(TFL2013_ind_DEPENDENCIES) $(EXTRA_TFL2013_ind_DEPENDENCIES) 
 	@rm -f TFL2013_ind$(EXEEXT)
-	$(LINK) $(TFL2013_ind_OBJECTS) $(TFL2013_ind_LDADD) $(LIBS)
+	$(CXXLINK) $(TFL2013_ind_OBJECTS) $(TFL2013_ind_LDADD) $(LIBS)
 chksimoutput$(EXEEXT): $(chksimoutput_OBJECTS) $(chksimoutput_DEPENDENCIES) $(EXTRA_chksimoutput_DEPENDENCIES) 
 	@rm -f chksimoutput$(EXEEXT)
 	$(CXXLINK) $(chksimoutput_OBJECTS) $(chksimoutput_LDADD) $(LIBS)
@@ -325,7 +324,7 @@ sfs$(EXEEXT): $(sfs_OBJECTS) $(sfs_DEPENDENCIES) $(EXTRA_sfs_DEPENDENCIES)
 	$(CXXLINK) $(sfs_OBJECTS) $(sfs_LDADD) $(LIBS)
 sfsSample$(EXEEXT): $(sfsSample_OBJECTS) $(sfsSample_DEPENDENCIES) $(EXTRA_sfsSample_DEPENDENCIES) 
 	@rm -f sfsSample$(EXEEXT)
-	$(LINK) $(sfsSample_OBJECTS) $(sfsSample_LDADD) $(LIBS)
+	$(CXXLINK) $(sfsSample_OBJECTS) $(sfsSample_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -350,20 +349,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfsSample.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simindex.Po@am__quote@
-
-.c.o:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
-
-.c.obj:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
