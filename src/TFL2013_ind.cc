@@ -27,7 +27,7 @@ struct mutation_model
 {
   typedef TFLmtype result_type;
   inline result_type operator()( gsl_rng * r, const unsigned int & ttl_generations,
-				 const double & s, const double & ud, const double & un, const  mlist * mutations,
+				 const double & s, const double & ud, const double & un,
 				 lookup_table_type * lookup,
 				 const bool dist_effects = false) const
   {
@@ -130,7 +130,7 @@ int main(int argc, char ** argv)
 			    &mutations,
 			    params.N,
 			    params.mu_neutral,
-			    std::bind(mutation_model(),r,ttl_gen,params.s,0.,params.mu_neutral,&mutations,&lookup,params.dist_effects),
+			    std::bind(mutation_model(),r,ttl_gen,params.s,0.,params.mu_neutral,&lookup,params.dist_effects),
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 					&gametes,
 					params.littler,
@@ -172,7 +172,7 @@ int main(int argc, char ** argv)
 			    &mutations,
 			    params.N,
 			    params.mu_disease+params.mu_neutral,
-			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
+			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&lookup,params.dist_effects),
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 					&gametes,
 					params.littler,
@@ -195,7 +195,7 @@ int main(int argc, char ** argv)
 			    N_current,
 			    N_next,
 			    params.mu_disease+params.mu_neutral,
-			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&mutations,&lookup,params.dist_effects),
+			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&lookup,params.dist_effects),
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 					&gametes,
 					params.littler,
