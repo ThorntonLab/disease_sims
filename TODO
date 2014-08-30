@@ -1,2 +1,4 @@
 1. Need to change policy for removing mutations so that causative
    mutations may fix and remain in the population, changing mean pheno
+2. Add Gaussian distr. of mutation effect sizes. This will require
+   re-jiggling the fitness model for the TFL2013 case
