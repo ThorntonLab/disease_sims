@@ -15,13 +15,28 @@ The project uses a configure script for setup, compiling and installation.  The 
 
 ##Vanilla installation instructions
 
-For a system where you have sudo privileges and dependencie are "where they should be":
+For a system where you have sudo privileges and dependencies are "where they should be":
 
 ```
 ./configure
 make
 sudo make install
 ```
+
+If you have dependencies in locations other than /usr/local.  For example, dependencies are in $HOME
+
+```
+./configure CXXFLAGS=-I$HOME/include LDFLAGS=-L$HOME/lib
+```
+
+To install the simulation in your user's $HOME:
+
+```
+./configure --prefix=$HOME
+```
+
+The above may be mixed and matched as needed.
+
 #Example workflow on UCI HPC
 
 See the scripts in the workflow directory.
