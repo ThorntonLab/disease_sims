@@ -88,7 +88,7 @@ void writePVblock( const char * outfilename,
 	  gzclose(ofile);
 
 	  //write data to index file AFTER writing
-	  fprintf(index_fh,"%ul %d %d\n",recordno,written,pvblock.nrows());
+	  fprintf(index_fh,"%lu %d %d\n",recordno,written,pvblock.nrows());
 	}
       else
 	{	  
@@ -100,7 +100,7 @@ void writePVblock( const char * outfilename,
 	      Rcpp::stop(error.str());
 	    }
 	  //write data to index file BEFORE writing
-	  fprintf(index_fh,"%ul %ld %d\n",recordno,ftell(ofile),pvblock.nrows());
+	  fprintf(index_fh,"%lu %ld %d\n",recordno,ftell(ofile),pvblock.nrows());
 
 	  fprintf(ofile,"%s",out.str().c_str());
 	  fclose(ofile);
