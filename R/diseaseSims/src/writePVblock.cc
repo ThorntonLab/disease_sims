@@ -137,7 +137,7 @@ void writePVblock( const char * outfilename,
 		    << indexfilename << " for writing in append mode";
 	      Rcpp::stop(error.str());
 	    }
-	  fprintf( idx,"%ul %d %d\n",recordno,written,pvblock.nrows());
+	  fprintf( idx,"%lu %d %d\n",recordno,written,pvblock.nrows());
 	  fclose(idx);
 	}
       else
@@ -149,7 +149,7 @@ void writePVblock( const char * outfilename,
 		    << indexfilename << " for writing in append mode";
 	      Rcpp::stop(error.str());
 	    }
-	  fprintf( idx,"%ul 0 %d\n",recordno,pvblock.nrows() );
+	  fprintf( idx,"%lu 0 %d\n",recordno,pvblock.nrows() );
 	  fclose(idx);
 
 	  idx = fopen(outfilename,"w");
