@@ -1,5 +1,5 @@
 #note: this takes ~1GB RAM for 5000 cases & 5000 controls
-
+library(diseaseSims)
 #gives case/control p-values for single-marker test under an additive model
 n=commandArgs(trailing=T)
 

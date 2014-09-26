@@ -4,7 +4,7 @@
 
 #Load the dependencies (this takes care of boost, zlib, libsequence, too, athough libsequence is not needed)
 module load R
-module load krthornt/fwdpp/0.2.4
+module load krthornt/fwdpp/0.2.5
 
 #make a personal directory for R libraries
 
