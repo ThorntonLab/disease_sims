@@ -1,6 +1,7 @@
 #ifndef __READ_SIM_OUTPUT_HPP__
 #define __READ_SIM_OUTPUT_HPP__
 
+#include <zlib.h>
 #include <vector>
 #include <iostream>
 
@@ -20,5 +21,5 @@ struct effectFileData
 recOffsets read_index( const char * idxfile,
 		       const unsigned & record_no );
 
-std::vector<effectFileData> read_effect_file( std::istream & i );
+std::vector<effectFileData> read_effect_file( gzFile in );
 #endif

@@ -61,23 +61,24 @@ int main( int argc, char ** argv )
   params options = process_argv(argc,argv);
 
   cerr << options.normalize << '\n';
-  ifstream estream( options.effectfile.c_str() );
-  if( ! estream )
-    {
-      cerr << "Error, " << options.effectfile << " could not be opened for reading\n";
-      exit(10);
-    }
+  gzFile effectsin = gzopen(options.effectfile.c_str(),"r");
+  // ifstream estream( options.effectfile.c_str() );
+  // if( ! estream )
+  //   {
+  //     cerr << "Error, " << options.effectfile << " could not be opened for reading\n";
+  //     exit(10);
+  //   }
 
   //data structures
   sfs meansfs_neut,meansfs_caus;
 
   unsigned nreps = 0;
-  estream.seekg(0,ios::end);
-  long eostream = estream.tellg();
-  estream.seekg(0,ios::beg);
+  //estream.seekg(0,ios::end);
+  //long eostream = estream.tellg();
+  //estream.seekg(0,ios::beg);
   do
     {
-      vector<effectFileData> effects = read_effect_file(estream);
+      vector<effectFileData> effects = read_effect_file(effectsin);
       ++nreps;
 
       //sfs sfs_i;
@@ -86,7 +87,9 @@ int main( int argc, char ** argv )
 	  update( effects[i],meansfs_neut,meansfs_caus,options.normalize,effects.size() );
 	}
     }
-  while( estream.tellg() < eostream );
+  while(!gzeof(effectsin));
+  gzclose(effectsin);
+  //while( estream.tellg() < eostream );
 
   ostringstream obuffer;
   
