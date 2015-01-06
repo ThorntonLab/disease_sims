@@ -11,19 +11,19 @@ using namespace std;
 typedef map<unsigned,long> mul;
 
 //private
-bool simindex::mono_increasing( const std::vector<long> & v ) const
-{
-  bool rv = true;
-  for( std::vector<long>::const_iterator i = v.begin() + 1 ;
-       rv == true && i < v.end() ; ++i )
-    {
-      if( !( *i > *(i-1) ) )
-	{
-	  rv=false;
-	}
-    }
-  return rv;
-}
+// bool simindex::mono_increasing( const std::vector<long> & v ) const
+// {
+//   bool rv = true;
+//   for( std::vector<long>::const_iterator i = v.begin() + 1 ;
+//        rv == true && i < v.end() ; ++i )
+//     {
+//       if( !( *i > *(i-1) ) )
+// 	{
+// 	  rv=false;
+// 	}
+//     }
+//   return rv;
+// }
 
 //public functions
 simindex::simindex(const char * filename) : e(mul()),
@@ -38,57 +38,67 @@ simindex::simindex(const char * filename) : e(mul()),
       return;
     }
   unsigned rec;
-  long ei,pi,hi;
+  long ei=0,pi=0,hi=0,ei_t,pi_t,hi_t;
 
   vector<unsigned> recs;
   vector<long> eis,pis,his;
   while(!in.eof() && !fileproblem)
     {
-      in >> rec >> ei >> pi >> hi >> ws;
+      in >> rec >> ei_t >> pi_t >> hi_t >> ws;
       if( find(recs.begin(),
 	       recs.end(),
 	       rec) != recs.end() ) //than the record ID exists multiple times = BAD!
 	{
 	  fileproblem = true;
 	}
-
       recs.push_back(rec);
       eis.push_back(ei);
       pis.push_back(pi);
       his.push_back(hi);
+      
+      ei += ei_t;
+      pi += pi_t;
+      hi += hi_t;
     }
   in.close();
 
-  if ( !mono_increasing(eis) || 
-       !mono_increasing(pis) ||
-       !mono_increasing(his) )
+  for( unsigned i = 0 ; i < recs.size() ; ++i )
     {
-      //index file is probably related to .gz output
-      for( unsigned i = 0 ; i < recs.size() ; ++i )
-	{
-	  if(i == 0)
-	    {
-	      e[recs[i]]=0;
-	      p[recs[i]]=0;
-	      h[recs[i]]=0;
-	    }
-	  else
-	    {
-	      e[recs[i]]=accumulate(eis.begin(),eis.begin()+i,0l);
-	      p[recs[i]]=accumulate(pis.begin(),pis.begin()+i,0l);
-	      h[recs[i]]=accumulate(his.begin(),his.begin()+i,0l);
-	    }
-	}
+      e[recs[i]]=eis[i];
+      p[recs[i]]=pis[i];
+      h[recs[i]]=his[i];
     }
-  else
-    {
-      for( unsigned i = 0 ; i < recs.size() ; ++i )
-	{
-	  e[recs[i]]=eis[i];
-	  p[recs[i]]=pis[i];
-	  h[recs[i]]=his[i];
-	}
-    }
+  std::cerr << e.size() << '\n';
+  // if ( !mono_increasing(eis) || 
+  //      !mono_increasing(pis) ||
+  //      !mono_increasing(his) )
+  //   {
+  //     //index file is probably related to .gz output
+  //     for( unsigned i = 0 ; i < recs.size() ; ++i )
+  // 	{
+  // 	  if(i == 0)
+  // 	    {
+  // 	      e[recs[i]]=0;
+  // 	      p[recs[i]]=0;
+  // 	      h[recs[i]]=0;
+  // 	    }
+  // 	  else
+  // 	    {
+  // 	      e[recs[i]]=accumulate(eis.begin(),eis.begin()+i,0l);
+  // 	      p[recs[i]]=accumulate(pis.begin(),pis.begin()+i,0l);
+  // 	      h[recs[i]]=accumulate(his.begin(),his.begin()+i,0l);
+  // 	    }
+  // 	}
+  //   }
+  // else
+  //   {
+  //     for( unsigned i = 0 ; i < recs.size() ; ++i )
+  // 	{
+  // 	  e[recs[i]]=eis[i];
+  // 	  p[recs[i]]=pis[i];
+  // 	  h[recs[i]]=his[i];
+  // 	}
+  //   }
 }
 
 bool simindex::file_problem() const

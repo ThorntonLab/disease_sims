@@ -145,10 +145,24 @@ int main(int argc, char ** argv)
 
   //if ( options.gzinput )
   //  {
-      gzFile gzin = gzopen(options.popfile.c_str(),"rb");
-      gzseek( gzin, index.hoffset(options.record_no), 0);
-      read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
-      gzclose(gzin);
+  gzFile gzin = gzopen(options.popfile.c_str(),"rb");
+  cerr << "seeking to " << index.hoffset(options.record_no) << '\n';
+  gzseek( gzin, index.hoffset(options.record_no), 0);
+  read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+  gzclose(gzin);
+
+  for(unsigned i=0;i<diploids.size();++i)
+    {
+      cerr << i << ' ' << diploids[i].first->mutations.size() << ' '
+	   << distance( diploids[i].first->mutations.begin(),diploids[i].first->mutations.end() ) << ' '
+	   << diploids[i].first->smutations.size() << ' '
+	   << distance( diploids[i].first->smutations.begin(),diploids[i].first->smutations.end() ) << ' '
+	   << diploids[i].second->mutations.size() << ' '
+	   << distance( diploids[i].second->mutations.begin(),diploids[i].second->mutations.end() ) << ' '
+	   << diploids[i].second->smutations.size() << ' '
+	   << distance( diploids[i].second->smutations.begin(),diploids[i].second->smutations.end() ) << '\n';
+    }
+
   //   }
   // else
   //   {
@@ -192,6 +206,7 @@ int main(int argc, char ** argv)
       phenotypes.push_back( make_pair(x,y) );
     }
   gzclose(gzin);
+  cerr << phenotypes.size() << ' ' << diploids.size() << '\n';
   //   }
   // else
   //   {
@@ -219,6 +234,7 @@ int main(int argc, char ** argv)
   double cutoff;
   pair<double,double> mean_sd = phenosums(phenotypes,options.case_proportion,&cutoff);
 
+  std::cerr << mean_sd.first << ' ' << mean_sd.second << '\n';
   /*
     2. Assign an individual to be a putative case, control, nor not included
     
@@ -308,6 +324,7 @@ int main(int argc, char ** argv)
 	}
     }
 
+  std::cerr << "here!\n";
   //Randomize lists just for fun
   std::function< size_t (size_t) > rand = std::bind(&gsl_ran_flat, r, 0,double(put_cases.size()));
   random_shuffle(put_cases.begin(),put_cases.end(),rand);
@@ -319,6 +336,7 @@ int main(int argc, char ** argv)
 									put_cases,
 									options.ncontrols,
 									options.ncases) );
+  std::cerr << "here2!\n";
   assert( ccblocks->min_n.size() == ccblocks->neutral.numsites() );
   assert( ccblocks->min_c.size() == ccblocks->causative.numsites() );
   

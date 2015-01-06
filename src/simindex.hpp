@@ -11,7 +11,7 @@ private:
   std::map<unsigned,long> e,p,h;
   bool fileproblem;
 
-  bool mono_increasing( const std::vector<long> & v ) const;
+  //bool mono_increasing( const std::vector<long> & v ) const;
 public:
   simindex(const char * filename);
 

@@ -2,6 +2,7 @@
 #include <mutation_with_age.hpp>
 #include <Sequence/PolyTableFunctions.hpp>
 #include <fwdpp/sampling_functions.hpp>
+#include <cassert>
 
 using namespace std;
 
@@ -28,6 +29,7 @@ void update_block( glist::const_iterator::value_type::mutation_container::const_
     {
       return std::fabs(site.first-d) <= std::numeric_limits<double>::epsilon();
     };
+  cerr << distance(beg,end) << ' ' << distance(beg2,end2) << '\n';
   for( ; beg < end ; ++beg )
     {
       double mutpos = (*beg)->pos;
@@ -75,9 +77,15 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 		     const unsigned & offset)
 {
   vector< pair<double,string> >::iterator itr;
-
+  cerr << indlist.size() << '\n';
   for( unsigned i = 0 ; i < maxnum ; ++i )
     {
+      assert(indlist[i] < diploids.size());
+      cerr << "icheck " << i << ' ' << indlist.size() << ' ' << indlist[i] << ' ' << diploids.size() << ' ' << popphenos.size() << '\n';
+	//<< distance(diploids[ indlist[i] ].first->mutations.begin(),diploids[ indlist[i] ].first->mutations.end()) << '\n';
+	//<< distance(diploids[ indlist[i] ].first->smutations.begin(),diploids[ indlist[i] ].first->smutations.end()) << '\n';
+      //<< distance(diploids[ indlist[i] ].second->mutations.begin(),diploids[ indlist[i] ].second->mutations.end()) << '\n';
+      // 	   << distance(diploids[ indlist[i] ].second->smutations.begin(),diploids[ indlist[i] ].second->smutations.end()) << '\n';
       ccphenos.push_back( popphenos[ indlist[i] ] );
       update_block(  diploids[ indlist[i] ].first->mutations.begin(),
 		     diploids[ indlist[i] ].first->mutations.end(),
@@ -87,6 +95,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 		     datablock_neut,
 		     ttl,offset
 		     );
+      cerr << "ub1\n";
       update_block(  diploids[ indlist[i] ].first->smutations.begin(),
 		     diploids[ indlist[i] ].first->smutations.end(),
 		     diploids[ indlist[i] ].second->smutations.begin(),
@@ -95,7 +104,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 		     datablock_sel,
 		     ttl,offset
 		     );
-
+      cerr << "ub2\n";
       /*
       //Old code replaced by update_block
       //neutral
@@ -202,6 +211,7 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 		  ncontrols,
 		  2*(ncontrols+ncases),
 		  0 );
+  cerr <<"controls done\n";
   //cases
   process_subset( neutral, selected,
 		  rv.phenotypes,
@@ -211,6 +221,7 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 		  ncases,
 		  2*(ncontrols+ncases),
 		  2*ncontrols);
+  cerr <<"cases done\n";
 
   sort( neutral.begin(), neutral.end(), 
 		[](std::pair<double,std::string> lhs,
