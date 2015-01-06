@@ -12,7 +12,7 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options.hpp>
 
-#include <fcntl.h>
+//#include <fcntl.h>
 
 #include <zlib.h>
 
