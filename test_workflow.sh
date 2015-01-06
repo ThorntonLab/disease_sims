@@ -7,4 +7,4 @@ rm -f simindex.txt pvalues.txt ccindex.txt esm.txt pvalues_index.txt *.bin
 
 R --no-save --slave --args simindex.txt ccindex.txt popfile.bin 0 ccfile.bin 100 100 1000 pvalues.txt pvalues_index.txt ./atomic_locker/atomic_locker
 
-./esm_chisq_zscore -c ccindex.txt -C ccfile.bin -o esm.txt -r 0 -s 101 
+#./esm_chisq_zscore -c ccindex.txt -C ccfile.bin -o esm.txt -r 0 -s 101 
