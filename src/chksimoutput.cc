@@ -5,7 +5,7 @@
 #include <simindex.hpp>
 #include <fwdpp/IO.hpp>
 #include <zlib.h>
-#include <boost/bind.hpp>
+//#include <boost/bind.hpp>
 #include <iostream>
 #include <string>
 #include <boost/program_options.hpp>
