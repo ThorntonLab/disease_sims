@@ -81,7 +81,7 @@ struct params
   string indexfile,popfile,phenofile,anovafile,anova_indexfile,idfile;
   unsigned twoN,record_no,ncases,ncontrols,seed;
   double case_proportion,crange;
-  bool gzinput,gzoutput;
+  //bool gzinput,gzoutput;
   params();
   bool files_undef( void ) const;
   void report_empty( std::ostream & out ) const;
@@ -100,9 +100,9 @@ params::params() : indexfile(string()),
 		   ncontrols(0),
 		   seed(0),
 		   case_proportion(1.),
-		   crange(0.5),
-		   gzinput(false),
-		   gzoutput(false)
+		   crange(0.5)
+		   //gzinput(false),
+		   //gzoutput(false)
 {
 }
 
@@ -143,20 +143,20 @@ int main(int argc, char ** argv)
       exit(10);
     }
 
-  if ( options.gzinput )
-    {
+  //if ( options.gzinput )
+  //  {
       gzFile gzin = gzopen(options.popfile.c_str(),"rb");
       gzseek( gzin, index.hoffset(options.record_no), 0);
       read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
       gzclose(gzin);
-    }
-  else
-    {
-      ifstream popstream( options.popfile.c_str() );
-      popstream.seekg( index.hoffset(options.record_no) );
-      read_binary_pop( &gametes, &mutations, &diploids, std::bind(mreader(),std::placeholders::_1),popstream );
-      popstream.close();
-    }
+  //   }
+  // else
+  //   {
+  //     ifstream popstream( options.popfile.c_str() );
+  //     popstream.seekg( index.hoffset(options.record_no) );
+  //     read_binary_pop( &gametes, &mutations, &diploids, std::bind(mreader(),std::placeholders::_1),popstream );
+  //     popstream.close();
+  //   }
 
   if ( gametes.size() > 2*diploids.size() )
     {
@@ -176,41 +176,41 @@ int main(int argc, char ** argv)
   //Read in the phenotype data
   vector< pair<double,double> > phenotypes;
 
-  if( options.gzinput )
+  //if( options.gzinput )
+  //  {
+  gzin = gzopen( options.phenofile.c_str(),"rb" );
+  gzseek( gzin, index.poffset(options.record_no), 0);
+  unsigned nphenos;
+  gzread(gzin,&nphenos,sizeof(unsigned));
+  for(unsigned i = 0 ; i < nphenos ; ++i )
     {
-      gzFile gzin = gzopen( options.phenofile.c_str(),"rb" );
-      gzseek( gzin, index.poffset(options.record_no), 0);
-      unsigned nphenos;
-      gzread(gzin,&nphenos,sizeof(unsigned));
-      for(unsigned i = 0 ; i < nphenos ; ++i )
-	{
-	  //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
-	  //Phenotype of the individual is x+y
-	  double x,y;
-	  gzread(gzin,&x,sizeof(double));
-	  gzread(gzin,&y,sizeof(double)); 
-	  phenotypes.push_back( make_pair(x,y) );
-	}
-      gzclose(gzin);
+      //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
+      //Phenotype of the individual is x+y
+      double x,y;
+      gzread(gzin,&x,sizeof(double));
+      gzread(gzin,&y,sizeof(double)); 
+      phenotypes.push_back( make_pair(x,y) );
     }
-  else
-    {
-      ifstream phenostream( options.phenofile.c_str() );
-      phenostream.seekg( index.poffset(options.record_no) );
+  gzclose(gzin);
+  //   }
+  // else
+  //   {
+  //     ifstream phenostream( options.phenofile.c_str() );
+  //     phenostream.seekg( index.poffset(options.record_no) );
       
-      unsigned nphenos;
-      phenostream.read( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
-      for( unsigned i = 0 ; i < nphenos ; ++i )
-	{
-	  //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
-	  //Phenotype of the individual is x+y
-	  double x,y;
-	  phenostream.read( reinterpret_cast<char *>(&x), sizeof(double) );
-	  phenostream.read( reinterpret_cast<char *>(&y), sizeof(double) );
-	  phenotypes.push_back( make_pair(x,y) );
-	}
-      phenostream.close();
-    }
+  //     unsigned nphenos;
+  //     phenostream.read( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
+  //     for( unsigned i = 0 ; i < nphenos ; ++i )
+  // 	{
+  // 	  //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
+  // 	  //Phenotype of the individual is x+y
+  // 	  double x,y;
+  // 	  phenostream.read( reinterpret_cast<char *>(&x), sizeof(double) );
+  // 	  phenostream.read( reinterpret_cast<char *>(&y), sizeof(double) );
+  // 	  phenotypes.push_back( make_pair(x,y) );
+  // 	}
+  //     phenostream.close();
+  //   }
 
   assert( phenotypes.size() == diploids.size() );
   //The real work starts here
@@ -464,8 +464,8 @@ int main(int argc, char ** argv)
 	}
     }
 
-  if( options.gzoutput )
-    {
+  //if( options.gzoutput )
+  //  {
       gzFile gzout = gzopen( options.anovafile.c_str(),"a" );
       int written = gzwrite( gzout, ccbuffer.str().c_str(), ccbuffer.str().size() );
       if(!written)
@@ -503,47 +503,47 @@ int main(int argc, char ** argv)
 	  cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
 	  exit(errno);
 	}
-    }
-  else
-    {
-      FILE * a_fh = fopen(options.anovafile.c_str(),"a"),*id_fh=NULL;
-      int a_fd = fileno(a_fh),id_fd=-1;
-      ostringstream buffer;
-      buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR );
-      if (!options.idfile.empty())
-	{
-	  id_fh = fopen(options.idfile.c_str(),"a");
-	  id_fd = fileno(id_fh);
-	  buffer <<' ' << lseek(id_fd,0,SEEK_CUR) << '\n';
-	  if(::write(id_fd,
-		     idbuffer.str().c_str(),
-		     idbuffer.str().size()) == -1 )
-	    {
-	      cerr << "Error on writing buffer to " << options.idfile << '\n';
-	      exit(10);
-	    }
-	  fclose(id_fh);
-	}
-      else
-	{
-	  buffer << '\n';
-	}
-      if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
-	{
-	  cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
-	  exit(errno);
-	}
-      buffer.str(string());
+  //   }
+  // else
+  //   {
+  //     FILE * a_fh = fopen(options.anovafile.c_str(),"a"),*id_fh=NULL;
+  //     int a_fd = fileno(a_fh),id_fd=-1;
+  //     ostringstream buffer;
+  //     buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR );
+  //     if (!options.idfile.empty())
+  // 	{
+  // 	  id_fh = fopen(options.idfile.c_str(),"a");
+  // 	  id_fd = fileno(id_fh);
+  // 	  buffer <<' ' << lseek(id_fd,0,SEEK_CUR) << '\n';
+  // 	  if(::write(id_fd,
+  // 		     idbuffer.str().c_str(),
+  // 		     idbuffer.str().size()) == -1 )
+  // 	    {
+  // 	      cerr << "Error on writing buffer to " << options.idfile << '\n';
+  // 	      exit(10);
+  // 	    }
+  // 	  fclose(id_fh);
+  // 	}
+  //     else
+  // 	{
+  // 	  buffer << '\n';
+  // 	}
+  //     if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
+  // 	{
+  // 	  cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
+  // 	  exit(errno);
+  // 	}
+  //     buffer.str(string());
       
-      //write out the CC buffer
-      if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
-	{
-	  cerr << "Error on writing buffer to " << options.anovafile << '\n';
-	  exit(errno);
-	}
-      fflush(a_fh);
-      fclose(a_fh);
-    }
+  //     //write out the CC buffer
+  //     if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
+  // 	{
+  // 	  cerr << "Error on writing buffer to " << options.anovafile << '\n';
+  // 	  exit(errno);
+  // 	}
+  //     fflush(a_fh);
+  //     fclose(a_fh);
+  //   }
 
   // FILE * a_fh = fopen(options.anovafile.c_str(),"a");
   // int a_fd = fileno(a_fh);
@@ -617,8 +617,8 @@ params process_command_line(int argc, char ** argv)
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed")
     ("threshold,t",value<double>(&rv.case_proportion)->default_value(-1.),"Proportion of population to be labelled as putative cases.  Value must be 0 < t < 1. E.g., individuals with phenotypic values larger than the (1-t)th quantile of phenotypic values in the entire population are potential cases.  For example, in Thornton, Foran, and Long (2013), we used t = 0.15, meaning that the upper 15% of phenotypic values were treated as possible cases.")
     ("control-range",value<double>(&rv.crange)->default_value(0.5),"A putatitve control is defined as the population mean phenotype +/- control-range*SD, where SD is the standard deviation of the population phenotype.  Default is what was used in Thornton, Foran, and Long (2013)")
-    ("gzin","Input is gzipped.  Default is to assume uncompressed input.")
-    ("gzout","Write output as gzipped file.  Default is to write uncompressed output.")
+    //("gzin","Input is gzipped.  Default is to assume uncompressed input.")
+    //("gzout","Write output as gzipped file.  Default is to write uncompressed output.")
     ("ids",value<string>(&rv.idfile)->default_value(string()),"Write individual identifiers to output file name.  Useful of you want to go back to the raw genotype info in the main population file later on.")
     ;
 
@@ -643,14 +643,14 @@ params process_command_line(int argc, char ** argv)
       exit(10);
     }
 
-  if( vm.count("gzin") )
-    {
-      rv.gzinput=true;
-    }
-  if(vm.count("gzout"))
-    {
-      rv.gzoutput = true;
-    }
+  // if( vm.count("gzin") )
+  //   {
+  //     rv.gzinput=true;
+  //   }
+  // if(vm.count("gzout"))
+  //   {
+  //     rv.gzoutput = true;
+  //   }
   return rv;
 }
 

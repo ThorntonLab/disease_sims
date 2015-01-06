@@ -77,9 +77,8 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = TFL2013$(EXEEXT) TFL2013_ind$(EXEEXT) \
-	make_case_control$(EXEEXT) esm_chisq_zscore$(EXEEXT) \
-	chksimoutput$(EXEEXT) phenoburden$(EXEEXT) CCburden$(EXEEXT) \
-	sfs$(EXEEXT) sfsSample$(EXEEXT)
+	make_case_control$(EXEEXT) chksimoutput$(EXEEXT) \
+	phenoburden$(EXEEXT) sfs$(EXEEXT) sfsSample$(EXEEXT)
 @DEBUG_FALSE@am__append_1 = -DNDEBUG
 
 #On some systems (or at least recent boost versions, the boost_system is needed to use the boost containers
@@ -101,10 +100,6 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_CCburden_OBJECTS = CCburden.$(OBJEXT) readCC.$(OBJEXT)
-CCburden_OBJECTS = $(am_CCburden_OBJECTS)
-CCburden_LDADD = $(LDADD)
-CCburden_DEPENDENCIES =
 am_TFL2013_OBJECTS = TFL2013.$(OBJEXT)
 TFL2013_OBJECTS = $(am_TFL2013_OBJECTS)
 TFL2013_DEPENDENCIES =
@@ -116,14 +111,6 @@ am_chksimoutput_OBJECTS = chksimoutput.$(OBJEXT) simindex.$(OBJEXT)
 chksimoutput_OBJECTS = $(am_chksimoutput_OBJECTS)
 chksimoutput_LDADD = $(LDADD)
 chksimoutput_DEPENDENCIES =
-am_esm_chisq_zscore_OBJECTS = esm_chisq_zscore.$(OBJEXT) esm.$(OBJEXT) \
-	chisq_per_marker.$(OBJEXT) esm_filter_sites.$(OBJEXT) \
-	readCC.$(OBJEXT)
-esm_chisq_zscore_OBJECTS = $(am_esm_chisq_zscore_OBJECTS)
-esm_chisq_zscore_LDADD = $(LDADD)
-esm_chisq_zscore_DEPENDENCIES =
-esm_chisq_zscore_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(esm_chisq_zscore_LDFLAGS) $(LDFLAGS) -o $@
 am_make_case_control_OBJECTS = make_case_control.$(OBJEXT) \
 	ccintermediate.$(OBJEXT) simindex.$(OBJEXT)
 make_case_control_OBJECTS = $(am_make_case_control_OBJECTS)
@@ -170,13 +157,11 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(CCburden_SOURCES) $(TFL2013_SOURCES) \
-	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
-	$(esm_chisq_zscore_SOURCES) $(make_case_control_SOURCES) \
+SOURCES = $(TFL2013_SOURCES) $(TFL2013_ind_SOURCES) \
+	$(chksimoutput_SOURCES) $(make_case_control_SOURCES) \
 	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES)
-DIST_SOURCES = $(CCburden_SOURCES) $(TFL2013_SOURCES) \
-	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
-	$(esm_chisq_zscore_SOURCES) $(make_case_control_SOURCES) \
+DIST_SOURCES = $(TFL2013_SOURCES) $(TFL2013_ind_SOURCES) \
+	$(chksimoutput_SOURCES) $(make_case_control_SOURCES) \
 	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -303,14 +288,15 @@ top_srcdir = @top_srcdir@
 TFL2013_SOURCES = TFL2013.cc
 TFL2013_ind_SOURCES = TFL2013_ind.cc
 make_case_control_SOURCES = make_case_control.cc ccintermediate.cc simindex.cc
-esm_chisq_zscore_SOURCES = esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc
+#esm_chisq_zscore_SOURCES=esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc
 chksimoutput_SOURCES = chksimoutput.cc simindex.cc
 phenoburden_SOURCES = phenoburden.cc
-CCburden_SOURCES = CCburden.cc readCC.cc
+#CCburden_SOURCES=CCburden.cc readCC.cc
 sfs_SOURCES = sfs.cc readSimOutput.cc
 sfsSample_SOURCES = sfsSample.cc
 # atomic_locker/atomic_locker
-esm_chisq_zscore_LDFLAGS = -pthread
+
+#esm_chisq_zscore_LDFLAGS=-pthread
 AM_CPPFLAGS = -W -Wall -I. $(am__append_1) $(am__append_2) \
 	$(am__append_3)
 LDADD = 
@@ -392,10 +378,6 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-CCburden$(EXEEXT): $(CCburden_OBJECTS) $(CCburden_DEPENDENCIES) $(EXTRA_CCburden_DEPENDENCIES) 
-	@rm -f CCburden$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(CCburden_OBJECTS) $(CCburden_LDADD) $(LIBS)
-
 TFL2013$(EXEEXT): $(TFL2013_OBJECTS) $(TFL2013_DEPENDENCIES) $(EXTRA_TFL2013_DEPENDENCIES) 
 	@rm -f TFL2013$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(TFL2013_OBJECTS) $(TFL2013_LDADD) $(LIBS)
@@ -407,10 +389,6 @@ TFL2013_ind$(EXEEXT): $(TFL2013_ind_OBJECTS) $(TFL2013_ind_DEPENDENCIES) $(EXTRA
 chksimoutput$(EXEEXT): $(chksimoutput_OBJECTS) $(chksimoutput_DEPENDENCIES) $(EXTRA_chksimoutput_DEPENDENCIES) 
 	@rm -f chksimoutput$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(chksimoutput_OBJECTS) $(chksimoutput_LDADD) $(LIBS)
-
-esm_chisq_zscore$(EXEEXT): $(esm_chisq_zscore_OBJECTS) $(esm_chisq_zscore_DEPENDENCIES) $(EXTRA_esm_chisq_zscore_DEPENDENCIES) 
-	@rm -f esm_chisq_zscore$(EXEEXT)
-	$(AM_V_CXXLD)$(esm_chisq_zscore_LINK) $(esm_chisq_zscore_OBJECTS) $(esm_chisq_zscore_LDADD) $(LIBS)
 
 make_case_control$(EXEEXT): $(make_case_control_OBJECTS) $(make_case_control_DEPENDENCIES) $(EXTRA_make_case_control_DEPENDENCIES) 
 	@rm -f make_case_control$(EXEEXT)
@@ -434,18 +412,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CCburden.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFL2013.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFL2013_ind.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ccintermediate.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chisq_per_marker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chksimoutput.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esm_chisq_zscore.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/esm_filter_sites.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make_case_control.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/phenoburden.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readCC.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readSimOutput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfsSample.Po@am__quote@

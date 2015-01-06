@@ -61,7 +61,7 @@ struct simparams
 {
   unsigned N,N2,ngens_burnin,ngens_evolve,ngens_evolve_growth,replicate_no,seed;
   double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum,dominance;
-  bool dist_effects,gzoutput;
+  bool dist_effects;//,gzoutput;
   MODEL model;
   string indexfile, hapfile, phenofile, effectsfile ;
   simparams(void);
@@ -82,7 +82,7 @@ simparams::simparams(void) : N(20000),N2(20000),
 			     optimum(0.),
 			     dominance(0.),
 			     dist_effects(true),
-			     gzoutput(false),
+			     //gzoutput(false),
 			     model( GENE_RECESSIVE ),
 			     indexfile(string()),
 			     hapfile(string()),
@@ -316,8 +316,8 @@ int main(int argc, char ** argv)
   ofstream indexstream(params.indexfile.c_str(),ios::out|ios::app);
   file_lock flock(params.indexfile.c_str());
 
-  if( params.gzoutput ) 
-    {
+  //  if( params.gzoutput ) 
+  //{
       gzFile gzout = gzopen(params.hapfile.c_str(),"a");
       int hapswritten = gzwrite(gzout,popbuffer.str().c_str(),popbuffer.str().size());
       if ( ! hapswritten && !popbuffer.str().empty() )
@@ -355,61 +355,61 @@ int main(int argc, char ** argv)
       indexstream << params.replicate_no << ' ' << effectwritten << ' '
 		  << phenowritten << ' ' << hapswritten << '\n';
       //fprintf(index_fh,"%s\n",indexstream.str().c_str());
-    }
-  else
-    {
-      FILE * haps_fh = fopen(params.hapfile.c_str(),"a");
-      int hapfile_fd = fileno(haps_fh);
-      if ( hapfile_fd == -1 ) 
-	{ 
-	  std::cerr << "ERROR: could not open " << params.hapfile << '\n';
-	  exit(10);
-	}
-      FILE * pheno_fh = fopen(params.phenofile.c_str(),"a");
-      int pheno_fd = fileno(pheno_fh);
-      if ( pheno_fd == -1 ) 
-	{ 
-	  std::cerr << "ERROR: could not open " << params.phenofile << '\n';
-	  exit(10);
-	}
-      FILE * effect_fh = fopen(params.effectsfile.c_str(),"a");
-      int effect_fd = 0;
-      effect_fd = fileno(effect_fh);
-      if ( effect_fd == -1 ) 
-	{ 
-	  std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
-	  exit(10);
-	}
-      //std::ostringstream indexstream;
-      indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
-		  << ftell(pheno_fh) << ' ' << ftell(haps_fh) << '\n';
-      //fprintf(index_fh,"%s\n",indexstream.str().c_str());
+  //   }
+  // else
+  //   {
+  //     FILE * haps_fh = fopen(params.hapfile.c_str(),"a");
+  //     int hapfile_fd = fileno(haps_fh);
+  //     if ( hapfile_fd == -1 ) 
+  // 	{ 
+  // 	  std::cerr << "ERROR: could not open " << params.hapfile << '\n';
+  // 	  exit(10);
+  // 	}
+  //     FILE * pheno_fh = fopen(params.phenofile.c_str(),"a");
+  //     int pheno_fd = fileno(pheno_fh);
+  //     if ( pheno_fd == -1 ) 
+  // 	{ 
+  // 	  std::cerr << "ERROR: could not open " << params.phenofile << '\n';
+  // 	  exit(10);
+  // 	}
+  //     FILE * effect_fh = fopen(params.effectsfile.c_str(),"a");
+  //     int effect_fd = 0;
+  //     effect_fd = fileno(effect_fh);
+  //     if ( effect_fd == -1 ) 
+  // 	{ 
+  // 	  std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
+  // 	  exit(10);
+  // 	}
+  //     //std::ostringstream indexstream;
+  //     indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
+  // 		  << ftell(pheno_fh) << ' ' << ftell(haps_fh) << '\n';
+  //     //fprintf(index_fh,"%s\n",indexstream.str().c_str());
 
-      //write the haplotype data
-      if ( ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size()) == -1 )
-	{
-	  cerr << "Error writing to " << params.hapfile << '\n';
-	  exit(errno);
-	}
-      //write the phenotype data
-      if( ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() ) == -1 )
-	{
-	  cerr << "Error writing to " << params.phenofile << '\n';
-	  exit(errno);
-	}
-      //write the effects
-      if( ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() ) == -1 )
-	{
-	  cerr << "Error writing to " << params.effectsfile << '\n';
-	  exit(errno);
-	}
-      fflush( haps_fh );
-      fclose( haps_fh );
-      fflush( pheno_fh );
-      fclose( pheno_fh );
-      fflush( effect_fh );
-      fclose( effect_fh );
-    }
+  //     //write the haplotype data
+  //     if ( ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size()) == -1 )
+  // 	{
+  // 	  cerr << "Error writing to " << params.hapfile << '\n';
+  // 	  exit(errno);
+  // 	}
+  //     //write the phenotype data
+  //     if( ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() ) == -1 )
+  // 	{
+  // 	  cerr << "Error writing to " << params.phenofile << '\n';
+  // 	  exit(errno);
+  // 	}
+  //     //write the effects
+  //     if( ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() ) == -1 )
+  // 	{
+  // 	  cerr << "Error writing to " << params.effectsfile << '\n';
+  // 	  exit(errno);
+  // 	}
+  //     fflush( haps_fh );
+  //     fclose( haps_fh );
+  //     fflush( pheno_fh );
+  //     fclose( pheno_fh );
+  //     fflush( effect_fh );
+  //     fclose( effect_fh );
+  //   }
   //release the locks
   indexstream.close();
   flock.unlock();
@@ -456,7 +456,7 @@ simparams parse_command_line(const int & argc,
     ("effectsfile,E",value<string>(&rv.effectsfile)->default_value(string()),"Name of output file for effect sizes of causative mutations")
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed (unsigned integer)")
     ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.")
-    ("gzout","Output will be in compressed binary.  Default is plain binary.")
+    //("gzout","Output will be in compressed binary.  Default is plain binary.")
     ;
 
   variables_map vm;
@@ -493,10 +493,10 @@ n";
       rv.model = POPGEN;
     }
 
-  if(vm.count("gzout"))
-    {
-      rv.gzoutput=true;
-    }
+  // if(vm.count("gzout"))
+  //   {
+  //     rv.gzoutput=true;
+  //   }
 
   if( vm.count("constant") )
     {
