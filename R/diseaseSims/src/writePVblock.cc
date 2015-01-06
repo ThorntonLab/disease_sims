@@ -91,7 +91,7 @@ void writePVblock( const char * outfilename,
 	  gzclose(ofile);
 
 	  //write data to index file AFTER writing
-	  fprintf(index_fh,"%lu %d %d\n",recordno,written,pvblock.nrows());
+	  fprintf(index_fh,"%u %d %d\n",recordno,written,pvblock.nrows());
 	}
       else
 	{	  
@@ -103,7 +103,7 @@ void writePVblock( const char * outfilename,
 	      Rcpp::stop(error.str());
 	    }
 	  //write data to index file BEFORE writing
-	  fprintf(index_fh,"%lu %ld %d\n",recordno,ftell(ofile),pvblock.nrows());
+	  fprintf(index_fh,"%u %ld %d\n",recordno,ftell(ofile),pvblock.nrows());
 
 	  fprintf(ofile,"%s",out.str().c_str());
 	  fclose(ofile);
@@ -143,7 +143,7 @@ void writePVblock( const char * outfilename,
 		    << indexfilename << " for writing in append mode";
 	      Rcpp::stop(error.str());
 	    }
-	  fprintf( idx,"%lu %d %d\n",recordno,written,pvblock.nrows());
+	  fprintf( idx,"%u %d %d\n",recordno,written,pvblock.nrows());
 	  fclose(idx);
 	}
       else
@@ -155,7 +155,7 @@ void writePVblock( const char * outfilename,
 		    << indexfilename << " for writing in append mode";
 	      Rcpp::stop(error.str());
 	    }
-	  fprintf( idx,"%lu 0 %d\n",recordno,pvblock.nrows() );
+	  fprintf( idx,"%u 0 %d\n",recordno,pvblock.nrows() );
 	  fclose(idx);
 
 	  idx = fopen(outfilename,"w");
