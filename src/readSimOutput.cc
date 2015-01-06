@@ -39,7 +39,6 @@ recOffsets read_index( const char * idxfile,
 vector<effectFileData> read_effect_file( gzFile in )
 {
   unsigned nrecs;
-  //in.read( reinterpret_cast<char *>(&nrecs), sizeof(unsigned ) );
   gzread(in,&nrecs,sizeof(unsigned));
 
   vector< effectFileData > rv(nrecs);
@@ -50,10 +49,6 @@ vector<effectFileData> read_effect_file( gzFile in )
       gzread(in,&rv[i].esize,sizeof(double));
       gzread(in,&rv[i].count,sizeof(double));
       gzread(in,&rv[i].age,sizeof(double));
-      // in.read( reinterpret_cast< char * >(&rv[i].pos),sizeof(double) );
-      // in.read( reinterpret_cast< char * >(&rv[i].esize),sizeof(double) );
-      // in.read( reinterpret_cast< char * >(&rv[i].count),sizeof(double) );
-      // in.read( reinterpret_cast< char * >(&rv[i].age),sizeof(double) );
     }
   return rv;
 }
