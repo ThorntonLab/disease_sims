@@ -2,7 +2,6 @@
 #include <mutation_with_age.hpp>
 #include <Sequence/PolyTableFunctions.hpp>
 #include <fwdpp/sampling_functions.hpp>
-//#include <boost/bind.hpp>
 
 using namespace std;
 
