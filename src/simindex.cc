@@ -68,7 +68,6 @@ simindex::simindex(const char * filename) : e(mul()),
       p[recs[i]]=pis[i];
       h[recs[i]]=his[i];
     }
-  std::cerr << e.size() << '\n';
   // if ( !mono_increasing(eis) || 
   //      !mono_increasing(pis) ||
   //      !mono_increasing(his) )
