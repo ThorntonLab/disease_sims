@@ -1,3 +1,0 @@
-[submodule "atomic_locker"]
-	path = atomic_locker
-	url = https://github.com/molpopgen/atomic_locker.git
