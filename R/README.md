@@ -57,6 +57,22 @@ If you use the modules system, then the "module load XXXX" commands should be pr
 R_LIBS=$HOME/R_libs:$R_LIBS PKG_LIBS=$LDFLAGS PKG_CPPFLAGS=$CPPFLAGS R CMD INSTALL diseaseSims
 ```
 
+##Finally, OS X:
+
+On my Yosemite system, I have to say:
+
+~~~
+R_LD_LIBRARY_PATH=/usr/local/lib R CMD INSTALL diseaseSims
+~~~
+
+I also need to define that variable at run-time:
+
+~~~
+R_LD_LIBRARY_PATH=/usr/local/lib R
+~~~
+
 ###Installation on the UCI HPC into a user's $HOME
+
+
 
 Execute the local_install_example.sh in disease_sims/R.

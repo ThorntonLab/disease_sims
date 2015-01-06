@@ -1,2 +1,3 @@
-PKG_CPPFLAGS+=-I. -I../../../src -std=c++11
-PKG_LIBS+=$(LDFLAGS) -L/usr/local/lib -lz -lboost_system
+CXX_STD = CXX11
+PKG_CPPFLAGS+=-I. -I../../../src 
+PKG_LIBS+=-lboost_system -lz
