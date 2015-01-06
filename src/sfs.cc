@@ -76,8 +76,12 @@ int main( int argc, char ** argv )
   //estream.seekg(0,ios::end);
   //long eostream = estream.tellg();
   //estream.seekg(0,ios::beg);
+  ifstream indexin(options.indexfile.c_str());
+  string temp;
   do
     {
+      getline(indexin,temp);
+      indexin >> ws;
       vector<effectFileData> effects = read_effect_file(effectsin);
       ++nreps;
 
@@ -87,7 +91,7 @@ int main( int argc, char ** argv )
 	  update( effects[i],meansfs_neut,meansfs_caus,options.normalize,effects.size() );
 	}
     }
-  while(!gzeof(effectsin));
+  while(!indexin.eof());
   gzclose(effectsin);
   //while( estream.tellg() < eostream );
 
