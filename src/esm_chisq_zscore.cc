@@ -17,6 +17,7 @@
 #include <numeric>
 #include <thread>
 
+#include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options.hpp>
 
 #include <gsl/gsl_rng.h>
@@ -24,9 +25,10 @@
 #include <gsl/gsl_statistics_double.h>
 
 #include <gwas_stats.hpp>
-#include <locking_routines.hpp>
+//#include <locking_routines.hpp>
 
 using namespace std;
+using namespace boost::interprocess;
 using namespace boost::program_options;
 
 void permute( const CCblock * ccdata,
@@ -119,23 +121,27 @@ int main(int argc, char ** argv)
   FILE * fp = fopen(options.outfile.c_str(),"a");
   int fd = fileno(fp);
 
-  struct flock fd_lock = get_whole_flock();
-
+  //struct flock fd_lock = get_whole_flock();
+  file_lock fd_lock(options.outfile.c_str());
+  /*
   if (fcntl(fd,F_SETLKW,&fd_lock) == -1)
     {
       cerr << "ERROR: could not obtain lock on " << options.outfile << '\n';
       exit(10);
     }
-
+  */
   fprintf(fp,"%u\t%lf\t%lf\n",options.record_no,perm_p,z);
 
+  /*
   fd_lock.l_type = F_UNLCK;
   if (fcntl(fd,F_UNLCK,&fd_lock) == -1)
     {
       cerr << "ERROR: could not release lock on " << options.outfile << '\n';
       exit(10);
     }
+  */
   fclose(fp);
+  fd_lock.unlock();
 }
 
 void permute( const CCblock * ccdata,

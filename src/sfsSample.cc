@@ -16,11 +16,11 @@
 
 #include <fwdpp/diploid.hh>
 
-#include <boost/bind.hpp>
+//#include <boost/bind.hpp>
 #include <boost/program_options.hpp>
 
 #include <mutation_with_age.hpp>
-#include <locking_routines.hpp>
+
 
 using namespace std;
 using namespace KTfwd;
