@@ -44,7 +44,7 @@
 #include <mutation_with_age.hpp>
 #include <ccintermediate.hpp>
 #include <simindex.hpp>
-#include <locking_routines.hpp>
+//#include <locking_routines.hpp>
 
 #include <Sequence/SimData.hpp>
 
@@ -59,6 +59,7 @@
 #include <cstdlib> 
 #include <set>
 
+#include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options.hpp>
 
 #include <gsl/gsl_statistics.h>
@@ -72,6 +73,7 @@
 using namespace std;
 using namespace Sequence;
 using namespace KTfwd;
+using namespace boost::interprocess;
 using namespace boost::program_options;
 
 struct params
@@ -432,9 +434,11 @@ int main(int argc, char ** argv)
   FILE * ai_fh = fopen(options.anova_indexfile.c_str(),"a");
   int ai_fd = fileno(ai_fh);
   
-  struct flock ai_lock = get_whole_flock();
+  file_lock ai_lock(options.anova_indexfile.c_str());
+  //struct flock ai_lock = get_whole_flock();
   
   //make sure our locking functions work...
+  /*
   assert( ai_lock.l_type == F_WRLCK );
   assert( ai_lock.l_whence == SEEK_SET );
   assert( ai_lock.l_start == 0 );
@@ -444,7 +448,7 @@ int main(int argc, char ** argv)
       cerr << "ERROR: could not obtain lock on " << options.anova_indexfile << '\n';
       exit(10);
     }
-  
+  */
   ostringstream idbuffer;
   if( !options.idfile.empty() ) //then we want to write the individual id indexes
     {
@@ -581,14 +585,17 @@ int main(int argc, char ** argv)
   // fclose(a_fh);
 
   //release lock on index file
+  /*
   ai_lock.l_type = F_UNLCK;
   if (fcntl(ai_fd,F_UNLCK,&ai_lock) == -1)
     {
       cerr << "ERROR: could not release lock on " << options.anova_indexfile << '\n';
       exit(10);
     }
+  */
   fflush(ai_fh);
   fclose(ai_fh);
+  ai_lock.unlock();
   exit(0);
 }
 
