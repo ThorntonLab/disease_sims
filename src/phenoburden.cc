@@ -17,14 +17,16 @@
 #include <fwdpp/IO.hpp>
 #include <fwdpp/sampling_functions.hpp>
 
-#include <boost/bind.hpp>
+//#include <boost/bind.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options.hpp>
 
 #include <mutation_with_age.hpp>
-#include <locking_routines.hpp>
+//#include <locking_routines.hpp>
 
 using namespace std;
 using namespace KTfwd;
+using namespace boost::interprocess;
 using namespace boost::program_options;
 
 struct params
@@ -152,9 +154,11 @@ int main( int argc, char ** argv )
       FILE * o_fh = fopen(options.ofile.c_str(),"a");
       int o_fd = fileno(o_fh);
       
-      flock o_lock = get_whole_flock();
+      file_lock o_lock(options.ofile.c_str());
+      //flock o_lock = get_whole_flock();
       
       //make sure our locking functions work...
+      /*
       assert( o_lock.l_type == F_WRLCK );
       assert( o_lock.l_whence == SEEK_SET );
       assert( o_lock.l_start == 0 );
@@ -164,20 +168,24 @@ int main( int argc, char ** argv )
 	  cerr << "ERROR: could not obtain lock on " << options.ofile << '\n';
 	  exit(10);
 	}
+      */
       if( ::write(o_fd,burdenbuffer.str().c_str(),burdenbuffer.str().size()) == -1 )
 	{
 	  cerr << "Error writing buffer to " << options.ofile << '\n';
 	  exit(errno);
 	}
 
+      /*
       o_lock.l_type = F_UNLCK;
       if (fcntl(o_fd,F_UNLCK,&o_lock) == -1)
 	{
 	  cerr << "ERROR: could not relesae lock on " << options.ofile << '\n';
 	  exit(10);
 	}
+      */
       fflush(o_fh);
       fclose(o_fh);
+      o_lock.unlock();
     }
   else
     {

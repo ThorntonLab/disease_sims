@@ -101,8 +101,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_CCburden_OBJECTS = CCburden.$(OBJEXT) locking_routines.$(OBJEXT) \
-	readCC.$(OBJEXT)
+am_CCburden_OBJECTS = CCburden.$(OBJEXT) readCC.$(OBJEXT)
 CCburden_OBJECTS = $(am_CCburden_OBJECTS)
 CCburden_LDADD = $(LDADD)
 CCburden_DEPENDENCIES =
@@ -128,8 +127,7 @@ am_make_case_control_OBJECTS = make_case_control.$(OBJEXT) \
 make_case_control_OBJECTS = $(am_make_case_control_OBJECTS)
 make_case_control_LDADD = $(LDADD)
 make_case_control_DEPENDENCIES =
-am_phenoburden_OBJECTS = phenoburden.$(OBJEXT) \
-	locking_routines.$(OBJEXT)
+am_phenoburden_OBJECTS = phenoburden.$(OBJEXT)
 phenoburden_OBJECTS = $(am_phenoburden_OBJECTS)
 phenoburden_LDADD = $(LDADD)
 phenoburden_DEPENDENCIES =
@@ -305,8 +303,8 @@ TFL2013_ind_SOURCES = TFL2013_ind.cc
 make_case_control_SOURCES = make_case_control.cc ccintermediate.cc simindex.cc
 esm_chisq_zscore_SOURCES = esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc locking_routines.cc
 chksimoutput_SOURCES = chksimoutput.cc simindex.cc
-phenoburden_SOURCES = phenoburden.cc locking_routines.cc
-CCburden_SOURCES = CCburden.cc locking_routines.cc readCC.cc
+phenoburden_SOURCES = phenoburden.cc
+CCburden_SOURCES = CCburden.cc readCC.cc
 sfs_SOURCES = sfs.cc readSimOutput.cc
 sfsSample_SOURCES = sfsSample.cc
 # atomic_locker/atomic_locker

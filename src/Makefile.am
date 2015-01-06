@@ -8,8 +8,8 @@ TFL2013_ind_SOURCES=TFL2013_ind.cc
 make_case_control_SOURCES=make_case_control.cc ccintermediate.cc simindex.cc
 esm_chisq_zscore_SOURCES=esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc locking_routines.cc
 chksimoutput_SOURCES=chksimoutput.cc simindex.cc
-phenoburden_SOURCES=phenoburden.cc locking_routines.cc
-CCburden_SOURCES=CCburden.cc locking_routines.cc readCC.cc
+phenoburden_SOURCES=phenoburden.cc
+CCburden_SOURCES=CCburden.cc readCC.cc
 sfs_SOURCES=sfs.cc readSimOutput.cc
 sfsSample_SOURCES=sfsSample.cc
 # atomic_locker/atomic_locker
