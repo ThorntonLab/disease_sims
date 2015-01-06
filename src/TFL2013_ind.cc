@@ -8,7 +8,8 @@
 #include <fwdpp/diploid.hh>
 #include <utility>
 #include <iostream>
-
+#include <fstream>
+#include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options.hpp>
 
 #include <fcntl.h>
@@ -20,6 +21,7 @@
 
 using namespace std;
 using namespace boost::program_options;
+using namespace boost::interprocess;
 using namespace KTfwd;
 
 //The mutation model
@@ -289,25 +291,30 @@ int main(int argc, char ** argv)
     Then, unlock output files first, releasing lock on index last.
   */
   //get file descriptors and grab locks in desired order
-  struct flock index_flock;//, hapfile_flock, phenofile_flock, effects_flock;
-  index_flock.l_type = F_WRLCK;/*Write lock*/
-  index_flock.l_whence = SEEK_SET;
-  index_flock.l_start = 0;
-  index_flock.l_len = 0;/*Lock whole file*/
+
+  //struct flock index_flock;//, hapfile_flock, phenofile_flock, effects_flock;
+  //index_flock.l_type = F_WRLCK;/*Write lock*/
+  //index_flock.l_whence = SEEK_SET;
+  //index_flock.l_start = 0;
+  //index_flock.l_len = 0;/*Lock whole file*/
 
   //lock index file ASAP
-  FILE * index_fh = fopen(params.indexfile.c_str(),"a");
-  int index_fd = fileno(index_fh);
-  if ( index_fd == -1 ) 
+  /*
+    FILE * index_fh = fopen(params.indexfile.c_str(),"a");
+    int index_fd = fileno(index_fh);
+    if ( index_fd == -1 ) 
     { 
-      std::cerr << "ERROR: could not open " << params.indexfile << '\n';
-      exit(10);
+    std::cerr << "ERROR: could not open " << params.indexfile << '\n';
+    exit(10);
     }
-  if (fcntl(index_fd, F_SETLKW,&index_flock) == -1) 
+    if (fcntl(index_fd, F_SETLKW,&index_flock) == -1) 
     {
-      std::cerr << "ERROR: could not obtain lock on " << params.indexfile << '\n';
-      exit(10);
+    std::cerr << "ERROR: could not obtain lock on " << params.indexfile << '\n';
+    exit(10);
     }
+  */
+  ofstream indexstream(params.indexfile.c_str(),ios::out|ios::app);
+  file_lock flock(params.indexfile.c_str());
 
   if( params.gzoutput ) 
     {
@@ -344,10 +351,10 @@ int main(int argc, char ** argv)
       gzclose(gzout);
 
       //Now we can write to the index file
-      std::ostringstream indexstream;
+      //std::ostringstream indexstream;
       indexstream << params.replicate_no << ' ' << effectwritten << ' '
-		  << phenowritten << ' ' << hapswritten;
-      fprintf(index_fh,"%s\n",indexstream.str().c_str());
+		  << phenowritten << ' ' << hapswritten << '\n';
+      //fprintf(index_fh,"%s\n",indexstream.str().c_str());
     }
   else
     {
@@ -373,10 +380,10 @@ int main(int argc, char ** argv)
 	  std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
 	  exit(10);
 	}
-      std::ostringstream indexstream;
+      //std::ostringstream indexstream;
       indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
-		  << ftell(pheno_fh) << ' ' << ftell(haps_fh);
-      fprintf(index_fh,"%s\n",indexstream.str().c_str());
+		  << ftell(pheno_fh) << ' ' << ftell(haps_fh) << '\n';
+      //fprintf(index_fh,"%s\n",indexstream.str().c_str());
 
       //write the haplotype data
       if ( ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size()) == -1 )
@@ -404,6 +411,9 @@ int main(int argc, char ** argv)
       fclose( effect_fh );
     }
   //release the locks
+  indexstream.close();
+  flock.unlock();
+  /*
   index_flock.l_type = F_UNLCK;
   if (fcntl(index_fd, F_UNLCK,&index_flock) == -1) 
     {
@@ -412,7 +422,7 @@ int main(int argc, char ** argv)
     }
   fflush( index_fh );
   fclose(index_fh);
-  
+  */
   exit(0);
 }
 
