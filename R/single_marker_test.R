@@ -13,7 +13,7 @@ ncases=as.integer(n[7])
 N=as.integer(n[8])
 outfile=n[9]
 outindex=n[10]
-blocker=n[11]
+#blocker=n[11]
 
 index=read.table(indexfile)
 aindex=read.table(anovaindex)
