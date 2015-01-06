@@ -1,14 +1,15 @@
 #include <Rcpp.h>
 
+#include <boost/interprocess/sync/file_lock.hpp>
 #include <sstream>
 #include <cstdio>
 
 #include <zlib.h>
-#include <fcntl.h>
+
 
 using namespace Rcpp;
 using namespace std;
-
+using namespace boost::interprocess;
 //' Write the results of an association test to a file
 //' @param outfilename Output file name
 //' @param indexfilename Index file name for the output
@@ -56,11 +57,11 @@ void writePVblock( const char * outfilename,
 
   if ( append )
     {
-      struct flock index_flock;
-      index_flock.l_type = F_WRLCK;/*Write lock*/
-      index_flock.l_whence = SEEK_SET;
-      index_flock.l_start = 0;
-      index_flock.l_len = 0;/*Lock whole file*/
+      //struct flock index_flock;
+      //index_flock.l_type = F_WRLCK;/*Write lock*/
+      //index_flock.l_whence = SEEK_SET;
+      //index_flock.l_start = 0;
+      //index_flock.l_len = 0;/*Lock whole file*/
 
       FILE * index_fh = fopen(indexfilename,"a");
       int index_fd = fileno(index_fh);
@@ -69,12 +70,14 @@ void writePVblock( const char * outfilename,
 	  error << "ERROR: could not open " << indexfilename << '\n';
 	  Rcpp::stop(error.str());
 	}
+      file_lock index_flock(indexfilename);
+      /*
       if (fcntl(index_fd, F_SETLKW,&index_flock) == -1) 
 	{
 	  error << "ERROR: could not obtain lock on " << indexfilename << '\n';
 	  Rcpp::stop(error.str());
 	}
-
+      */
       if (gzip)
 	{
 	  gzFile ofile = gzopen(outfilename,"a");
@@ -107,14 +110,17 @@ void writePVblock( const char * outfilename,
 	}
 
       //release locks & close index file
+      /*
       index_flock.l_type = F_UNLCK;
       if (fcntl(index_fd, F_UNLCK,&index_flock) == -1) 
 	{
 	  error << "ERROR: could not release lock on " << indexfilename << '\n';
 	  Rcpp::stop(error.str());
 	}
+      */
       fflush( index_fh );
       fclose(index_fh);
+      index_flock.unlock();
     }
   else
     {
