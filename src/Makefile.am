@@ -14,7 +14,7 @@ sfs_SOURCES=sfs.cc readSimOutput.cc
 sfsSample_SOURCES=sfsSample.cc
 # atomic_locker/atomic_locker
 
-
+esm_chisq_zscore_LDFLAGS=-pthread
 
 AM_CPPFLAGS=-W -Wall -I.
 

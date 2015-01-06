@@ -122,6 +122,8 @@ am_esm_chisq_zscore_OBJECTS = esm_chisq_zscore.$(OBJEXT) esm.$(OBJEXT) \
 esm_chisq_zscore_OBJECTS = $(am_esm_chisq_zscore_OBJECTS)
 esm_chisq_zscore_LDADD = $(LDADD)
 esm_chisq_zscore_DEPENDENCIES =
+esm_chisq_zscore_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(esm_chisq_zscore_LDFLAGS) $(LDFLAGS) -o $@
 am_make_case_control_OBJECTS = make_case_control.$(OBJEXT) \
 	ccintermediate.$(OBJEXT) simindex.$(OBJEXT)
 make_case_control_OBJECTS = $(am_make_case_control_OBJECTS)
@@ -308,6 +310,7 @@ CCburden_SOURCES = CCburden.cc readCC.cc
 sfs_SOURCES = sfs.cc readSimOutput.cc
 sfsSample_SOURCES = sfsSample.cc
 # atomic_locker/atomic_locker
+esm_chisq_zscore_LDFLAGS = -pthread
 AM_CPPFLAGS = -W -Wall -I. $(am__append_1) $(am__append_2) \
 	$(am__append_3)
 LDADD = 
@@ -407,7 +410,7 @@ chksimoutput$(EXEEXT): $(chksimoutput_OBJECTS) $(chksimoutput_DEPENDENCIES) $(EX
 
 esm_chisq_zscore$(EXEEXT): $(esm_chisq_zscore_OBJECTS) $(esm_chisq_zscore_DEPENDENCIES) $(EXTRA_esm_chisq_zscore_DEPENDENCIES) 
 	@rm -f esm_chisq_zscore$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(esm_chisq_zscore_OBJECTS) $(esm_chisq_zscore_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(esm_chisq_zscore_LINK) $(esm_chisq_zscore_OBJECTS) $(esm_chisq_zscore_LDADD) $(LIBS)
 
 make_case_control$(EXEEXT): $(make_case_control_OBJECTS) $(make_case_control_DEPENDENCIES) $(EXTRA_make_case_control_DEPENDENCIES) 
 	@rm -f make_case_control$(EXEEXT)
