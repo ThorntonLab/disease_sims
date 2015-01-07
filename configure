@@ -4914,6 +4914,38 @@ else
 fi
 
 
+ac_fn_cxx_check_header_mongrel "$LINENO" "boost/archive/binary_iarchive.hpp" "ac_cv_header_boost_archive_binary_iarchive_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_archive_binary_iarchive_hpp" = xyes; then :
+
+else
+  as_fn_error $? "echo \"boost/archive/binary_iarchive.hpp not found\"" "$LINENO" 5
+fi
+
+
+ac_fn_cxx_check_header_mongrel "$LINENO" "boost/archive/binary_oarchive.hpp" "ac_cv_header_boost_archive_binary_oarchive_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_archive_binary_oarchive_hpp" = xyes; then :
+
+else
+  as_fn_error $? "echo \"boost/archive/binary_oarchive.hpp not found\"" "$LINENO" 5
+fi
+
+
+ac_fn_cxx_check_header_mongrel "$LINENO" "boost/serialization/vector.hpp" "ac_cv_header_boost_serialization_vector_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_serialization_vector_hpp" = xyes; then :
+
+else
+  as_fn_error $? "echo \"boost/serialization/vector.hpp not found\"" "$LINENO" 5
+fi
+
+
+ac_fn_cxx_check_header_mongrel "$LINENO" "boost/serialization/string.hpp" "ac_cv_header_boost_serialization_string_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_serialization_string_hpp" = xyes; then :
+
+else
+  as_fn_error $? "echo \"boost/serialization/string.hpp not found\"" "$LINENO" 5
+fi
+
+
 ac_fn_cxx_check_header_mongrel "$LINENO" "gsl/gsl_rng.h" "ac_cv_header_gsl_gsl_rng_h" "$ac_includes_default"
 if test "x$ac_cv_header_gsl_gsl_rng_h" = xyes; then :
   HAVE_GSL=1
