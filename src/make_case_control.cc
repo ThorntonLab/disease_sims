@@ -261,19 +261,14 @@ int main(int argc, char ** argv)
   ostringstream ccbuffer;
   ccbuffer << ccblocks;
 
-  // ostringstream ccbuffer2;
-  // boost::archive::binary_oarchive b(ccbuffer2);
-  // b << *ccblocks;
-  // istringstream ccbuffer3(ccbuffer2.str());
-  // boost::archive::binary_iarchive b2(ccbuffer3);
-  // cc_intermediate test;
-  // b2 >> test;
-
-  // cerr << (ccblocks.neutral == test.neutral) << ' '
-  //      << (ccblocks.causative == test.causative) << '\n';
-
-  //free up RAM
-  //delete ccblocks;
+  ostringstream idbuffer;
+  if( !options.idfile.empty() ) //then we want to write the individual id indexes
+    {
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks.ncontrols), sizeof(unsigned) );  
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks.ncases), sizeof(unsigned) );  
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks.control_ids[0]), ccblocks.ncontrols*sizeof(unsigned));
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks.case_ids[0]), ccblocks.ncases*sizeof(unsigned));
+    }
 
   //4. Output to files
 
@@ -282,22 +277,6 @@ int main(int argc, char ** argv)
   int ai_fd = fileno(ai_fh);
   
   file_lock ai_lock(options.anova_indexfile.c_str());
-  ostringstream idbuffer;
-  if( !options.idfile.empty() ) //then we want to write the individual id indexes
-    {
-      idbuffer.write( reinterpret_cast<char *>(&ccblocks.ncontrols), sizeof(unsigned) );  
-      idbuffer.write( reinterpret_cast<char *>(&ccblocks.ncases), sizeof(unsigned) );  
-      idbuffer.write( reinterpret_cast<char *>(&ccblocks.control_ids[0]), ccblocks.ncontrols*sizeof(unsigned));
-      idbuffer.write( reinterpret_cast<char *>(&ccblocks.case_ids[0]), ccblocks.ncases*sizeof(unsigned));
-      // for(unsigned i = 0 ; i < options.ncontrols ; ++i )
-      // 	{
-      // 	  idbuffer.write( reinterpret_cast<char *>(&put_controls[i]), sizeof(unsigned) );  
-      // 	}
-      // for(unsigned i = 0 ; i < options.ncases ; ++i )
-      // 	{
-      // 	  idbuffer.write( reinterpret_cast<char *>(&put_cases[i]), sizeof(unsigned) );  
-      // 	}
-    }
 
   gzFile gzout = gzopen( options.anovafile.c_str(),"a" );
   int written = gzwrite( gzout, ccbuffer.str().c_str(), ccbuffer.str().size() );
