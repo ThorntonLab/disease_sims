@@ -8,6 +8,6 @@ SEED=$RANDOM
 echo $SEED > seedfile
 ../src/make_case_control -i simindex.txt -p popfile.bin.gz -P phenotypes.bin.gz -c ccfile.bin.gz -I ccindex.txt -n 100 -N 100 -t 0.1
 
-#R --no-save --slave --args simindex.txt ccindex.txt popfile.bin.gz 0 ccfile.bin.gz 100 100 1000 pvalues.txt pvalues_index.txt  < ../R/single_marker_test.R
+R --no-save --slave --args simindex.txt ccindex.txt effectsizes.bin.gz 0 ccfile.bin.gz 100 100 1000 pvalues.txt pvalues_index.txt  < ../R/single_marker_test.R
 
 #./esm_chisq_zscore -c ccindex.txt -C ccfile.bin.gz -o esm.txt -r 0 -s 101 
