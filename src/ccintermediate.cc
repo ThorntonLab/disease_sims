@@ -8,13 +8,15 @@
 
 using namespace std;
 
-cc_intermediate::cc_intermediate(void) : neutral(Sequence::SimData()),
+cc_intermediate::cc_intermediate(void) : ncontrols(0),ncases(0),
+					 neutral(Sequence::SimData()),
 					 causative(Sequence::SimData()),
 					 min_n( vector<char>() ),
 					 min_c( vector<char>() ),
 					 G ( vector<double>() ),
-					 E ( vector<double>() )
-					 //phenotypes( vector<pair<double,double> >() )
+					 E ( vector<double>() ),
+					 control_ids( vector<size_t>() ),
+					 case_ids( vector<size_t>() )
 {
 }
 
