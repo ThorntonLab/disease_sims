@@ -247,19 +247,19 @@ int main(int argc, char ** argv)
     assert( x < diploids.size() );
   }
 #endif
-  cc_intermediate * ccblocks = new cc_intermediate(  process_population(diploids,phenotypes,
-									put_controls,
-									put_cases,
-									options.ncontrols,
-									options.ncases) );
-  assert( ccblocks->min_n.size() == ccblocks->neutral.numsites() );
-  assert( ccblocks->min_c.size() == ccblocks->causative.numsites() );
+  cc_intermediate ccblocks(process_population(diploids,phenotypes,
+					      put_controls,
+					      put_cases,
+					      options.ncontrols,
+					      options.ncases) );
+  assert( ccblocks.min_n.size() == ccblocks.neutral.numsites() );
+  assert( ccblocks.min_c.size() == ccblocks.causative.numsites() );
   
   //3. Output to buffers
 
   //first, the ccdata to a buffer
   ostringstream ccbuffer;
-  ccbuffer << *ccblocks;
+  ccbuffer << ccblocks;
 
   // ostringstream ccbuffer2;
   // boost::archive::binary_oarchive b(ccbuffer2);
@@ -269,8 +269,8 @@ int main(int argc, char ** argv)
   // cc_intermediate test;
   // b2 >> test;
 
-  // cerr << (ccblocks->neutral == test.neutral) << ' '
-  //      << (ccblocks->causative == test.causative) << '\n';
+  // cerr << (ccblocks.neutral == test.neutral) << ' '
+  //      << (ccblocks.causative == test.causative) << '\n';
 
   //free up RAM
   //delete ccblocks;
@@ -285,10 +285,10 @@ int main(int argc, char ** argv)
   ostringstream idbuffer;
   if( !options.idfile.empty() ) //then we want to write the individual id indexes
     {
-      idbuffer.write( reinterpret_cast<char *>(&ccblocks->ncontrols), sizeof(unsigned) );  
-      idbuffer.write( reinterpret_cast<char *>(&ccblocks->ncases), sizeof(unsigned) );  
-      idbuffer.write( reinterpret_cast<char *>(&ccblocks->control_ids[0]), ccblocks->ncontrols*sizeof(unsigned));
-      idbuffer.write( reinterpret_cast<char *>(&ccblocks->case_ids[0]), ccblocks->ncontrols*sizeof(unsigned));
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks.ncontrols), sizeof(unsigned) );  
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks.ncases), sizeof(unsigned) );  
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks.control_ids[0]), ccblocks.ncontrols*sizeof(unsigned));
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks.case_ids[0]), ccblocks.ncontrols*sizeof(unsigned));
       // for(unsigned i = 0 ; i < options.ncontrols ; ++i )
       // 	{
       // 	  idbuffer.write( reinterpret_cast<char *>(&put_controls[i]), sizeof(unsigned) );  
