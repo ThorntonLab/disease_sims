@@ -261,16 +261,16 @@ int main(int argc, char ** argv)
   ostringstream ccbuffer;
   ccbuffer << *ccblocks;
 
-  ostringstream ccbuffer2;
-  boost::archive::binary_oarchive b(ccbuffer2);
-  b << *ccblocks;
-  istringstream ccbuffer3(ccbuffer2.str());
-  boost::archive::binary_iarchive b2(ccbuffer3);
-  cc_intermediate test;
-  b2 >> test;
+  // ostringstream ccbuffer2;
+  // boost::archive::binary_oarchive b(ccbuffer2);
+  // b << *ccblocks;
+  // istringstream ccbuffer3(ccbuffer2.str());
+  // boost::archive::binary_iarchive b2(ccbuffer3);
+  // cc_intermediate test;
+  // b2 >> test;
 
-  cerr << (ccblocks->neutral == test.neutral) << ' '
-       << (ccblocks->causative == test.causative) << '\n';
+  // cerr << (ccblocks->neutral == test.neutral) << ' '
+  //      << (ccblocks->causative == test.causative) << '\n';
 
   //free up RAM
   delete ccblocks;
