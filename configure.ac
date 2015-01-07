@@ -26,6 +26,25 @@ AM_CONDITIONAL([DEBUG],test x$enable_debug = xyes)
 
 dnl check for things that we might need
 AC_CHECK_HEADER(Sequence/SimDataIO.hpp,HAVE_LIBSEQ=1 , [AC_MSG_ERROR([Sequence/SimDataIO.hpp not found. libsequence (www.molpopgen.org) >= 1.7.8 required.])])
+AC_MSG_CHECKING(that Sequence::SimData is derived from std::pair< std::vector<double>, std::vector<std::string> >)
+AC_TRY_COMPILE(
+[
+#include <Sequence/SimData.hpp>
+using namespace Sequence;
+using namespace std;
+],
+[
+SimData d;
+d.first = vector<double>();
+d.second = vector< string >();
+],
+[AC_MSG_RESULT(yes)
+AC_DEFINE([HAVE_SEQUENCE_COALSIM],[],"Sequence::SimData has direct access to underlying data")],
+[
+AC_MSG_RESULT(no)
+AC_MSG_ERROR([Sequence::SimData does not have direct access to underlying data.  Please install libsequence >= 1.8.4])
+])
+
 AC_CHECK_HEADER(fwdpp/diploid.hh,HAVE_FWDPP=1 , [AC_MSG_ERROR([fwdpp/diploid.hh not found. fwdpp >= 0.2.5 required])])
 AC_CHECK_HEADER(fwdpp/internal/rec_gamete_updater.hpp,HAVE_FWDPP_OK=1 , [AC_MSG_ERROR([fwdpp/rec_gamete_updater.hpp not found. fwdpp >= 0.2.5 required])])
 AC_CHECK_HEADER(boost/container/vector.hpp, BVECTOR=1, [AC_MSG_WARN([echo "boost/container/vector.hpp not found.  Will use std::vector to compile."])])

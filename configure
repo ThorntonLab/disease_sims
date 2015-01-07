@@ -4873,6 +4873,42 @@ else
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking that Sequence::SimData is derived from std::pair< std::vector<double>" >&5
+$as_echo_n "checking that Sequence::SimData is derived from std::pair< std::vector<double>... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <Sequence/SimData.hpp>
+using namespace Sequence;
+using namespace std;
+
+int
+main ()
+{
+
+SimData d;
+d.first = vector<double>();
+d.second = vector< string >();
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_SEQUENCE_COALSIM /**/" >>confdefs.h
+
+else
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+as_fn_error $? "Sequence::SimData does not have direct access to underlying data.  Please install libsequence >= 1.8.4" "$LINENO" 5
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 ac_fn_cxx_check_header_mongrel "$LINENO" "fwdpp/diploid.hh" "ac_cv_header_fwdpp_diploid_hh" "$ac_includes_default"
 if test "x$ac_cv_header_fwdpp_diploid_hh" = xyes; then :
   HAVE_FWDPP=1
