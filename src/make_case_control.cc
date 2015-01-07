@@ -81,7 +81,6 @@ struct params
   string indexfile,popfile,phenofile,anovafile,anova_indexfile,idfile;
   unsigned twoN,record_no,ncases,ncontrols,seed;
   double case_proportion,crange;
-  //bool gzinput,gzoutput;
   params();
   bool files_undef( void ) const;
   void report_empty( std::ostream & out ) const;
@@ -101,8 +100,6 @@ params::params() : indexfile(string()),
 		   seed(0),
 		   case_proportion(1.),
 		   crange(0.5)
-		   //gzinput(false),
-		   //gzoutput(false)
 {
 }
 
