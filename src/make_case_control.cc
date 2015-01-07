@@ -288,7 +288,7 @@ int main(int argc, char ** argv)
       idbuffer.write( reinterpret_cast<char *>(&ccblocks.ncontrols), sizeof(unsigned) );  
       idbuffer.write( reinterpret_cast<char *>(&ccblocks.ncases), sizeof(unsigned) );  
       idbuffer.write( reinterpret_cast<char *>(&ccblocks.control_ids[0]), ccblocks.ncontrols*sizeof(unsigned));
-      idbuffer.write( reinterpret_cast<char *>(&ccblocks.case_ids[0]), ccblocks.ncontrols*sizeof(unsigned));
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks.case_ids[0]), ccblocks.ncases*sizeof(unsigned));
       // for(unsigned i = 0 ; i < options.ncontrols ; ++i )
       // 	{
       // 	  idbuffer.write( reinterpret_cast<char *>(&put_controls[i]), sizeof(unsigned) );  
