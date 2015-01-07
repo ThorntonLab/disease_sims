@@ -175,7 +175,7 @@ int main(int argc, char ** argv)
     putative case = phenotype >= cutoff
     putative control = phenotype within mean +/- sd of population distribution
   */
-  vector< size_t > put_cases,put_controls;
+  vector< unsigned > put_cases,put_controls;
   grab_putative_CC(mean_sd,phenotypes,options.crange,cutoff,put_controls,put_cases);
 
   /*
@@ -186,7 +186,7 @@ int main(int argc, char ** argv)
     If not, we warn that the CC data may be invalid, as cases and controls will share individuals.
   */
 
-  vector< size_t > isect;
+  vector< unsigned > isect;
   set_intersection( put_controls.begin(),
 		    put_controls.end(),
 		    put_cases.begin(),
@@ -198,7 +198,7 @@ int main(int argc, char ** argv)
       ostringstream wbuffer;
       wbuffer << "Warning: list of putative cases and controls have individuals in common.\n"; 
       //Get the set differences now
-      vector< size_t > ucontrols, ucases;
+      vector< unsigned > ucontrols, ucases;
       set_difference( put_controls.begin() , put_controls.end(),
 		      put_cases.begin(), put_cases.end(),
 		      std::back_inserter( ucontrols ) );
@@ -273,7 +273,7 @@ int main(int argc, char ** argv)
   //      << (ccblocks->causative == test.causative) << '\n';
 
   //free up RAM
-  delete ccblocks;
+  //delete ccblocks;
 
   //4. Output to files
 
@@ -285,16 +285,18 @@ int main(int argc, char ** argv)
   ostringstream idbuffer;
   if( !options.idfile.empty() ) //then we want to write the individual id indexes
     {
-      idbuffer.write( reinterpret_cast<char *>(&options.ncontrols), sizeof(unsigned) );  
-      idbuffer.write( reinterpret_cast<char *>(&options.ncases), sizeof(unsigned) );  
-      for(unsigned i = 0 ; i < options.ncontrols ; ++i )
-	{
-	  idbuffer.write( reinterpret_cast<char *>(&put_controls[i]), sizeof(unsigned) );  
-	}
-      for(unsigned i = 0 ; i < options.ncases ; ++i )
-	{
-	  idbuffer.write( reinterpret_cast<char *>(&put_cases[i]), sizeof(unsigned) );  
-	}
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks->ncontrols), sizeof(unsigned) );  
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks->ncases), sizeof(unsigned) );  
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks->control_ids[0]), ccblocks->ncontrols*sizeof(unsigned));
+      idbuffer.write( reinterpret_cast<char *>(&ccblocks->case_ids[0]), ccblocks->ncontrols*sizeof(unsigned));
+      // for(unsigned i = 0 ; i < options.ncontrols ; ++i )
+      // 	{
+      // 	  idbuffer.write( reinterpret_cast<char *>(&put_controls[i]), sizeof(unsigned) );  
+      // 	}
+      // for(unsigned i = 0 ; i < options.ncases ; ++i )
+      // 	{
+      // 	  idbuffer.write( reinterpret_cast<char *>(&put_cases[i]), sizeof(unsigned) );  
+      // 	}
     }
 
   gzFile gzout = gzopen( options.anovafile.c_str(),"a" );

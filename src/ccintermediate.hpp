@@ -21,7 +21,7 @@ struct cc_intermediate
   Sequence::SimData neutral,causative; //genotypes
   std::vector<char> min_n,min_c; //minor alleles
   std::vector<double> G,E; //genetic and random bits of phenotype
-  std::vector<size_t> control_ids,case_ids; //the indexes relating individuals back to general pop
+  std::vector<unsigned> control_ids,case_ids; //the indexes relating individuals back to general pop
   cc_intermediate(void);
 
   //IO routines
@@ -51,8 +51,8 @@ std::ostream & operator<<(std::ostream &, const cc_intermediate & );
 
 cc_intermediate process_population( const std::vector< std::pair<glist::iterator,glist::iterator> > & diploids,
 				    const std::vector<std::pair<double,double> > & phenotypes,
-				    const std::vector<size_t> & put_controls,
-				    const std::vector<size_t> & put_cases,
+				    const std::vector<unsigned> & put_controls,
+				    const std::vector<unsigned> & put_cases,
 				    const unsigned & ncontrols,
 				    const unsigned & ncases);
 
@@ -62,6 +62,6 @@ void grab_putative_CC( const std::pair<double,double> & mean_sd,
 		      const std::vector<std::pair<double,double> > & phenotypes,
 		      const double & crange,
 		      const double & cutoff,
-		      std::vector<size_t> & put_controls,
-		      std::vector<size_t> & put_cases );
+		      std::vector<unsigned> & put_controls,
+		      std::vector<unsigned> & put_cases );
 #endif

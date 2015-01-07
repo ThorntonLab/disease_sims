@@ -15,8 +15,8 @@ cc_intermediate::cc_intermediate(void) : ncontrols(0),ncases(0),
 					 min_c( vector<char>() ),
 					 G ( vector<double>() ),
 					 E ( vector<double>() ),
-					 control_ids( vector<size_t>() ),
-					 case_ids( vector<size_t>() )
+					 control_ids( vector<unsigned>() ),
+					 case_ids( vector<unsigned>() )
 {
 }
 
@@ -178,7 +178,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 		     vector<double> & ccE,
 		     const vector< pair<glist::iterator,glist::iterator> > & diploids,
 		     const vector<pair<double,double> > & popphenos,
-		     const vector<size_t> & indlist,
+		     const vector<unsigned> & indlist,
 		     const unsigned & maxnum,
 		     const unsigned & ttl,
 		     const unsigned & offset)
@@ -285,8 +285,8 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 
 cc_intermediate process_population( const vector< pair<glist::iterator,glist::iterator> > & diploids,
 				    const vector<pair<double,double> > & phenotypes,
-				    const vector<size_t> & put_controls,
-				    const vector<size_t> & put_cases,
+				    const vector<unsigned> & put_controls,
+				    const vector<unsigned> & put_cases,
 				    const unsigned & ncontrols,
 				    const unsigned & ncases)
 {
@@ -395,12 +395,12 @@ void grab_putative_CC( const pair<double,double> & mean_sd,
 		      const vector<pair<double,double> > & phenotypes,
 		      const double & crange,
 		      const double & cutoff,
-		      std::vector<size_t> & put_controls,
-		      std::vector<size_t> & put_cases )
+		      std::vector<unsigned> & put_controls,
+		      std::vector<unsigned> & put_cases )
 {
   put_controls.clear();
   put_cases.clear();
-  for( size_t i = 0 ; i < phenotypes.size() ; ++i )
+  for( unsigned i = 0 ; i < phenotypes.size() ; ++i )
     {
       const double P = phenotypes[i].first+phenotypes[i].second;
       if( P >= cutoff )
