@@ -16,7 +16,6 @@
 
 #include <fwdpp/diploid.hh>
 
-//#include <boost/bind.hpp>
 #include <boost/program_options.hpp>
 
 #include <mutation_with_age.hpp>
@@ -46,17 +45,20 @@ int main( int argc, char ** argv )
   unsigned rep = 0;
   for( unsigned p = 0 ;p < options.popfiles.size() ; ++p )
     {
-      ifstream popstream( options.popfiles[p].c_str() );
+      //ifstream popstream( options.popfiles[p].c_str() );
+      gzFile popstream = gzopen(options.popfiles[p].c_str(),"rb");
       unsigned nreps = 0;
+      /*
       popstream.seekg(0,ios::end);
       long eostream = popstream.tellg();
       popstream.seekg(0,ios::beg);
+      */
       do
 	{
 	  glist gametes;
 	  mlist mutations;
 	  vector< pair< glist::iterator,glist::iterator > > diploids;
-	  read_binary_pop( &gametes, &mutations, &diploids, std::bind(mreader(),std::placeholders::_1),popstream );
+	  read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),popstream );
 	  ++rep;
 
 	  //Take a sample
@@ -74,8 +76,10 @@ int main( int argc, char ** argv )
 			    sample.second[i].second.end(),'1' ) - 1 ]++;
 	    }
 	}
-      while( popstream.tellg() < eostream );
-      popstream.close();
+      while(!gzeof(popstream));
+      //while( popstream.tellg() < eostream );
+      gzclose(popstream);
+      //popstream.close();
     }
 
   ostringstream buffer;
