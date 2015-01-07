@@ -12,8 +12,6 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options.hpp>
 
-//#include <fcntl.h>
-
 #include <zlib.h>
 
 #include <mutation_with_age.hpp>
@@ -61,7 +59,7 @@ struct simparams
 {
   unsigned N,N2,ngens_burnin,ngens_evolve,ngens_evolve_growth,replicate_no,seed;
   double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum,dominance;
-  bool dist_effects;//,gzoutput;
+  bool dist_effects;
   MODEL model;
   string indexfile, hapfile, phenofile, effectsfile ;
   simparams(void);
@@ -82,7 +80,6 @@ simparams::simparams(void) : N(20000),N2(20000),
 			     optimum(0.),
 			     dominance(0.),
 			     dist_effects(true),
-			     //gzoutput(false),
 			     model( GENE_RECESSIVE ),
 			     indexfile(string()),
 			     hapfile(string()),
@@ -134,10 +131,10 @@ int main(int argc, char ** argv)
 			    params.mu_neutral,
 			    std::bind(mutation_model(),r,ttl_gen,params.s,0.,params.mu_neutral,&lookup,params.dist_effects),
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
-					&gametes,
-					params.littler,
-					r,
-					recmap),
+				      &gametes,
+				      params.littler,
+				      r,
+				      recmap),
 			    std::bind(KTfwd::insert_at_end<TFLmtype,mlist>,std::placeholders::_1,std::placeholders::_2),
 			    std::bind(KTfwd::insert_at_end<gtype,glist>,std::placeholders::_1,std::placeholders::_2),
 			    std::bind(KTfwd::no_selection(),std::placeholders::_1,std::placeholders::_2),
@@ -176,10 +173,10 @@ int main(int argc, char ** argv)
 			    params.mu_disease+params.mu_neutral,
 			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&lookup,params.dist_effects),
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
-					&gametes,
-					params.littler,
-					r,
-					recmap),
+				      &gametes,
+				      params.littler,
+				      r,
+				      recmap),
 			    std::bind(KTfwd::insert_at_end<TFLmtype,mlist>,std::placeholders::_1,std::placeholders::_2),
 			    std::bind(KTfwd::insert_at_end<gtype,glist>,std::placeholders::_1,std::placeholders::_2),
 			    dipfit,
@@ -199,10 +196,10 @@ int main(int argc, char ** argv)
 			    params.mu_disease+params.mu_neutral,
 			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&lookup,params.dist_effects),
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
-					&gametes,
-					params.littler,
-					r,
-					recmap),
+				      &gametes,
+				      params.littler,
+				      r,
+				      recmap),
 			    std::bind(KTfwd::insert_at_end<TFLmtype,mlist>,std::placeholders::_1,std::placeholders::_2),
 			    std::bind(KTfwd::insert_at_end<gtype,glist>,std::placeholders::_1,std::placeholders::_2),
 			    dipfit,
@@ -283,146 +280,46 @@ int main(int argc, char ** argv)
 	  effectstream.write( reinterpret_cast<char *>(&age), sizeof(double) );
 	}
     }
-  /*
-    OK, now we lock the index file first.  Then, the rest of the output files.
-
-    Write the relevant info to the index files, then the output files.
-
-    Then, unlock output files first, releasing lock on index last.
-  */
-  //get file descriptors and grab locks in desired order
-
-  //struct flock index_flock;//, hapfile_flock, phenofile_flock, effects_flock;
-  //index_flock.l_type = F_WRLCK;/*Write lock*/
-  //index_flock.l_whence = SEEK_SET;
-  //index_flock.l_start = 0;
-  //index_flock.l_len = 0;/*Lock whole file*/
-
   //lock index file ASAP
-  /*
-    FILE * index_fh = fopen(params.indexfile.c_str(),"a");
-    int index_fd = fileno(index_fh);
-    if ( index_fd == -1 ) 
-    { 
-    std::cerr << "ERROR: could not open " << params.indexfile << '\n';
-    exit(10);
-    }
-    if (fcntl(index_fd, F_SETLKW,&index_flock) == -1) 
-    {
-    std::cerr << "ERROR: could not obtain lock on " << params.indexfile << '\n';
-    exit(10);
-    }
-  */
   ofstream indexstream(params.indexfile.c_str(),ios::out|ios::app);
   file_lock flock(params.indexfile.c_str());
 
-  //  if( params.gzoutput ) 
-  //{
-      gzFile gzout = gzopen(params.hapfile.c_str(),"a");
-      int hapswritten = gzwrite(gzout,popbuffer.str().c_str(),popbuffer.str().size());
-      if ( ! hapswritten && !popbuffer.str().empty() )
-	{
-	  cerr << "Error writing population to " 
-	       << params.hapfile << '\n';
-	  exit(10);
-	}
-      //gzflush(gzout,Z_FINISH);
-      gzclose(gzout);
+  gzFile gzout = gzopen(params.hapfile.c_str(),"a");
+  int hapswritten = gzwrite(gzout,popbuffer.str().c_str(),popbuffer.str().size());
+  if ( ! hapswritten && !popbuffer.str().empty() )
+    {
+      cerr << "Error writing population to " 
+	   << params.hapfile << '\n';
+      exit(10);
+    }
+  gzclose(gzout);
 
-      gzout = gzopen(params.phenofile.c_str(),"a");
-      int phenowritten = gzwrite(gzout,phenobuffer.str().c_str(),phenobuffer.str().size());
-      if ( ! phenowritten && !phenobuffer.str().empty() )
-	{
-	  cerr << "Error writing population to " 
-	       << params.phenofile << '\n';
-	  exit(10);
-	}
-      //gzflush(gzout,Z_FINISH);
-      gzclose(gzout);
+  gzout = gzopen(params.phenofile.c_str(),"a");
+  int phenowritten = gzwrite(gzout,phenobuffer.str().c_str(),phenobuffer.str().size());
+  if ( ! phenowritten && !phenobuffer.str().empty() )
+    {
+      cerr << "Error writing population to " 
+	   << params.phenofile << '\n';
+      exit(10);
+    }
+  gzclose(gzout);
 
-      gzout = gzopen(params.effectsfile.c_str(),"a");
-      int effectwritten = gzwrite(gzout,effectstream.str().c_str(),effectstream.str().size());
-      if ( ! effectwritten && !effectstream.str().empty() )
-	{
-	  cerr << "Error writing population to " 
-	       << params.effectsfile << '\n';
-	  exit(10);
-	}
-      gzclose(gzout);
+  gzout = gzopen(params.effectsfile.c_str(),"a");
+  int effectwritten = gzwrite(gzout,effectstream.str().c_str(),effectstream.str().size());
+  if ( ! effectwritten && !effectstream.str().empty() )
+    {
+      cerr << "Error writing population to " 
+	   << params.effectsfile << '\n';
+      exit(10);
+    }
+  gzclose(gzout);
 
-      //Now we can write to the index file
-      //std::ostringstream indexstream;
-      indexstream << params.replicate_no << ' ' << effectwritten << ' '
-		  << phenowritten << ' ' << hapswritten << '\n';
-      //fprintf(index_fh,"%s\n",indexstream.str().c_str());
-  //   }
-  // else
-  //   {
-  //     FILE * haps_fh = fopen(params.hapfile.c_str(),"a");
-  //     int hapfile_fd = fileno(haps_fh);
-  //     if ( hapfile_fd == -1 ) 
-  // 	{ 
-  // 	  std::cerr << "ERROR: could not open " << params.hapfile << '\n';
-  // 	  exit(10);
-  // 	}
-  //     FILE * pheno_fh = fopen(params.phenofile.c_str(),"a");
-  //     int pheno_fd = fileno(pheno_fh);
-  //     if ( pheno_fd == -1 ) 
-  // 	{ 
-  // 	  std::cerr << "ERROR: could not open " << params.phenofile << '\n';
-  // 	  exit(10);
-  // 	}
-  //     FILE * effect_fh = fopen(params.effectsfile.c_str(),"a");
-  //     int effect_fd = 0;
-  //     effect_fd = fileno(effect_fh);
-  //     if ( effect_fd == -1 ) 
-  // 	{ 
-  // 	  std::cerr << "ERROR: could not open " << params.effectsfile << '\n';
-  // 	  exit(10);
-  // 	}
-  //     //std::ostringstream indexstream;
-  //     indexstream << params.replicate_no << ' ' << ftell(effect_fh) << ' '
-  // 		  << ftell(pheno_fh) << ' ' << ftell(haps_fh) << '\n';
-  //     //fprintf(index_fh,"%s\n",indexstream.str().c_str());
-
-  //     //write the haplotype data
-  //     if ( ::write(hapfile_fd,popbuffer.str().c_str(),popbuffer.str().size()) == -1 )
-  // 	{
-  // 	  cerr << "Error writing to " << params.hapfile << '\n';
-  // 	  exit(errno);
-  // 	}
-  //     //write the phenotype data
-  //     if( ::write(pheno_fd, phenobuffer.str().c_str(), phenobuffer.str().size() ) == -1 )
-  // 	{
-  // 	  cerr << "Error writing to " << params.phenofile << '\n';
-  // 	  exit(errno);
-  // 	}
-  //     //write the effects
-  //     if( ::write( effect_fd, effectstream.str().c_str(), effectstream.str().size() ) == -1 )
-  // 	{
-  // 	  cerr << "Error writing to " << params.effectsfile << '\n';
-  // 	  exit(errno);
-  // 	}
-  //     fflush( haps_fh );
-  //     fclose( haps_fh );
-  //     fflush( pheno_fh );
-  //     fclose( pheno_fh );
-  //     fflush( effect_fh );
-  //     fclose( effect_fh );
-  //   }
+  //Now we can write to the index file
+  indexstream << params.replicate_no << ' ' << effectwritten << ' '
+	      << phenowritten << ' ' << hapswritten << '\n';
   //release the locks
   indexstream.close();
   flock.unlock();
-  /*
-  index_flock.l_type = F_UNLCK;
-  if (fcntl(index_fd, F_UNLCK,&index_flock) == -1) 
-    {
-      std::cerr << "ERROR: could not release lock on " << params.indexfile << '\n';
-      exit(10);
-    }
-  fflush( index_fh );
-  fclose(index_fh);
-  */
   exit(0);
 }
 
@@ -456,7 +353,6 @@ simparams parse_command_line(const int & argc,
     ("effectsfile,E",value<string>(&rv.effectsfile)->default_value(string()),"Name of output file for effect sizes of causative mutations")
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed (unsigned integer)")
     ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.")
-    //("gzout","Output will be in compressed binary.  Default is plain binary.")
     ;
 
   variables_map vm;
@@ -492,11 +388,6 @@ n";
 	}
       rv.model = POPGEN;
     }
-
-  // if(vm.count("gzout"))
-  //   {
-  //     rv.gzoutput=true;
-  //   }
 
   if( vm.count("constant") )
     {

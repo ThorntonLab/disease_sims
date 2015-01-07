@@ -10,20 +10,6 @@ using namespace std;
 
 typedef map<unsigned,long> mul;
 
-//private
-// bool simindex::mono_increasing( const std::vector<long> & v ) const
-// {
-//   bool rv = true;
-//   for( std::vector<long>::const_iterator i = v.begin() + 1 ;
-//        rv == true && i < v.end() ; ++i )
-//     {
-//       if( !( *i > *(i-1) ) )
-// 	{
-// 	  rv=false;
-// 	}
-//     }
-//   return rv;
-// }
 
 //public functions
 simindex::simindex(const char * filename) : e(mul()),

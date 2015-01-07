@@ -62,20 +62,11 @@ int main( int argc, char ** argv )
 
   cerr << options.normalize << '\n';
   gzFile effectsin = gzopen(options.effectfile.c_str(),"r");
-  // ifstream estream( options.effectfile.c_str() );
-  // if( ! estream )
-  //   {
-  //     cerr << "Error, " << options.effectfile << " could not be opened for reading\n";
-  //     exit(10);
-  //   }
 
   //data structures
   sfs meansfs_neut,meansfs_caus;
 
   unsigned nreps = 0;
-  //estream.seekg(0,ios::end);
-  //long eostream = estream.tellg();
-  //estream.seekg(0,ios::beg);
   ifstream indexin(options.indexfile.c_str());
   string temp;
   do
@@ -93,7 +84,6 @@ int main( int argc, char ** argv )
     }
   while(!indexin.eof());
   gzclose(effectsin);
-  //while( estream.tellg() < eostream );
 
   ostringstream obuffer;
   

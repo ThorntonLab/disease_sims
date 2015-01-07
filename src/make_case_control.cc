@@ -39,7 +39,7 @@
   Comments: The index file seeks only to the very beginning of a record.  However,
   once you know the # of controls. cases, and mutations, you can seek around within
   a record easily using standard C or C++ functions as appropriate.
- */
+*/
 
 #include <mutation_with_age.hpp>
 #include <ccintermediate.hpp>
@@ -143,21 +143,10 @@ int main(int argc, char ** argv)
       exit(10);
     }
 
-  //if ( options.gzinput )
-  //  {
   gzFile gzin = gzopen(options.popfile.c_str(),"rb");
   gzseek( gzin, index.hoffset(options.record_no), 0);
   read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
   gzclose(gzin);
-
-  //   }
-  // else
-  //   {
-  //     ifstream popstream( options.popfile.c_str() );
-  //     popstream.seekg( index.hoffset(options.record_no) );
-  //     read_binary_pop( &gametes, &mutations, &diploids, std::bind(mreader(),std::placeholders::_1),popstream );
-  //     popstream.close();
-  //   }
 
   if ( gametes.size() > 2*diploids.size() )
     {
@@ -177,8 +166,6 @@ int main(int argc, char ** argv)
   //Read in the phenotype data
   vector< pair<double,double> > phenotypes;
 
-  //if( options.gzinput )
-  //  {
   gzin = gzopen( options.phenofile.c_str(),"rb" );
   gzseek( gzin, index.poffset(options.record_no), 0);
   unsigned nphenos;
@@ -193,25 +180,6 @@ int main(int argc, char ** argv)
       phenotypes.push_back( make_pair(x,y) );
     }
   gzclose(gzin);
-  //   }
-  // else
-  //   {
-  //     ifstream phenostream( options.phenofile.c_str() );
-  //     phenostream.seekg( index.poffset(options.record_no) );
-      
-  //     unsigned nphenos;
-  //     phenostream.read( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
-  //     for( unsigned i = 0 ; i < nphenos ; ++i )
-  // 	{
-  // 	  //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
-  // 	  //Phenotype of the individual is x+y
-  // 	  double x,y;
-  // 	  phenostream.read( reinterpret_cast<char *>(&x), sizeof(double) );
-  // 	  phenostream.read( reinterpret_cast<char *>(&y), sizeof(double) );
-  // 	  phenotypes.push_back( make_pair(x,y) );
-  // 	}
-  //     phenostream.close();
-  //   }
 
   assert( phenotypes.size() == diploids.size() );
   //The real work starts here
@@ -331,19 +299,6 @@ int main(int argc, char ** argv)
   assert( ccblocks->min_n.size() == ccblocks->neutral.numsites() );
   assert( ccblocks->min_c.size() == ccblocks->causative.numsites() );
   
-  //free up memory
-  
-  /*
-  cerr << "deleting dips " << diploids.size() << ' ';
-  //diploids.clear();
-  cerr << "gams " << gametes.size() << ' ';
-  delete gametes;
-  //gametes.clear();
-  cerr << "muts ";
-  delete mutations;
-  //mutations.clear();
-  cerr << "done\n";
-  */
   //3. Output to buffers
 
   //first, the ccdata to a buffer
@@ -444,20 +399,6 @@ int main(int argc, char ** argv)
   int ai_fd = fileno(ai_fh);
   
   file_lock ai_lock(options.anova_indexfile.c_str());
-  //struct flock ai_lock = get_whole_flock();
-  
-  //make sure our locking functions work...
-  /*
-  assert( ai_lock.l_type == F_WRLCK );
-  assert( ai_lock.l_whence == SEEK_SET );
-  assert( ai_lock.l_start == 0 );
-  assert( ai_lock.l_len == 0 );
-  if (fcntl(ai_fd,F_SETLKW,&ai_lock) == -1)
-    {
-      cerr << "ERROR: could not obtain lock on " << options.anova_indexfile << '\n';
-      exit(10);
-    }
-  */
   ostringstream idbuffer;
   if( !options.idfile.empty() ) //then we want to write the individual id indexes
     {
@@ -473,135 +414,43 @@ int main(int argc, char ** argv)
 	}
     }
 
-  //if( options.gzoutput )
-  //  {
-      gzFile gzout = gzopen( options.anovafile.c_str(),"a" );
-      int written = gzwrite( gzout, ccbuffer.str().c_str(), ccbuffer.str().size() );
-      if(!written)
-	{
-	  cerr << "Error writing to " << options.anovafile << '\n';
-	  exit(10);
-	}
-      //gzflush(gzout,Z_FINISH);
-      gzclose(gzout);
-
-      int idwritten = 0;
-      if( !options.idfile.empty() ) //then we want to write the individual id indexes
-	{
-	  gzout = gzopen( options.idfile.c_str(), "a" );
-	  idwritten = gzwrite( gzout, idbuffer.str().c_str(), ccbuffer.str().size() );
-	  if(! idwritten)
-	    {
-	      cerr << "Error writing to " << options.idfile << '\n';
-	      exit(10);
-	    }
-	  gzclose(gzout);
-	}
-      ostringstream buffer;
-      buffer << options.record_no << ' ' << written;
-      if( !options.idfile.empty() )
-	{
-	  buffer << ' ' << idwritten << '\n';
-	}
-      else 
-	{
-	  buffer << '\n';
-	}
-      if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
-	{
-	  cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
-	  exit(errno);
-	}
-  //   }
-  // else
-  //   {
-  //     FILE * a_fh = fopen(options.anovafile.c_str(),"a"),*id_fh=NULL;
-  //     int a_fd = fileno(a_fh),id_fd=-1;
-  //     ostringstream buffer;
-  //     buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR );
-  //     if (!options.idfile.empty())
-  // 	{
-  // 	  id_fh = fopen(options.idfile.c_str(),"a");
-  // 	  id_fd = fileno(id_fh);
-  // 	  buffer <<' ' << lseek(id_fd,0,SEEK_CUR) << '\n';
-  // 	  if(::write(id_fd,
-  // 		     idbuffer.str().c_str(),
-  // 		     idbuffer.str().size()) == -1 )
-  // 	    {
-  // 	      cerr << "Error on writing buffer to " << options.idfile << '\n';
-  // 	      exit(10);
-  // 	    }
-  // 	  fclose(id_fh);
-  // 	}
-  //     else
-  // 	{
-  // 	  buffer << '\n';
-  // 	}
-  //     if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
-  // 	{
-  // 	  cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
-  // 	  exit(errno);
-  // 	}
-  //     buffer.str(string());
-      
-  //     //write out the CC buffer
-  //     if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
-  // 	{
-  // 	  cerr << "Error on writing buffer to " << options.anovafile << '\n';
-  // 	  exit(errno);
-  // 	}
-  //     fflush(a_fh);
-  //     fclose(a_fh);
-  //   }
-
-  // FILE * a_fh = fopen(options.anovafile.c_str(),"a");
-  // int a_fd = fileno(a_fh);
-  // struct flock a_lock = get_whole_flock();
-  // assert( a_lock.l_type == F_WRLCK );
-  // assert( a_lock.l_whence == SEEK_SET );
-  // assert( a_lock.l_start == 0 );
-  // assert( a_lock.l_len == 0 );
-  // if (fcntl(a_fd,F_SETLKW,&a_lock) == -1)
-  //   {
-  //     cerr << "ERROR: could not obtain lock on " << options.anovafile << '\n';
-  //     exit(10);
-  //   }
-  
-  // ostringstream buffer;
-  // buffer << options.record_no << ' ' << lseek( a_fd, 0, SEEK_CUR ) << '\n';
-  // if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
-  //   {
-  //     cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
-  //     exit(errno);
-  //   }
-  // buffer.str(string());
-  
-  // //write out the CC buffer
-  // if(::write( a_fd, ccbuffer.str().c_str(), ccbuffer.str().size() ) == -1 )
-  //   {
-  //     cerr << "Error on writing buffer to " << options.anovafile << '\n';
-  //     exit(errno);
-  //   }
-  
-  // //Unlock files
-  // a_lock.l_type = F_UNLCK;
-  // if (fcntl(a_fd,F_UNLCK,&a_lock) == -1)
-  //   {
-  //     cerr << "ERROR: could not relesae lock on " << options.anovafile << '\n';
-  //     exit(10);
-  //   }
-  // fflush(a_fh);
-  // fclose(a_fh);
-
-  //release lock on index file
-  /*
-  ai_lock.l_type = F_UNLCK;
-  if (fcntl(ai_fd,F_UNLCK,&ai_lock) == -1)
+  gzFile gzout = gzopen( options.anovafile.c_str(),"a" );
+  int written = gzwrite( gzout, ccbuffer.str().c_str(), ccbuffer.str().size() );
+  if(!written)
     {
-      cerr << "ERROR: could not release lock on " << options.anova_indexfile << '\n';
+      cerr << "Error writing to " << options.anovafile << '\n';
       exit(10);
     }
-  */
+  gzclose(gzout);
+
+  int idwritten = 0;
+  if( !options.idfile.empty() ) //then we want to write the individual id indexes
+    {
+      gzout = gzopen( options.idfile.c_str(), "a" );
+      idwritten = gzwrite( gzout, idbuffer.str().c_str(), ccbuffer.str().size() );
+      if(! idwritten)
+	{
+	  cerr << "Error writing to " << options.idfile << '\n';
+	  exit(10);
+	}
+      gzclose(gzout);
+    }
+  ostringstream buffer;
+  buffer << options.record_no << ' ' << written;
+  if( !options.idfile.empty() )
+    {
+      buffer << ' ' << idwritten << '\n';
+    }
+  else 
+    {
+      buffer << '\n';
+    }
+  if( ::write(ai_fd,buffer.str().c_str(),buffer.str().size()) == -1 )
+    {
+      cerr << "Error on writing buffer to " << options.anova_indexfile << '\n';
+      exit(errno);
+    }
+
   fflush(ai_fh);
   fclose(ai_fh);
   ai_lock.unlock();
@@ -626,8 +475,6 @@ params process_command_line(int argc, char ** argv)
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed")
     ("threshold,t",value<double>(&rv.case_proportion)->default_value(-1.),"Proportion of population to be labelled as putative cases.  Value must be 0 < t < 1. E.g., individuals with phenotypic values larger than the (1-t)th quantile of phenotypic values in the entire population are potential cases.  For example, in Thornton, Foran, and Long (2013), we used t = 0.15, meaning that the upper 15% of phenotypic values were treated as possible cases.")
     ("control-range",value<double>(&rv.crange)->default_value(0.5),"A putatitve control is defined as the population mean phenotype +/- control-range*SD, where SD is the standard deviation of the population phenotype.  Default is what was used in Thornton, Foran, and Long (2013)")
-    //("gzin","Input is gzipped.  Default is to assume uncompressed input.")
-    //("gzout","Write output as gzipped file.  Default is to write uncompressed output.")
     ("ids",value<string>(&rv.idfile)->default_value(string()),"Write individual identifiers to output file name.  Useful of you want to go back to the raw genotype info in the main population file later on.")
     ;
 
@@ -652,14 +499,6 @@ params process_command_line(int argc, char ** argv)
       exit(10);
     }
 
-  // if( vm.count("gzin") )
-  //   {
-  //     rv.gzinput=true;
-  //   }
-  // if(vm.count("gzout"))
-  //   {
-  //     rv.gzoutput = true;
-  //   }
   return rv;
 }
 
