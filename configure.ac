@@ -52,6 +52,7 @@ AC_LANG_SAVE
           AC_CHECK_LIB(sequence, main,,[AC_MSG_ERROR([eecho "libsequence runtime library does not seem to be here";exit 1])])
           AC_CHECK_LIB(boost_system, main,,[AC_MSG_ERROR([echo "boost_system runtime library does not seem to be here";exit 1])])
           AC_CHECK_LIB(boost_program_options, main,,[AC_MSG_ERROR([eecho "boost_program_options runtime library does not seem to be here";exit 1])])
+          AC_CHECK_LIB(boost_serialization, main,,[AC_MSG_ERROR([eecho "boost_serialization runtime library does not seem to be here";exit 1])])
 AC_LANG_RESTORE
 
 dnl AM_CONFIG_HEADER(config.h)
