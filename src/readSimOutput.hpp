@@ -22,4 +22,5 @@ recOffsets read_index( const char * idxfile,
 		       const unsigned & record_no );
 
 std::vector<effectFileData> read_effect_file( gzFile in );
+std::vector< std::pair<double,double> > read_phenotypes(const char * fn, z_off_t offset);
 #endif

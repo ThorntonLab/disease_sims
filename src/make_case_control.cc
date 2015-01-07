@@ -62,13 +62,13 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options.hpp>
 
-#include <gsl/gsl_statistics.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
 #include <fwdpp/IO.hpp>
 #include <fwdpp/sampling_functions.hpp>
 
+#include <readSimOutput.hpp>
 
 using namespace std;
 using namespace Sequence;
@@ -104,8 +104,6 @@ params::params() : indexfile(string()),
 }
 
 params process_command_line(int argc, char ** argv);
-
-std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, const double & case_proportion, double * cutoff);
 
 int main(int argc, char ** argv)
 {
@@ -161,22 +159,8 @@ int main(int argc, char ** argv)
     }
 
   //Read in the phenotype data
-  vector< pair<double,double> > phenotypes;
-
-  gzin = gzopen( options.phenofile.c_str(),"rb" );
-  gzseek( gzin, index.poffset(options.record_no), 0);
-  unsigned nphenos;
-  gzread(gzin,&nphenos,sizeof(unsigned));
-  for(unsigned i = 0 ; i < nphenos ; ++i )
-    {
-      //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
-      //Phenotype of the individual is x+y
-      double x,y;
-      gzread(gzin,&x,sizeof(double));
-      gzread(gzin,&y,sizeof(double)); 
-      phenotypes.push_back( make_pair(x,y) );
-    }
-  gzclose(gzin);
+  vector< pair<double,double> > phenotypes = read_phenotypes(options.phenofile.c_str(),
+							     index.poffset(options.record_no));
 
   assert( phenotypes.size() == diploids.size() );
   //The real work starts here
@@ -192,29 +176,7 @@ int main(int argc, char ** argv)
     putative control = phenotype within mean +/- sd of population distribution
   */
   vector< size_t > put_cases,put_controls;
-
-  for( size_t i = 0 ; i < phenotypes.size() ; ++i )
-    {
-      const double P = phenotypes[i].first+phenotypes[i].second;
-      if( P >= cutoff )
-	{
-	  put_cases.push_back(i);
-	}
-      /*
-	Issue alert!!!
-	TFL (2013) claim that "controls are within 1 standard
-	deviation of the mean", by which they mean in terms of phenotype.
-	
-	Well, that was technically true, but a problem for reproducibility
-	because our code to make case/control panels required that a putative
-	control's phenotype be within 0.5*sd of population mean phenotype!!!
-      */
-      else if ( P >= mean_sd.first - options.crange*mean_sd.second &&
-		P <= mean_sd.first + options.crange*mean_sd.second )
-	{
-	  put_controls.push_back(i);
-	}
-    }
+  grab_putative_CC(mean_sd,phenotypes,options.crange,cutoff,put_controls,put_cases);
 
   /*
     Check: do putative cases and controls overlap?
@@ -223,9 +185,6 @@ int main(int argc, char ** argv)
 
     If not, we warn that the CC data may be invalid, as cases and controls will share individuals.
   */
-
-  sort( put_controls.begin(), put_controls.end() );
-  sort( put_cases.begin(), put_cases.end() );
 
   vector< size_t > isect;
   set_intersection( put_controls.begin(),
@@ -300,91 +259,7 @@ int main(int argc, char ** argv)
 
   //first, the ccdata to a buffer
   ostringstream ccbuffer;
-  ccbuffer.write( reinterpret_cast<char *>(&options.ncontrols),sizeof(unsigned) );
-  ccbuffer.write( reinterpret_cast<char *>(&options.ncases),sizeof(unsigned) );
-  unsigned temp = ccblocks->neutral.numsites();
-  ccbuffer.write( reinterpret_cast<char *>(&temp),sizeof(unsigned) );
-  temp = ccblocks->causative.numsites();
-  ccbuffer.write( reinterpret_cast<char *>(&temp),sizeof(unsigned) );
-
-  for( SimData::const_pos_iterator p = ccblocks->neutral.pbegin() ; 
-       p < ccblocks->neutral.pend() ; ++p )
-    {
-      double x = *p;
-      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
-    }
-
-  for( SimData::const_pos_iterator p = ccblocks->causative.pbegin() ; 
-       p < ccblocks->causative.pend() ; ++p )
-    {
-      double x = *p;
-      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
-    }
-
-  //iterate over the diploids and write block for association tests
-  for( unsigned ind = 0 ; ind < ccblocks->neutral.size() ; ind += 2 ) 
-    {
-      vector<unsigned> ones,twos;
-      //neutral genotypes for this individual
-      for( unsigned site = 0 ; site < ccblocks->neutral.numsites() ; ++site )
-	{
-	  //count # copies of minor allele at this site in this individual
-	  unsigned cminor = ( (ccblocks->neutral[ind][site] == ccblocks->min_n[site]) ? 1 : 0 ) +
-	    ( (ccblocks->neutral[ind+1][site] == ccblocks->min_n[site]) ? 1 : 0 );
-	  if( cminor==1 )
-	    {
-	      ones.push_back(site);
-	    }
-	  else if ( cminor == 2 )
-	    {
-	      twos.push_back(site);
-	    }
-	  //ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
-	}
-      //causative genotypes for this individual
-      for( unsigned site = 0 ; site < ccblocks->causative.numsites() ; ++site )
-	{
-	  //count # copies of minor allele at this site in this individual
-	  unsigned cminor = ( (ccblocks->causative[ind][site] == ccblocks->min_c[site]) ? 1 : 0 ) +
-	    ( (ccblocks->causative[ind+1][site] == ccblocks->min_c[site]) ? 1 : 0 );
-	  //ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
-	  if( cminor==1 )
-	    {
-	      ones.push_back(ccblocks->neutral.numsites()+site);
-	    }
-	  else if ( cminor == 2 )
-	    {
-	      twos.push_back(ccblocks->neutral.numsites()+site);
-	    }
-	}
-      //update the buffer
-      unsigned n = ones.size();
-      ccbuffer.write( reinterpret_cast<char *>(&n),sizeof(unsigned) );
-      ccbuffer.write( reinterpret_cast<char *>(&ones[0]),n*sizeof(unsigned) );
-      n = twos.size();
-      ccbuffer.write( reinterpret_cast<char *>(&n),sizeof(unsigned) );
-      ccbuffer.write( reinterpret_cast<char *>(&twos[0]),n*sizeof(unsigned) );
-    }
-
-  //Now, output # of causative mutations on each haplotype carried by this diploid
-  for( unsigned ind = 0 ; ind < ccblocks->causative.size() ; ind += 2 ) 
-    {
-      unsigned ncaus = count( ccblocks->causative[ind].begin(),
-			      ccblocks->causative[ind].end(),'1' );
-      ccbuffer.write( reinterpret_cast<char *>(&ncaus), sizeof(unsigned) );
-      ncaus = count( ccblocks->causative[ind+1].begin(),
-		     ccblocks->causative[ind+1].end(),'1' );
-      ccbuffer.write( reinterpret_cast<char *>(&ncaus), sizeof(unsigned) );
-    }
-  //Give phenos of controls & cases
-  for( vector< pair<double,double> >::const_iterator i = ccblocks->phenotypes.begin() ; 
-       i != ccblocks->phenotypes.end() ; ++i )
-    {
-      double x = i->first;
-      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
-      x = i->second;
-      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
-    }
+  ccbuffer << *ccblocks;
 
   //free up RAM
   delete ccblocks;
@@ -590,16 +465,4 @@ bool params::params_ok( void ) const
   return ok;
 }
 
-std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, const double & case_proportion, double * cutoff)
-{
-  vector<double> pcopy;
-  for(unsigned i=0;i<phenos.size();++i)
-    {
-      pcopy.push_back(phenos[i].first+phenos[i].second);
-    }
-  sort(pcopy.begin(),pcopy.end());
-  //get the upper case_proportion-th'd quantile from the pheno dist
-  *cutoff = gsl_stats_quantile_from_sorted_data(&pcopy[0],1,pcopy.size(),1.-case_proportion);
-  return std::make_pair( gsl_stats_mean(&pcopy[0],1,pcopy.size()),
-			 gsl_stats_sd(&pcopy[0],1,pcopy.size()) );
-}
+

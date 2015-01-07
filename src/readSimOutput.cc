@@ -52,3 +52,23 @@ vector<effectFileData> read_effect_file( gzFile in )
     }
   return rv;
 }
+
+std::vector< std::pair<double,double> > read_phenotypes(const char * fn, z_off_t offset)
+{
+  std::vector< std::pair<double,double> > phenotypes;
+  gzFile gzin = gzopen( fn,"rb" );
+  gzseek( gzin, offset, 0);
+  unsigned nphenos;
+  gzread(gzin,&nphenos,sizeof(unsigned));
+  for(unsigned i = 0 ; i < nphenos ; ++i )
+    {
+      //x is the genetic contribution to phenotype. y is the Gaussian noise from the simulation.
+      //Phenotype of the individual is x+y
+      double x,y;
+      gzread(gzin,&x,sizeof(double));
+      gzread(gzin,&y,sizeof(double)); 
+      phenotypes.push_back( make_pair(x,y) );
+    }
+  gzclose(gzin);
+  return phenotypes;
+}

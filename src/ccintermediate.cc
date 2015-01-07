@@ -4,6 +4,8 @@
 #include <fwdpp/sampling_functions.hpp>
 #include <cassert>
 
+#include <gsl/gsl_statistics.h>
+
 using namespace std;
 
 cc_intermediate::cc_intermediate(void) : neutral(Sequence::SimData()),
@@ -12,6 +14,101 @@ cc_intermediate::cc_intermediate(void) : neutral(Sequence::SimData()),
 					 min_c( vector<char>() ),
 					 phenotypes( vector<pair<double,double> >() )
 {
+}
+
+std::ostream & cc_intermediate::buffer( std::ostream & ccbuffer ) const
+{
+  ccbuffer.write( reinterpret_cast<const char *>(&ncontrols),sizeof(unsigned) );
+  ccbuffer.write( reinterpret_cast<const char *>(&ncases),sizeof(unsigned) );
+  unsigned temp = neutral.numsites();
+  ccbuffer.write( reinterpret_cast<char *>(&temp),sizeof(unsigned) );
+  temp = causative.numsites();
+  ccbuffer.write( reinterpret_cast<char *>(&temp),sizeof(unsigned) );
+
+  for( Sequence::SimData::const_pos_iterator p = neutral.pbegin() ; 
+       p < neutral.pend() ; ++p )
+    {
+      double x = *p;
+      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+    }
+
+  for( Sequence::SimData::const_pos_iterator p = causative.pbegin() ; 
+       p < causative.pend() ; ++p )
+    {
+      double x = *p;
+      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+    }
+
+  //iterate over the diploids and write block for association tests
+  for( unsigned ind = 0 ; ind < neutral.size() ; ind += 2 ) 
+    {
+      vector<unsigned> ones,twos;
+      //neutral genotypes for this individual
+      for( unsigned site = 0 ; site < neutral.numsites() ; ++site )
+	{
+	  //count # copies of minor allele at this site in this individual
+	  unsigned cminor = ( (neutral[ind][site] == min_n[site]) ? 1 : 0 ) +
+	    ( (neutral[ind+1][site] == min_n[site]) ? 1 : 0 );
+	  if( cminor==1 )
+	    {
+	      ones.push_back(site);
+	    }
+	  else if ( cminor == 2 )
+	    {
+	      twos.push_back(site);
+	    }
+	  //ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
+	}
+      //causative genotypes for this individual
+      for( unsigned site = 0 ; site < causative.numsites() ; ++site )
+	{
+	  //count # copies of minor allele at this site in this individual
+	  unsigned cminor = ( (causative[ind][site] == min_c[site]) ? 1 : 0 ) +
+	    ( (causative[ind+1][site] == min_c[site]) ? 1 : 0 );
+	  //ccbuffer.write( reinterpret_cast<char *>(&cminor), sizeof(unsigned) );
+	  if( cminor==1 )
+	    {
+	      ones.push_back(neutral.numsites()+site);
+	    }
+	  else if ( cminor == 2 )
+	    {
+	      twos.push_back(neutral.numsites()+site);
+	    }
+	}
+      //update the buffer
+      unsigned n = ones.size();
+      ccbuffer.write( reinterpret_cast<char *>(&n),sizeof(unsigned) );
+      ccbuffer.write( reinterpret_cast<char *>(&ones[0]),n*sizeof(unsigned) );
+      n = twos.size();
+      ccbuffer.write( reinterpret_cast<char *>(&n),sizeof(unsigned) );
+      ccbuffer.write( reinterpret_cast<char *>(&twos[0]),n*sizeof(unsigned) );
+    }
+
+  //Now, output # of causative mutations on each haplotype carried by this diploid
+  for( unsigned ind = 0 ; ind < causative.size() ; ind += 2 ) 
+    {
+      unsigned ncaus = count( causative[ind].begin(),
+			      causative[ind].end(),'1' );
+      ccbuffer.write( reinterpret_cast<char *>(&ncaus), sizeof(unsigned) );
+      ncaus = count( causative[ind+1].begin(),
+		     causative[ind+1].end(),'1' );
+      ccbuffer.write( reinterpret_cast<char *>(&ncaus), sizeof(unsigned) );
+    }
+  //Give phenos of controls & cases
+  for( vector< pair<double,double> >::const_iterator i = phenotypes.begin() ; 
+       i != phenotypes.end() ; ++i )
+    {
+      double x = i->first;
+      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+      x = i->second;
+      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+    }
+  return ccbuffer;
+}
+
+std::ostream & operator<<(std::ostream & o, const cc_intermediate & b )
+{
+  return b.buffer(o);
 }
 
 //called by process_subset to update data blocks
@@ -181,6 +278,8 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 				    const unsigned & ncases)
 {
   cc_intermediate rv;
+  rv.ncontrols = ncontrols;
+  rv.ncases = ncases;
 
   /*
     vector of position,genotype pairs. 
@@ -263,4 +362,54 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
       rv.min_c.push_back( (c < rv.causative.size()/2) ? '1' : '0' );
     }
   return rv;
+}
+
+std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, const double & case_proportion, double * cutoff)
+{
+  vector<double> pcopy;
+  for(unsigned i=0;i<phenos.size();++i)
+    {
+      pcopy.push_back(phenos[i].first+phenos[i].second);
+    }
+  sort(pcopy.begin(),pcopy.end());
+  //get the upper case_proportion-th'd quantile from the pheno dist
+  *cutoff = gsl_stats_quantile_from_sorted_data(&pcopy[0],1,pcopy.size(),1.-case_proportion);
+  return std::make_pair( gsl_stats_mean(&pcopy[0],1,pcopy.size()),
+			 gsl_stats_sd(&pcopy[0],1,pcopy.size()) );
+}
+
+void grab_putative_CC( const pair<double,double> & mean_sd,
+		      const vector<pair<double,double> > & phenotypes,
+		      const double & crange,
+		      const double & cutoff,
+		      std::vector<size_t> & put_controls,
+		      std::vector<size_t> & put_cases )
+{
+  put_controls.clear();
+  put_cases.clear();
+  for( size_t i = 0 ; i < phenotypes.size() ; ++i )
+    {
+      const double P = phenotypes[i].first+phenotypes[i].second;
+      if( P >= cutoff )
+	{
+	  put_cases.push_back(i);
+	}
+      /*
+	Issue alert!!!
+	TFL (2013) claim that "controls are within 1 standard
+	deviation of the mean", by which they mean in terms of phenotype.
+	
+	Well, that was technically true, but a problem for reproducibility
+	because our code to make case/control panels required that a putative
+	control's phenotype be within 0.5*sd of population mean phenotype!!!
+      */
+      else if ( P >= mean_sd.first - crange*mean_sd.second &&
+		P <= mean_sd.first + crange*mean_sd.second )
+	{
+	  put_controls.push_back(i);
+	}
+    }
+
+  sort( put_controls.begin(), put_controls.end() );
+  sort( put_cases.begin(), put_cases.end() );
 }
