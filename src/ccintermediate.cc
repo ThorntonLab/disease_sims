@@ -12,7 +12,9 @@ cc_intermediate::cc_intermediate(void) : neutral(Sequence::SimData()),
 					 causative(Sequence::SimData()),
 					 min_n( vector<char>() ),
 					 min_c( vector<char>() ),
-					 phenotypes( vector<pair<double,double> >() )
+					 G ( vector<double>() ),
+					 E ( vector<double>() )
+					 //phenotypes( vector<pair<double,double> >() )
 {
 }
 
@@ -95,14 +97,19 @@ std::ostream & cc_intermediate::buffer( std::ostream & ccbuffer ) const
       ccbuffer.write( reinterpret_cast<char *>(&ncaus), sizeof(unsigned) );
     }
   //Give phenos of controls & cases
-  for( vector< pair<double,double> >::const_iterator i = phenotypes.begin() ; 
-       i != phenotypes.end() ; ++i )
+  for(unsigned i = 0 ; i < G.size() ; ++i )
     {
-      double x = i->first;
-      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
-      x = i->second;
-      ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+      ccbuffer.write(reinterpret_cast<const char *>(&G[i]),sizeof(double));
+      ccbuffer.write(reinterpret_cast<const char *>(&E[i]),sizeof(double));
     }
+  // for( vector< pair<double,double> >::const_iterator i = phenotypes.begin() ; 
+  //      i != phenotypes.end() ; ++i )
+  //   {
+  //     double x = i->first;
+  //     ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+  //     x = i->second;
+  //     ccbuffer.write( reinterpret_cast<char *>(&x),sizeof(double) );
+  //   }
   return ccbuffer;
 }
 
@@ -164,7 +171,9 @@ void update_block( glist::const_iterator::value_type::mutation_container::const_
 
 void process_subset( vector< pair<double,string> > & datablock_neut,
 		     vector< pair<double,string> > & datablock_sel,
-		     vector< pair<double,double> > & ccphenos,
+		     //vector< pair<double,double> > &cphenos,
+		     vector<double> & ccG,
+		     vector<double> & ccE,
 		     const vector< pair<glist::iterator,glist::iterator> > & diploids,
 		     const vector<pair<double,double> > & popphenos,
 		     const vector<size_t> & indlist,
@@ -177,7 +186,9 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
     {
       assert( i < maxnum );
       assert(indlist[i] < diploids.size());
-      ccphenos.push_back( popphenos[ indlist[i] ] );
+      //ccphenos.push_back( popphenos[ indlist[i] ] );
+      ccG.push_back( popphenos[ indlist[i] ].first );
+      ccE.push_back( popphenos[ indlist[i] ].second );
       update_block(  diploids[ indlist[i] ].first->mutations.begin(),
 		     diploids[ indlist[i] ].first->mutations.end(),
 		     diploids[ indlist[i] ].second->mutations.begin(),
@@ -295,7 +306,7 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 
   //Go thru controls first
   process_subset( neutral, selected,
-		  rv.phenotypes,
+		  rv.G,rv.E,
 		  diploids,
 		  phenotypes,
 		  put_controls,
@@ -304,7 +315,7 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 		  0 );
   //cases
   process_subset( neutral, selected,
-		  rv.phenotypes,
+		  rv.G,rv.E,
 		  diploids,
 		  phenotypes,
 		  put_cases,
