@@ -154,6 +154,15 @@ DataFrame getEsizes( const char * filename,
 //' Sample a case/control panel from a population.
 //' This is used for "on the fly" analysis in place of the make_case_control program,
 //' for cases where the user may not want to write a case/control panel to file.
+//' @param popfilename  The name of the population file (gzipped, binary)
+//' @param offset  The offset of the record in popfilename
+//' @param phenofilename The name of the file recording phenotypes (gzipped, binary)
+//' @param phenooffset The offset of the record in phenofilename
+//' @param ncontrols The number of controls to sample
+//' @param ncases The number of cases to sample
+//' @param case_proportion The incidence of the disease.  Thus, an individual whose trait value is >= the 1 - case_proportion'th quantile of trait values in the population is a potential case
+//' @param control_range A putative control individual is defined as mean +/- control_range*sd, where mean and sd refer to the distribution of the phenotype in the entire population.
+//' @param seed Random number seed
 // [[Rcpp::export]]
 List sampleCCfromPop( const char * popfilename,
 		      const unsigned long & offset,
