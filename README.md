@@ -37,6 +37,10 @@ To install the simulation in your user's $HOME:
 
 The above may be mixed and matched as needed.
 
+##Notes
+
+On many systems, LD_LIBRARY_PATH may be needed to run make_case_control.
+
 #Example workflow on UCI HPC
 
 See the scripts in the workflow directory.
