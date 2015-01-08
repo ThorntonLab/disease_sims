@@ -13,9 +13,10 @@ AC_PROG_CXX
 
 AM_MAINTAINER_MODE([disable])
 
+LT_INIT
+AC_PROG_LIBTOOL
 AC_LANG(C++)
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
-AC_PROG_RANLIB
 AC_CONFIG_FILES([Makefile diseaseSims/Makefile src/Makefile])
 
 AC_ARG_ENABLE([standard],AS_HELP_STRING([--enable-standard],[Disable use of boost containers.]))

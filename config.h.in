@@ -3,12 +3,19 @@
 /* define if the compiler supports basic C++11 syntax */
 #undef HAVE_CXX11
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Define to 1 if you have the `boost_program_options' library
    (-lboost_program_options). */
 #undef HAVE_LIBBOOST_PROGRAM_OPTIONS
+
+/* Define to 1 if you have the `boost_serialization' library
+   (-lboost_serialization). */
+#undef HAVE_LIBBOOST_SERIALIZATION
 
 /* Define to 1 if you have the `boost_system' library (-lboost_system). */
 #undef HAVE_LIBBOOST_SYSTEM
@@ -27,6 +34,9 @@
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* "Sequence::SimData has direct access to underlying data" */
+#undef HAVE_SEQUENCE_COALSIM
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -48,6 +58,10 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
 
 /* Name of package */
 #undef PACKAGE
