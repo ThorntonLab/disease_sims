@@ -52,3 +52,8 @@ Calculates statistics relatated to the deleterious mutation load in the entire p
 ##CCburden
 
 Calculates statistics related to the deleterous mutation load in a case/control panel.
+
+
+#Important links:
+
+* PCGC software: https://sites.google.com/site/davidgolanshomepage/software/pcgc
