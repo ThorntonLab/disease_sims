@@ -21,7 +21,7 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options.hpp>
 
-#include <mutation_with_age.hpp>
+#include <diseaseSims/mutation_with_age.hpp>
 //#include <locking_routines.hpp>
 
 using namespace std;

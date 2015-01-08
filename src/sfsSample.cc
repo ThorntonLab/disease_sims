@@ -10,7 +10,7 @@
 
 #include <fwdpp/diploid.hh>
 #include <boost/program_options.hpp>
-#include <mutation_with_age.hpp>
+#include <diseaseSims/mutation_with_age.hpp>
 
 using namespace std;
 using namespace KTfwd;

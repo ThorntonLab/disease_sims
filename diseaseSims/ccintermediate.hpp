@@ -6,7 +6,7 @@
 #include <functional>
 #include <iosfwd>
 #include <Sequence/SimData.hpp>
-#include <mutation_with_age.hpp>
+#include <diseaseSims/mutation_with_age.hpp>
 #include <zlib.h>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>

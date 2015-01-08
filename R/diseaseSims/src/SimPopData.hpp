@@ -1,7 +1,7 @@
 #ifndef __SIMPOPDATA_HPP__
 #define __SIMPOPDATA_HPP__
 
-#include <mutation_with_age.hpp>
+#include <diseaseSims/mutation_with_age.hpp>
 
 class SimPopData
 {
@@ -11,7 +11,8 @@ private:
 public:
   mlist mutations;
   glist gametes;
-  typedef boost::container::vector< std::pair<glist::iterator,glist::iterator> > dips;
+  //typedef boost::container::vector< std::pair<glist::iterator,glist::iterator> > dips;
+  typedef std::vector< std::pair<glist::iterator,glist::iterator> > dips;
   dips diploids;
 
   SimPopData(const std::string & filename,
@@ -26,5 +27,8 @@ public:
   Rcpp::List selectedGenotype(const size_t & i) const;
   dips::size_type popsize() const;
 };
+
+Rcpp::NumericMatrix getPheno(const char * filename,
+			     const unsigned long & offset);
 
 #endif

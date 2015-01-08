@@ -1,7 +1,7 @@
 //Validates simulation output using the index file
 //So far only checks number of mutations
 
-#include <mutation_with_age.hpp>
+#include <diseaseSims/mutation_with_age.hpp>
 #include <simindex.hpp>
 #include <fwdpp/IO.hpp>
 #include <zlib.h>

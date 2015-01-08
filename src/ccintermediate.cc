@@ -1,5 +1,5 @@
 #include <diseaseSims/ccintermediate.hpp>
-#include <mutation_with_age.hpp>
+#include <diseaseSims/mutation_with_age.hpp>
 #include <Sequence/PolyTableFunctions.hpp>
 #include <fwdpp/sampling_functions.hpp>
 #include <cassert>
@@ -211,74 +211,74 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
       //Old code replaced by update_block
       //neutral
       for( unsigned mut = 0 ; mut < diploids[ indlist[i] ].first->mutations.size() ; ++mut )
-	{
-	  double mutpos =  diploids[ indlist[i] ].first->mutations[mut]->pos;
-	  itr = find_if(datablock_neut.begin(),
-			datablock_neut.end(),
-			std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
-	  if( itr == datablock_neut.end() )
-	    {
-	      datablock_neut.push_back( make_pair(mutpos,string(ttl,'0')) );
-	      datablock_neut[datablock_neut.size()-1].second[offset + 2*i] = '1';
-	    }
-	  else
-	    {
-	      assert(offset+2*i < itr->second.size());
-	      itr->second[offset + 2*i] = '1';
-	    }
-	}
+      {
+      double mutpos =  diploids[ indlist[i] ].first->mutations[mut]->pos;
+      itr = find_if(datablock_neut.begin(),
+      datablock_neut.end(),
+      std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
+      if( itr == datablock_neut.end() )
+      {
+      datablock_neut.push_back( make_pair(mutpos,string(ttl,'0')) );
+      datablock_neut[datablock_neut.size()-1].second[offset + 2*i] = '1';
+      }
+      else
+      {
+      assert(offset+2*i < itr->second.size());
+      itr->second[offset + 2*i] = '1';
+      }
+      }
       for( unsigned mut = 0 ; mut < diploids[ indlist[i] ].second->mutations.size() ; ++mut )
-	{
-	  double mutpos =  diploids[ indlist[i] ].second->mutations[mut]->pos;
-	  itr = find_if(datablock_neut.begin(),
-			datablock_neut.end(),
-			std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
-	  if( itr == datablock_neut.end() )
-	    {
-	      datablock_neut.push_back( make_pair(mutpos,string(ttl,'0')) );
-	      datablock_neut[datablock_neut.size()-1].second[2*i + 1] = '1';
-	    }
-	  else
-	    {
-	      assert( (offset + 2*i + 1) < itr->second.size() );
-	      itr->second[offset + 2*i + 1] = '1';
-	    }
-	}
+      {
+      double mutpos =  diploids[ indlist[i] ].second->mutations[mut]->pos;
+      itr = find_if(datablock_neut.begin(),
+      datablock_neut.end(),
+      std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
+      if( itr == datablock_neut.end() )
+      {
+      datablock_neut.push_back( make_pair(mutpos,string(ttl,'0')) );
+      datablock_neut[datablock_neut.size()-1].second[2*i + 1] = '1';
+      }
+      else
+      {
+      assert( (offset + 2*i + 1) < itr->second.size() );
+      itr->second[offset + 2*i + 1] = '1';
+      }
+      }
       //selected
       for( unsigned mut = 0 ; mut < diploids[ indlist[i] ].first->smutations.size() ; ++mut )
-	{
-	  double mutpos =  diploids[ indlist[i] ].first->smutations[mut]->pos;
-	  itr = find_if(datablock_sel.begin(),
-			datablock_sel.end(),
-			std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
-	  if( itr == datablock_sel.end() )
-	    {
-	      datablock_sel.push_back( make_pair(mutpos,string(ttl,'0')) );
-	      datablock_sel[datablock_sel.size()-1].second[offset + 2*i] = '1';
-	    }
-	  else
-	    {
-	      assert( offset+2*i < itr->second.size() );
-	      itr->second[offset+2*i] = '1';
-	    }
-	}
+      {
+      double mutpos =  diploids[ indlist[i] ].first->smutations[mut]->pos;
+      itr = find_if(datablock_sel.begin(),
+      datablock_sel.end(),
+      std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
+      if( itr == datablock_sel.end() )
+      {
+      datablock_sel.push_back( make_pair(mutpos,string(ttl,'0')) );
+      datablock_sel[datablock_sel.size()-1].second[offset + 2*i] = '1';
+      }
+      else
+      {
+      assert( offset+2*i < itr->second.size() );
+      itr->second[offset+2*i] = '1';
+      }
+      }
       for( unsigned mut = 0 ; mut < diploids[ indlist[i] ].second->smutations.size() ; ++mut )
-	{
-	  double mutpos =  diploids[ indlist[i] ].second->smutations[mut]->pos;
-	  itr = find_if(datablock_sel.begin(),
-			datablock_sel.end(),
-			std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
-	  if( itr == datablock_sel.end() )
-	    {
-	      datablock_sel.push_back( make_pair(mutpos,string(ttl,'0')) );
-	      datablock_sel[datablock_sel.size()-1].second[2*i + 1] = '1';
-	    }
-	  else
-	    {
-	      assert( (offset + 2*i + 1) < itr->second.size() );
-	      itr->second[offset + 2*i + 1] = '1';
-	    }
-	}
+      {
+      double mutpos =  diploids[ indlist[i] ].second->smutations[mut]->pos;
+      itr = find_if(datablock_sel.begin(),
+      datablock_sel.end(),
+      std::bind(KTfwd::find_mut_pos(),std::placeholders::_1,mutpos));
+      if( itr == datablock_sel.end() )
+      {
+      datablock_sel.push_back( make_pair(mutpos,string(ttl,'0')) );
+      datablock_sel[datablock_sel.size()-1].second[2*i + 1] = '1';
+      }
+      else
+      {
+      assert( (offset + 2*i + 1) < itr->second.size() );
+      itr->second[offset + 2*i + 1] = '1';
+      }
+      }
       */
     }
 }
@@ -326,8 +326,8 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 		  2*ncontrols);
 
   sort( neutral.begin(), neutral.end(), 
-		[](std::pair<double,std::string> lhs,
-		   std::pair<double,std::string> rhs) { return lhs.first < rhs.first; });
+	[](std::pair<double,std::string> lhs,
+	   std::pair<double,std::string> rhs) { return lhs.first < rhs.first; });
   //std::bind(KTfwd::sortpos(),std::placeholders::_1,std::placeholders::_2) );
   sort( selected.begin(), selected.end(), 
 	[](std::pair<double,std::string> lhs,
@@ -344,17 +344,17 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 
   //The block below deterimines minor allele based on controls
   /*
-  for( Sequence::SimData::const_site_iterator i = rv.neutral.sbegin() ; 
-       i < rv.neutral.send() ; ++i )
+    for( Sequence::SimData::const_site_iterator i = rv.neutral.sbegin() ; 
+    i < rv.neutral.send() ; ++i )
     {
-      size_t c = count(i->second.begin(),i->second.begin() + 2*ncontrols,'1');
-      rv.min_n.push_back( (c < ncontrols) ? '1' : '0' );
+    size_t c = count(i->second.begin(),i->second.begin() + 2*ncontrols,'1');
+    rv.min_n.push_back( (c < ncontrols) ? '1' : '0' );
     }
-  for( Sequence::SimData::const_site_iterator i = rv.causative.sbegin() ; 
-       i < rv.causative.send() ; ++i )
+    for( Sequence::SimData::const_site_iterator i = rv.causative.sbegin() ; 
+    i < rv.causative.send() ; ++i )
     {
-      size_t c = count(i->second.begin(),i->second.begin() + 2*ncontrols,'1');
-      rv.min_c.push_back( (c < ncontrols) ? '1' : '0' );
+    size_t c = count(i->second.begin(),i->second.begin() + 2*ncontrols,'1');
+    rv.min_c.push_back( (c < ncontrols) ? '1' : '0' );
     }
   */
 
@@ -392,11 +392,11 @@ std::pair<double,double> phenosums(const vector<pair<double,double> > & phenos, 
 }
 
 void grab_putative_CC( const pair<double,double> & mean_sd,
-		      const vector<pair<double,double> > & phenotypes,
-		      const double & crange,
-		      const double & cutoff,
-		      std::vector<unsigned> & put_controls,
-		      std::vector<unsigned> & put_cases )
+		       const vector<pair<double,double> > & phenotypes,
+		       const double & crange,
+		       const double & cutoff,
+		       std::vector<unsigned> & put_controls,
+		       std::vector<unsigned> & put_cases )
 {
   put_controls.clear();
   put_cases.clear();

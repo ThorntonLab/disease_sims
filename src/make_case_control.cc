@@ -41,7 +41,7 @@
   a record easily using standard C or C++ functions as appropriate.
 */
 
-#include <mutation_with_age.hpp>
+#include <diseaseSims/mutation_with_age.hpp>
 #include <diseaseSims/ccintermediate.hpp>
 #include <simindex.hpp>
 //#include <locking_routines.hpp>
@@ -177,6 +177,7 @@ int main(int argc, char ** argv)
   */
   vector< unsigned > put_cases,put_controls;
   grab_putative_CC(mean_sd,phenotypes,options.crange,cutoff,put_controls,put_cases);
+
 
   /*
     Check: do putative cases and controls overlap?

@@ -21,6 +21,29 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// sampleCCfromPop
+List sampleCCfromPop(const char * popfilename, const unsigned long& offset, const char * phenofilename, const unsigned long& phenooffset, const unsigned& ncontrols, const unsigned& ncases, const double& case_proportion, const double& control_range, const unsigned& seed);
+RcppExport SEXP diseaseSims_sampleCCfromPop(SEXP popfilenameSEXP, SEXP offsetSEXP, SEXP phenofilenameSEXP, SEXP phenooffsetSEXP, SEXP ncontrolsSEXP, SEXP ncasesSEXP, SEXP case_proportionSEXP, SEXP control_rangeSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< const char * >::type popfilename(popfilenameSEXP );
+        Rcpp::traits::input_parameter< const unsigned long& >::type offset(offsetSEXP );
+        Rcpp::traits::input_parameter< const char * >::type phenofilename(phenofilenameSEXP );
+        Rcpp::traits::input_parameter< const unsigned long& >::type phenooffset(phenooffsetSEXP );
+        Rcpp::traits::input_parameter< const unsigned& >::type ncontrols(ncontrolsSEXP );
+        Rcpp::traits::input_parameter< const unsigned& >::type ncases(ncasesSEXP );
+        Rcpp::traits::input_parameter< const double& >::type case_proportion(case_proportionSEXP );
+        Rcpp::traits::input_parameter< const double& >::type control_range(control_rangeSEXP );
+        Rcpp::traits::input_parameter< const unsigned& >::type seed(seedSEXP );
+        List __result = sampleCCfromPop(popfilename, offset, phenofilename, phenooffset, ncontrols, ncases, case_proportion, control_range, seed);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // getCCblock
 List getCCblock(const char * filename, const unsigned long& offset);
 RcppExport SEXP diseaseSims_getCCblock(SEXP filenameSEXP, SEXP offsetSEXP) {

@@ -8,6 +8,13 @@ getEsizes <- function(filename, offset) {
     .Call('diseaseSims_getEsizes', PACKAGE = 'diseaseSims', filename, offset)
 }
 
+#' Sample a case/control panel from a population.
+#' This is used for "on the fly" analysis in place of the make_case_control program,
+#' for cases where the user may not want to write a case/control panel to file.
+sampleCCfromPop <- function(popfilename, offset, phenofilename, phenooffset, ncontrols, ncases, case_proportion, control_range, seed) {
+    .Call('diseaseSims_sampleCCfromPop', PACKAGE = 'diseaseSims', popfilename, offset, phenofilename, phenooffset, ncontrols, ncases, case_proportion, control_range, seed)
+}
+
 #' Read case/control panel from a file at a specific position
 #' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 #' @param offset The size in bytes where the desired record begins

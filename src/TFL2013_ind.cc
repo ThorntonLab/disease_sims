@@ -14,7 +14,7 @@
 
 #include <zlib.h>
 
-#include <mutation_with_age.hpp>
+#include <diseaseSims/mutation_with_age.hpp>
 #include <TFL_fitness_models.hpp>
 
 using namespace std;

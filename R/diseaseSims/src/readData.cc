@@ -3,12 +3,16 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <random>
 
+#include <diseaseSims/ccintermediate.hpp>
 #include <SimPopData.hpp>
 #include <fwdpp/IO.hpp>
 #include <boost/bind.hpp>
 using namespace Rcpp;
 using namespace std;
+
+// [[Rcpp::plugins(cpp11)]]
 
 void SimPopData::readPop(const char * filename,
 			 const unsigned long & offset)
@@ -145,6 +149,40 @@ DataFrame getEsizes( const char * filename,
 			    Named("esize") = esize,
 			    Named("count") = count,
 			    Named("age") = age );
+}
+
+//' Sample a case/control panel from a population.
+//' This is used for "on the fly" analysis in place of the make_case_control program,
+//' for cases where the user may not want to write a case/control panel to file.
+// [[Rcpp::export]]
+List sampleCCfromPop( const char * popfilename,
+		      const unsigned long & offset,
+		      const char * phenofilename,
+		      const unsigned long & phenooffset,
+		      const unsigned & ncontrols,
+		      const unsigned & ncases,
+		      const double & case_proportion,
+		      const double & control_range,
+		      const unsigned & seed)
+{
+  SimPopData spd(popfilename,offset);
+  NumericMatrix phenos = getPheno(phenofilename,phenooffset);
+  vector<pair<double,double> > phenos2; //converted for use by external function
+  for ( unsigned i = 0 ; i < phenos.nrow() ; ++i )
+    {
+      phenos2.push_back( make_pair( phenos(i,0),phenos(i,1) ) );
+    }
+  double cutoff;
+  pair<double,double> mean_sd = phenosums(phenos2,case_proportion,&cutoff);
+  vector<unsigned> put_controls,put_cases;
+  grab_putative_CC(mean_sd,phenos2,control_range,cutoff,put_controls,put_cases);
+  shuffle( put_controls.begin(), put_controls.end(), default_random_engine(seed) );
+  shuffle( put_cases.begin(), put_cases.end(), default_random_engine(seed) );
+  cc_intermediate ccblocks(process_population(spd.diploids,phenos2,
+					      put_controls,
+					      put_cases,
+					      ncontrols,
+					      ncases) );
 }
 
 //' Read case/control panel from a file at a specific position
