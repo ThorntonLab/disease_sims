@@ -42,7 +42,7 @@
 */
 
 #include <mutation_with_age.hpp>
-#include <ccintermediate.hpp>
+#include <diseaseSims/ccintermediate.hpp>
 #include <simindex.hpp>
 //#include <locking_routines.hpp>
 

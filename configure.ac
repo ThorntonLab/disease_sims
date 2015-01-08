@@ -16,7 +16,7 @@ AM_MAINTAINER_MODE([disable])
 AC_LANG(C++)
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 AC_PROG_RANLIB
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile diseaseSims/Makefile src/Makefile])
 
 AC_ARG_ENABLE([standard],AS_HELP_STRING([--enable-standard],[Disable use of boost containers.]))
 AM_CONDITIONAL([USE_STANDARD],test x$enable_standard = xyes)
