@@ -5,7 +5,7 @@ This repository contains various forward simulations of disease models.  More pr
 #Dependencies
 
 1. [fwdpp](http://github.com/molpopgen/fwdpp). Version 0.2.5 or greater.
-2. [libsequence](http://github.com/molpopgen/libsequence).  Version 1.7.8 or greater.
+2. [libsequence](http://github.com/molpopgen/libsequence).  Version 1.8.4 or greater.
 3. [boost](http://www.boost.org)
 4. [GSL](http://www.gnu.org/software/gsl)
 
