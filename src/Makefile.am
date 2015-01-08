@@ -1,5 +1,7 @@
 bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control chksimoutput phenoburden sfs sfsSample
 
+lib_LIBRARIES=libdiseaseSims.a
+libdiseaseSims_a_SOURCES=ccintermediate.cc
 #atomic_locker/atomic_locker
 
 #TFL2013_ind_SOURCES=
