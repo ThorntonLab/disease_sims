@@ -183,6 +183,48 @@ List sampleCCfromPop( const char * popfilename,
 					      put_cases,
 					      ncontrols,
 					      ncases) );
+
+  //Fill up the positions
+  vector<double> pos;
+  copy( ccblocks.neutral.pbegin(),
+	ccblocks.neutral.pend(),
+	back_inserter(pos) );
+  copy( ccblocks.causative.pbegin(),
+	ccblocks.causative.pend(),
+	back_inserter(pos) );
+  IntegerMatrix genos(ncontrols+ncases,ccblocks.neutral.numsites()+ccblocks.causative.size()),
+    burdens(ncontrols+ncases,2);
+
+  //Add the neutral sites into genos
+  unsigned I = 0;
+  for( unsigned i = 0 ; i < ccblocks.neutral.size() ; i+= 2,++I )
+    {
+      for( unsigned j = 0 ; j < ccblocks.neutral.numsites() ; i += 2 )
+	{
+	  genos(I,j) += (ccblocks.neutral[i][j]=='1') ? 1 : 0;
+	  genos(I,j) += (ccblocks.neutral[i+1][j]=='1') ? 1 : 0;
+	}
+    }
+  I = 0;
+  //And the causative
+  for( unsigned i = 0 ; i < ccblocks.causative.size() ; i+= 2,++I )
+    {
+      for( unsigned j = 0 ; j < ccblocks.causative.numsites() ; i += 2 )
+	{
+	  genos(I,j + ccblocks.neutral.numsites()) += (ccblocks.causative[i][j]=='1') ? 1 : 0;
+	  genos(I,j + ccblocks.neutral.numsites()) += (ccblocks.causative[i+1][j]=='1') ? 1 : 0;
+	  burdens(I,0) = std::count_if( ccblocks.causative[i].begin(),ccblocks.causative[i].end(),[]( const char & c ) { return c == '1'; } );
+	  burdens(I,1) = std::count_if( ccblocks.causative[i+1].begin(),ccblocks.causative[i+1].end(),[]( const char & c ) { return c == '1'; } );
+	}
+    }
+  return List::create( Named("pos") = pos,
+		       Named("genos") = genos,
+		       Named("burdens") = burdens,
+		       Named("phenos") = phenos,
+		       Named("ncontrols") = ncontrols,
+		       Named("ncases") = ncases,
+		       Named("neutral") = ccblocks.neutral.numsites(),
+		       Named("causative") = ccblocks.causative.numsites());
 }
 
 //' Read case/control panel from a file at a specific position
