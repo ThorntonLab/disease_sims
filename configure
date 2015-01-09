@@ -648,8 +648,6 @@ BVEC_PRESENT_FALSE
 BVEC_PRESENT_TRUE
 DEBUG_FALSE
 DEBUG_TRUE
-USE_STANDARD_FALSE
-USE_STANDARD_TRUE
 HAVE_CXX11
 CXXCPP
 CPP
@@ -786,7 +784,6 @@ enable_fast_install
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
-enable_standard
 enable_debug
 '
       ac_precious_vars='build_alias
@@ -1434,7 +1431,6 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --enable-standard       Disable use of boost containers.
   --enable-debug          Compile examples with run-time assert macro enabled.
 
 Optional Packages:
@@ -15454,19 +15450,6 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 ac_config_files="$ac_config_files Makefile diseaseSims/Makefile src/Makefile"
 
 
-# Check whether --enable-standard was given.
-if test "${enable_standard+set}" = set; then :
-  enableval=$enable_standard;
-fi
-
- if test x$enable_standard = xyes; then
-  USE_STANDARD_TRUE=
-  USE_STANDARD_FALSE='#'
-else
-  USE_STANDARD_TRUE='#'
-  USE_STANDARD_FALSE=
-fi
-
 
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then :
@@ -15547,8 +15530,7 @@ ac_fn_cxx_check_header_mongrel "$LINENO" "boost/container/vector.hpp" "ac_cv_hea
 if test "x$ac_cv_header_boost_container_vector_hpp" = xyes; then :
   BVECTOR=1
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: echo \"boost/container/vector.hpp not found.  Will use std::vector to compile.\"" >&5
-$as_echo "$as_me: WARNING: echo \"boost/container/vector.hpp not found.  Will use std::vector to compile.\"" >&2;}
+  as_fn_error $? "echo \"boost/container/vector.hpp not found\"" "$LINENO" 5
 fi
 
 
@@ -15556,7 +15538,7 @@ ac_fn_cxx_check_header_mongrel "$LINENO" "boost/container/list.hpp" "ac_cv_heade
 if test "x$ac_cv_header_boost_container_list_hpp" = xyes; then :
   BLIST=1
 else
-  echo "boost/container/list.hpp not found.  Will use std::list to compile."
+  as_fn_error $? "echo \"boost/container/vector.hpp not found\"" "$LINENO" 5
 fi
 
 
@@ -16126,10 +16108,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
   as_fn_error $? "conditional \"MAINTAINER_MODE\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${USE_STANDARD_TRUE}" && test -z "${USE_STANDARD_FALSE}"; then
-  as_fn_error $? "conditional \"USE_STANDARD\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEBUG_TRUE}" && test -z "${DEBUG_FALSE}"; then

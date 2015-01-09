@@ -19,8 +19,8 @@ AC_LANG(C++)
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 AC_CONFIG_FILES([Makefile diseaseSims/Makefile src/Makefile])
 
-AC_ARG_ENABLE([standard],AS_HELP_STRING([--enable-standard],[Disable use of boost containers.]))
-AM_CONDITIONAL([USE_STANDARD],test x$enable_standard = xyes)
+dnl AC_ARG_ENABLE([standard],AS_HELP_STRING([--enable-standard],[Disable use of boost containers.]))
+dnl AM_CONDITIONAL([USE_STANDARD],test x$enable_standard = xyes)
 
 AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[Compile examples with run-time assert macro enabled.]))
 AM_CONDITIONAL([DEBUG],test x$enable_debug = xyes)
@@ -48,8 +48,8 @@ AC_MSG_ERROR([Sequence::SimData does not have direct access to underlying data. 
 
 AC_CHECK_HEADER(fwdpp/diploid.hh,HAVE_FWDPP=1 , [AC_MSG_ERROR([fwdpp/diploid.hh not found. fwdpp >= 0.2.5 required])])
 AC_CHECK_HEADER(fwdpp/internal/rec_gamete_updater.hpp,HAVE_FWDPP_OK=1 , [AC_MSG_ERROR([fwdpp/rec_gamete_updater.hpp not found. fwdpp >= 0.2.5 required])])
-AC_CHECK_HEADER(boost/container/vector.hpp, BVECTOR=1, [AC_MSG_WARN([echo "boost/container/vector.hpp not found.  Will use std::vector to compile."])])
-AC_CHECK_HEADER(boost/container/list.hpp, BLIST=1, [echo "boost/container/list.hpp not found.  Will use std::list to compile."])
+AC_CHECK_HEADER(boost/container/vector.hpp, BVECTOR=1, [AC_MSG_ERROR([echo "boost/container/vector.hpp not found"])])
+AC_CHECK_HEADER(boost/container/list.hpp, BLIST=1,  [AC_MSG_ERROR([echo "boost/container/vector.hpp not found"])])
 AC_CHECK_HEADER(boost/interprocess/sync/file_lock.hpp,, [AC_MSG_ERROR([echo "boost/interprocess/sync/file_lock.hpp not found"])])
 AC_CHECK_HEADER(boost/archive/binary_iarchive.hpp,, [AC_MSG_ERROR([echo "boost/archive/binary_iarchive.hpp not found"])])
 AC_CHECK_HEADER(boost/archive/binary_oarchive.hpp,, [AC_MSG_ERROR([echo "boost/archive/binary_oarchive.hpp not found"])])
