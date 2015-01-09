@@ -15470,7 +15470,7 @@ ac_fn_cxx_check_header_mongrel "$LINENO" "Sequence/SimDataIO.hpp" "ac_cv_header_
 if test "x$ac_cv_header_Sequence_SimDataIO_hpp" = xyes; then :
   HAVE_LIBSEQ=1
 else
-  as_fn_error $? "Sequence/SimDataIO.hpp not found. libsequence (www.molpopgen.org) >= 1.7.8 required." "$LINENO" 5
+  as_fn_error $? "Sequence/SimDataIO.hpp not found. libsequence (www.molpopgen.org) >= 1.8.4 required." "$LINENO" 5
 fi
 
 

@@ -26,7 +26,7 @@ AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[Compile examples with run
 AM_CONDITIONAL([DEBUG],test x$enable_debug = xyes)
 
 dnl check for things that we might need
-AC_CHECK_HEADER(Sequence/SimDataIO.hpp,HAVE_LIBSEQ=1 , [AC_MSG_ERROR([Sequence/SimDataIO.hpp not found. libsequence (www.molpopgen.org) >= 1.7.8 required.])])
+AC_CHECK_HEADER(Sequence/SimDataIO.hpp,HAVE_LIBSEQ=1 , [AC_MSG_ERROR([Sequence/SimDataIO.hpp not found. libsequence (www.molpopgen.org) >= 1.8.4 required.])])
 AC_MSG_CHECKING(that Sequence::SimData is derived from std::pair< std::vector<double>, std::vector<std::string> >)
 AC_TRY_COMPILE(
 [
