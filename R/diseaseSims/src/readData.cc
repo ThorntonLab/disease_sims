@@ -14,6 +14,14 @@ using namespace std;
 
 // [[Rcpp::plugins(cpp11)]]
 
+SimPopData::SimPopData(const std::string & filename,
+		       const unsigned long & offset) : mutations(mlist()),
+						       gametes(glist()),
+						       diploids(dipvector())
+{
+  this->readPop(filename.c_str(),offset);
+}
+
 void SimPopData::readPop(const char * filename,
 			 const unsigned long & offset)
 {
@@ -94,7 +102,7 @@ List SimPopData::selectedGenotype(const size_t & i) const
 		       Named("hap2") = hap2 );
 }
 
-SimPopData::dips::size_type SimPopData::popsize() const
+dipvector::size_type SimPopData::popsize() const
 {
   return diploids.size();
 }

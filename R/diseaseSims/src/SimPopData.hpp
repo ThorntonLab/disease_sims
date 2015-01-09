@@ -11,21 +11,14 @@ private:
 public:
   mlist mutations;
   glist gametes;
-  //typedef boost::container::vector< std::pair<glist::iterator,glist::iterator> > dips;
-  typedef std::vector< std::pair<glist::iterator,glist::iterator> > dips;
-  dips diploids;
+  dipvector diploids;
 
   SimPopData(const std::string & filename,
-	     const unsigned long & offset) : mutations(mlist()),
-					     gametes(glist()),
-					     diploids(dips())
-  {
-    this->readPop(filename.c_str(),offset);
-  }
+	     const unsigned long & offset);
 
   Rcpp::List neutralGenotype(const size_t & i) const;
   Rcpp::List selectedGenotype(const size_t & i) const;
-  dips::size_type popsize() const;
+  dipvector::size_type popsize() const;
 };
 
 Rcpp::NumericMatrix getPheno(const char * filename,
