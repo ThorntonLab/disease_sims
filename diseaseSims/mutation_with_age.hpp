@@ -40,25 +40,7 @@ struct mutation_with_age : public KTfwd::mutation_base
   }	
 };
 
-typedef mutation_with_age TFLmtype;
-//boost containers
-#ifndef USE_STANDARD_CONTAINERS
-typedef boost::pool_allocator<TFLmtype> mut_allocator;
-typedef boost::container::list<TFLmtype,mut_allocator > mlist;
-typedef KTfwd::gamete_base<TFLmtype,mlist> gtype;
-typedef boost::pool_allocator<gtype> gam_allocator;
-typedef boost::container::list<gtype,gam_allocator > glist;
-typedef boost::container::vector<TFLmtype> mvector;
-typedef boost::container::vector<unsigned> ftvector;
-typedef boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps > lookup_table_type;
-#else
-typedef std::list<TFLmtype > mlist;
-typedef KTfwd::gamete_base<TFLmtype, mlist> gtype;
-typedef std::list<gtype> glist;
-typedef std::vector<TFLmtype> mvector;
-typedef std::vector<unsigned> ftvector;
-typedef std::unordered_set<double,std::hash<double>,KTfwd::equal_eps > lookup_table_type;
-#endif
+using TFLmtype = mutation_with_age;
 
 //function object to write mutation data in binary format
 struct mwriter
@@ -118,5 +100,15 @@ struct gzmreader
     return result_type(pos,s,n,o,label,neut);
   }
 };
+
+using mut_allocator = boost::pool_allocator<TFLmtype>;
+using mlist = boost::container::list<TFLmtype,mut_allocator >;
+using gtype = KTfwd::gamete_base<TFLmtype,mlist>;
+using gam_allocator = boost::pool_allocator<gtype>;
+using glist =  boost::container::list<gtype,gam_allocator >;
+using mvector = boost::container::vector<TFLmtype>;
+using ftvector = boost::container::vector<unsigned>;
+using lookup_table_type = boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps >;
+using dipvector = std::vector< std::pair<glist::iterator,glist::iterator> >;
 
 #endif
