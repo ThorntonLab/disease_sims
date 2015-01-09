@@ -111,9 +111,9 @@ int main(int argc, char ** argv)
   mlist mutations;
   mvector fixations;      
   ftvector fixation_times;
-  std::vector< std::pair< glist::iterator, glist::iterator> > diploids(params.N,
-								       std::make_pair(gametes.begin(),
-										      gametes.begin()));
+  dipvector diploids(params.N,
+		     std::make_pair(gametes.begin(),
+				    gametes.begin()));
   unsigned generation;
   unsigned ttl_gen = 0;
   double wbar=1;
