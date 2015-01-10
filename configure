@@ -15479,7 +15479,7 @@ ac_fn_cxx_check_header_mongrel "$LINENO" "fwdpp/diploid.hh" "ac_cv_header_fwdpp_
 if test "x$ac_cv_header_fwdpp_diploid_hh" = xyes; then :
   HAVE_FWDPP=1
 else
-  as_fn_error $? "fwdpp/diploid.hh not found. fwdpp >= 0.2.5 required" "$LINENO" 5
+  as_fn_error $? "fwdpp/diploid.hh not found. fwdpp >= 0.2.4 required" "$LINENO" 5
 fi
 
 
@@ -15487,7 +15487,8 @@ ac_fn_cxx_check_header_mongrel "$LINENO" "fwdpp/internal/rec_gamete_updater.hpp"
 if test "x$ac_cv_header_fwdpp_internal_rec_gamete_updater_hpp" = xyes; then :
   HAVE_FWDPP_OK=1
 else
-  as_fn_error $? "fwdpp/rec_gamete_updater.hpp not found. fwdpp >= 0.2.5 required" "$LINENO" 5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: fwdpp < 0.2.5 detected. Upgrading to a version >= 0.2.5 will result in much more efficient simulations!" >&5
+$as_echo "$as_me: WARNING: fwdpp < 0.2.5 detected. Upgrading to a version >= 0.2.5 will result in much more efficient simulations!" >&2;}
 fi
 
 

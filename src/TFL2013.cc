@@ -267,7 +267,7 @@ int main(int argc, char ** argv)
 	  //neutral mutations
 	  for( unsigned mut = 0 ; mut < diploids[i].first->mutations.size() ; ++mut )
 	    {
-	      vector< pair<double,string> >::iterator itr = find_if(neutral.begin(),neutral.end(),std::bind(sitefinder, _1,diploids[i].first->mutations[mut]->pos));
+	      vector< pair<double,string> >::iterator itr = find_if(neutral.begin(),neutral.end(),std::bind(sitefinder, std::placeholders::_1,diploids[i].first->mutations[mut]->pos));
 	      if( itr == neutral.end() )
 		{
 		  neutral.push_back( std::make_pair(diploids[i].first->mutations[mut]->pos,std::string(2*N,'0')) );
@@ -280,7 +280,7 @@ int main(int argc, char ** argv)
 	    }
 	  for( unsigned mut = 0 ; mut < diploids[i].second->mutations.size() ; ++mut )
 	    {
-	      vector< pair<double,string> >::iterator itr = find_if(neutral.begin(),neutral.end(),std::bind(sitefinder, _1, diploids[i].second->mutations[mut]->pos));
+	      vector< pair<double,string> >::iterator itr = find_if(neutral.begin(),neutral.end(),std::bind(sitefinder, std::placeholders::_1, diploids[i].second->mutations[mut]->pos));
 	      if( itr == neutral.end() )
 		{
 		  neutral.push_back( std::make_pair(diploids[i].second->mutations[mut]->pos,std::string(2*N,'0')) );
