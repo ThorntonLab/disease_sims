@@ -15495,7 +15495,7 @@ ac_fn_cxx_check_header_mongrel "$LINENO" "boost/container/vector.hpp" "ac_cv_hea
 if test "x$ac_cv_header_boost_container_vector_hpp" = xyes; then :
   BVECTOR=1
 else
-  as_fn_error $? "echo \"boost/container/vector.hpp not found\"" "$LINENO" 5
+  as_fn_error $? "boost/container/vector.hpp not found" "$LINENO" 5
 fi
 
 
@@ -15503,7 +15503,7 @@ ac_fn_cxx_check_header_mongrel "$LINENO" "boost/container/list.hpp" "ac_cv_heade
 if test "x$ac_cv_header_boost_container_list_hpp" = xyes; then :
   BLIST=1
 else
-  as_fn_error $? "echo \"boost/container/vector.hpp not found\"" "$LINENO" 5
+  as_fn_error $? "boost/container/vector.hpp not found" "$LINENO" 5
 fi
 
 
@@ -15511,7 +15511,7 @@ ac_fn_cxx_check_header_mongrel "$LINENO" "boost/interprocess/sync/file_lock.hpp"
 if test "x$ac_cv_header_boost_interprocess_sync_file_lock_hpp" = xyes; then :
 
 else
-  as_fn_error $? "echo \"boost/interprocess/sync/file_lock.hpp not found\"" "$LINENO" 5
+  as_fn_error $? "boost/interprocess/sync/file_lock.hpp not found" "$LINENO" 5
 fi
 
 
@@ -15624,7 +15624,7 @@ _ACEOF
   LIBS="-lz $LIBS"
 
 else
-  as_fn_error $? "\"zlib run time library not found\";exit 1" "$LINENO" 5
+  as_fn_error $? "zlib run time library not found" "$LINENO" 5
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for cblas_dgemm in -lgslcblas" >&5
@@ -15671,7 +15671,7 @@ _ACEOF
   LIBS="-lgslcblas $LIBS"
 
 else
-  as_fn_error $? "\"gslcblas run-time library not found\"" "$LINENO" 5
+  as_fn_error $? "gslcblas run-time library not found" "$LINENO" 5
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gsl_blas_dgemm in -lgsl" >&5
@@ -15718,7 +15718,7 @@ _ACEOF
   LIBS="-lgsl $LIBS"
 
 else
-  as_fn_error $? "\"gsl run-time library not found\"" "$LINENO" 5
+  as_fn_error $? "gsl run-time library not found" "$LINENO" 5
 fi
 
 
@@ -15768,7 +15768,7 @@ _ACEOF
   LIBS="-lsequence $LIBS"
 
 else
-  as_fn_error $? "eecho \"libsequence runtime library does not seem to be here\";exit 1" "$LINENO" 5
+  as_fn_error $? "libsequence runtime library does not seem to be here" "$LINENO" 5
 fi
 
           { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lboost_system" >&5
@@ -15809,7 +15809,7 @@ _ACEOF
   LIBS="-lboost_system $LIBS"
 
 else
-  as_fn_error $? "echo \"boost_system runtime library does not seem to be here\";exit 1" "$LINENO" 5
+  as_fn_error $? "boost_system runtime library does not seem to be here" "$LINENO" 5
 fi
 
           { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lboost_program_options" >&5
@@ -15850,7 +15850,7 @@ _ACEOF
   LIBS="-lboost_program_options $LIBS"
 
 else
-  as_fn_error $? "eecho \"boost_program_options runtime library does not seem to be here\";exit 1" "$LINENO" 5
+  as_fn_error $? "boost_program_options runtime library does not seem to be here" "$LINENO" 5
 fi
 
 ac_ext=cpp
