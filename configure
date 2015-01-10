@@ -15550,38 +15550,6 @@ else
 fi
 
 
-ac_fn_cxx_check_header_mongrel "$LINENO" "boost/archive/binary_iarchive.hpp" "ac_cv_header_boost_archive_binary_iarchive_hpp" "$ac_includes_default"
-if test "x$ac_cv_header_boost_archive_binary_iarchive_hpp" = xyes; then :
-
-else
-  as_fn_error $? "echo \"boost/archive/binary_iarchive.hpp not found\"" "$LINENO" 5
-fi
-
-
-ac_fn_cxx_check_header_mongrel "$LINENO" "boost/archive/binary_oarchive.hpp" "ac_cv_header_boost_archive_binary_oarchive_hpp" "$ac_includes_default"
-if test "x$ac_cv_header_boost_archive_binary_oarchive_hpp" = xyes; then :
-
-else
-  as_fn_error $? "echo \"boost/archive/binary_oarchive.hpp not found\"" "$LINENO" 5
-fi
-
-
-ac_fn_cxx_check_header_mongrel "$LINENO" "boost/serialization/vector.hpp" "ac_cv_header_boost_serialization_vector_hpp" "$ac_includes_default"
-if test "x$ac_cv_header_boost_serialization_vector_hpp" = xyes; then :
-
-else
-  as_fn_error $? "echo \"boost/serialization/vector.hpp not found\"" "$LINENO" 5
-fi
-
-
-ac_fn_cxx_check_header_mongrel "$LINENO" "boost/serialization/string.hpp" "ac_cv_header_boost_serialization_string_hpp" "$ac_includes_default"
-if test "x$ac_cv_header_boost_serialization_string_hpp" = xyes; then :
-
-else
-  as_fn_error $? "echo \"boost/serialization/string.hpp not found\"" "$LINENO" 5
-fi
-
-
 ac_fn_cxx_check_header_mongrel "$LINENO" "gsl/gsl_rng.h" "ac_cv_header_gsl_gsl_rng_h" "$ac_includes_default"
 if test "x$ac_cv_header_gsl_gsl_rng_h" = xyes; then :
   HAVE_GSL=1
@@ -15918,47 +15886,6 @@ _ACEOF
 
 else
   as_fn_error $? "eecho \"boost_program_options runtime library does not seem to be here\";exit 1" "$LINENO" 5
-fi
-
-          { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lboost_serialization" >&5
-$as_echo_n "checking for main in -lboost_serialization... " >&6; }
-if ${ac_cv_lib_boost_serialization_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lboost_serialization  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_boost_serialization_main=yes
-else
-  ac_cv_lib_boost_serialization_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_boost_serialization_main" >&5
-$as_echo "$ac_cv_lib_boost_serialization_main" >&6; }
-if test "x$ac_cv_lib_boost_serialization_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBBOOST_SERIALIZATION 1
-_ACEOF
-
-  LIBS="-lboost_serialization $LIBS"
-
-else
-  as_fn_error $? "eecho \"boost_serialization runtime library does not seem to be here\";exit 1" "$LINENO" 5
 fi
 
 ac_ext=cpp

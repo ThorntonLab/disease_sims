@@ -13,10 +13,6 @@
    (-lboost_program_options). */
 #undef HAVE_LIBBOOST_PROGRAM_OPTIONS
 
-/* Define to 1 if you have the `boost_serialization' library
-   (-lboost_serialization). */
-#undef HAVE_LIBBOOST_SERIALIZATION
-
 /* Define to 1 if you have the `boost_system' library (-lboost_system). */
 #undef HAVE_LIBBOOST_SYSTEM
 
