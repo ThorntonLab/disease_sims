@@ -15467,7 +15467,7 @@ fi
 
 ac_fn_cxx_check_header_mongrel "$LINENO" "fwdpp/diploid.hh" "ac_cv_header_fwdpp_diploid_hh" "$ac_includes_default"
 if test "x$ac_cv_header_fwdpp_diploid_hh" = xyes; then :
-  HAVE_FWDPP=1
+
 else
   as_fn_error $? "fwdpp/diploid.hh not found. fwdpp >= 0.2.4 required" "$LINENO" 5
 fi
@@ -15484,7 +15484,7 @@ fi
 
 ac_fn_cxx_check_header_mongrel "$LINENO" "boost/container/vector.hpp" "ac_cv_header_boost_container_vector_hpp" "$ac_includes_default"
 if test "x$ac_cv_header_boost_container_vector_hpp" = xyes; then :
-  BVECTOR=1
+
 else
   as_fn_error $? "boost/container/vector.hpp not found" "$LINENO" 5
 fi
@@ -15492,7 +15492,7 @@ fi
 
 ac_fn_cxx_check_header_mongrel "$LINENO" "boost/container/list.hpp" "ac_cv_header_boost_container_list_hpp" "$ac_includes_default"
 if test "x$ac_cv_header_boost_container_list_hpp" = xyes; then :
-  BLIST=1
+
 else
   as_fn_error $? "boost/container/vector.hpp not found" "$LINENO" 5
 fi
@@ -15508,7 +15508,7 @@ fi
 
 ac_fn_cxx_check_header_mongrel "$LINENO" "gsl/gsl_rng.h" "ac_cv_header_gsl_gsl_rng_h" "$ac_includes_default"
 if test "x$ac_cv_header_gsl_gsl_rng_h" = xyes; then :
-  HAVE_GSL=1
+
 else
   as_fn_error $? "gsl/gsl_rng.h not found.  Please install the GNU Scientific Library" "$LINENO" 5
 fi
@@ -15516,7 +15516,7 @@ fi
 
 ac_fn_cxx_check_header_mongrel "$LINENO" "gsl/gsl_randist.h" "ac_cv_header_gsl_gsl_randist_h" "$ac_includes_default"
 if test "x$ac_cv_header_gsl_gsl_randist_h" = xyes; then :
-  HAVE_GSL=1
+
 else
   as_fn_error $? "gsl/gsl_rng.h not found.  Please install the GNU Scientific Library" "$LINENO" 5
 fi

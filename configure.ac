@@ -46,13 +46,13 @@ dnl AC_MSG_RESULT(no)
 dnl AC_MSG_ERROR([Sequence::SimData does not have direct access to underlying data.  Please install libsequence >= 1.8.4])
 dnl ])
 
-AC_CHECK_HEADER(fwdpp/diploid.hh,HAVE_FWDPP=1 , [AC_MSG_ERROR([fwdpp/diploid.hh not found. fwdpp >= 0.2.4 required])])
+AC_CHECK_HEADER(fwdpp/diploid.hh,, [AC_MSG_ERROR([fwdpp/diploid.hh not found. fwdpp >= 0.2.4 required])])
 AC_CHECK_HEADER(fwdpp/internal/rec_gamete_updater.hpp,HAVE_FWDPP_OK=1 , [AC_MSG_WARN([fwdpp < 0.2.5 detected. Upgrading to a version >= 0.2.5 will result in much more efficient simulations!])])
-AC_CHECK_HEADER(boost/container/vector.hpp, BVECTOR=1, [AC_MSG_ERROR([boost/container/vector.hpp not found])])
-AC_CHECK_HEADER(boost/container/list.hpp, BLIST=1,  [AC_MSG_ERROR([boost/container/vector.hpp not found])])
+AC_CHECK_HEADER(boost/container/vector.hpp,, [AC_MSG_ERROR([boost/container/vector.hpp not found])])
+AC_CHECK_HEADER(boost/container/list.hpp,,  [AC_MSG_ERROR([boost/container/vector.hpp not found])])
 AC_CHECK_HEADER(boost/interprocess/sync/file_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/file_lock.hpp not found])])
-AC_CHECK_HEADER(gsl/gsl_rng.h,HAVE_GSL=1,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
-AC_CHECK_HEADER(gsl/gsl_randist.h,HAVE_GSL=1,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
+AC_CHECK_HEADER(gsl/gsl_rng.h,,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
+AC_CHECK_HEADER(gsl/gsl_randist.h,,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
 AC_CHECK_HEADER(zlib.h,,[AC_MSG_ERROR([zlib.h not found.  zlib >= 1.2.5 is requred])])
 
 dnl check for C run-time libraries
