@@ -26,25 +26,25 @@ AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[Compile examples with run
 AM_CONDITIONAL([DEBUG],test x$enable_debug = xyes)
 
 dnl check for things that we might need
-AC_CHECK_HEADER(Sequence/SimDataIO.hpp,HAVE_LIBSEQ=1 , [AC_MSG_ERROR([Sequence/SimDataIO.hpp not found. libsequence (www.molpopgen.org) >= 1.8.4 required.])])
-AC_MSG_CHECKING(that Sequence::SimData is derived from std::pair< std::vector<double>, std::vector<std::string> >)
-AC_TRY_COMPILE(
-[
-#include <Sequence/SimData.hpp>
-using namespace Sequence;
-using namespace std;
-],
-[
-SimData d;
-d.first = vector<double>();
-d.second = vector< string >();
-],
-[AC_MSG_RESULT(yes)
-AC_DEFINE([HAVE_SEQUENCE_COALSIM],[],"Sequence::SimData has direct access to underlying data")],
-[
-AC_MSG_RESULT(no)
-AC_MSG_ERROR([Sequence::SimData does not have direct access to underlying data.  Please install libsequence >= 1.8.4])
-])
+AC_CHECK_HEADER(Sequence/SimDataIO.hpp,HAVE_LIBSEQ=1 , [AC_MSG_ERROR([Sequence/SimDataIO.hpp not found. libsequence (www.molpopgen.org) >= 1.7.8 required.])])
+dnl AC_MSG_CHECKING(that Sequence::SimData is derived from std::pair< std::vector<double>, std::vector<std::string> >)
+dnl AC_TRY_COMPILE(
+dnl [
+dnl #include <Sequence/SimData.hpp>
+dnl using namespace Sequence;
+dnl using namespace std;
+dnl ],
+dnl [
+dnl SimData d;
+dnl d.first = vector<double>();
+dnl d.second = vector< string >();
+dnl ],
+dnl [AC_MSG_RESULT(yes)
+dnl AC_DEFINE([HAVE_SEQUENCE_COALSIM],[],"Sequence::SimData has direct access to underlying data")],
+dnl [
+dnl AC_MSG_RESULT(no)
+dnl AC_MSG_ERROR([Sequence::SimData does not have direct access to underlying data.  Please install libsequence >= 1.8.4])
+dnl ])
 
 AC_CHECK_HEADER(fwdpp/diploid.hh,HAVE_FWDPP=1 , [AC_MSG_ERROR([fwdpp/diploid.hh not found. fwdpp >= 0.2.5 required])])
 AC_CHECK_HEADER(fwdpp/internal/rec_gamete_updater.hpp,HAVE_FWDPP_OK=1 , [AC_MSG_ERROR([fwdpp/rec_gamete_updater.hpp not found. fwdpp >= 0.2.5 required])])
