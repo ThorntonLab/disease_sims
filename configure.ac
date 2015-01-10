@@ -54,11 +54,6 @@ AC_CHECK_HEADER(boost/interprocess/sync/file_lock.hpp,, [AC_MSG_ERROR([boost/int
 AC_CHECK_HEADER(gsl/gsl_rng.h,HAVE_GSL=1,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
 AC_CHECK_HEADER(gsl/gsl_randist.h,HAVE_GSL=1,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
 AC_CHECK_HEADER(zlib.h,,[AC_MSG_ERROR([zlib.h not found.  zlib >= 1.2.5 is requred])])
-AM_CONDITIONAL([BVEC_PRESENT],test x$BVECTOR$enable_boost = x1)
-AM_CONDITIONAL([BLIST_PRESENT],test x$BLIST = x1)
-AM_CONDITIONAL([BPOOL_PRESENT],test x$BPOOL = x1)
-AM_CONDITIONAL([BSET_PRESENT],test x$BSET = x1)
-AM_CONDITIONAL([BHASH_PRESENT],test x$BHASH = x1)
 
 dnl check for C run-time libraries
 AC_CHECK_LIB([z],gzungetc,,[AC_MSG_ERROR([zlib run time library not found])])

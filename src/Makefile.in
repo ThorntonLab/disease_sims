@@ -83,10 +83,6 @@ bin_PROGRAMS = TFL2013$(EXEEXT) TFL2013_ind$(EXEEXT) \
 	make_case_control$(EXEEXT) chksimoutput$(EXEEXT) \
 	phenoburden$(EXEEXT) sfs$(EXEEXT) sfsSample$(EXEEXT)
 @DEBUG_FALSE@am__append_1 = -DNDEBUG
-
-#On some systems (or at least recent boost versions, the boost_system is needed to use the boost containers
-#Boost is missing, so we gotta use the standard headers                                                                   
-@BVEC_PRESENT_FALSE@am__append_2 = -DUSE_STANDARD_CONTAINERS
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -148,11 +144,9 @@ TFL2013_DEPENDENCIES =
 am_TFL2013_ind_OBJECTS = TFL2013_ind.$(OBJEXT)
 TFL2013_ind_OBJECTS = $(am_TFL2013_ind_OBJECTS)
 TFL2013_ind_LDADD = $(LDADD)
-TFL2013_ind_DEPENDENCIES =
 am_chksimoutput_OBJECTS = chksimoutput.$(OBJEXT) simindex.$(OBJEXT)
 chksimoutput_OBJECTS = $(am_chksimoutput_OBJECTS)
 chksimoutput_LDADD = $(LDADD)
-chksimoutput_DEPENDENCIES =
 am_make_case_control_OBJECTS = make_case_control.$(OBJEXT) \
 	simindex.$(OBJEXT) readSimOutput.$(OBJEXT)
 make_case_control_OBJECTS = $(am_make_case_control_OBJECTS)
@@ -160,15 +154,12 @@ make_case_control_DEPENDENCIES = libcommon.la
 am_phenoburden_OBJECTS = phenoburden.$(OBJEXT)
 phenoburden_OBJECTS = $(am_phenoburden_OBJECTS)
 phenoburden_LDADD = $(LDADD)
-phenoburden_DEPENDENCIES =
 am_sfs_OBJECTS = sfs.$(OBJEXT) readSimOutput.$(OBJEXT)
 sfs_OBJECTS = $(am_sfs_OBJECTS)
 sfs_LDADD = $(LDADD)
-sfs_DEPENDENCIES =
 am_sfsSample_OBJECTS = sfsSample.$(OBJEXT)
 sfsSample_OBJECTS = $(am_sfsSample_OBJECTS)
 sfsSample_LDADD = $(LDADD)
-sfsSample_DEPENDENCIES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -378,8 +369,7 @@ sfsSample_SOURCES = sfsSample.cc
 
 #esm_chisq_zscore_LDFLAGS=-pthread
 make_case_control_LDADD = libcommon.la
-AM_CPPFLAGS = -W -Wall -I. $(am__append_1) $(am__append_2)
-LDADD = 
+AM_CPPFLAGS = -W -Wall -I. $(am__append_1)
 TFL2013_LDADD = -lboost_iostreams
 all: all-am
 
@@ -799,10 +789,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
 	uninstall-am uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
-#This will over-ride the above
-#if USE_STANDARD
-#AM_CPPFLAGS+=-DUSE_STANDARD_CONTAINERS
-#endif
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

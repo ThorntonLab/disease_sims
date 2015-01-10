@@ -636,16 +636,6 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-BHASH_PRESENT_FALSE
-BHASH_PRESENT_TRUE
-BSET_PRESENT_FALSE
-BSET_PRESENT_TRUE
-BPOOL_PRESENT_FALSE
-BPOOL_PRESENT_TRUE
-BLIST_PRESENT_FALSE
-BLIST_PRESENT_TRUE
-BVEC_PRESENT_FALSE
-BVEC_PRESENT_TRUE
 DEBUG_FALSE
 DEBUG_TRUE
 HAVE_CXX11
@@ -15540,46 +15530,6 @@ else
 fi
 
 
- if test x$BVECTOR$enable_boost = x1; then
-  BVEC_PRESENT_TRUE=
-  BVEC_PRESENT_FALSE='#'
-else
-  BVEC_PRESENT_TRUE='#'
-  BVEC_PRESENT_FALSE=
-fi
-
- if test x$BLIST = x1; then
-  BLIST_PRESENT_TRUE=
-  BLIST_PRESENT_FALSE='#'
-else
-  BLIST_PRESENT_TRUE='#'
-  BLIST_PRESENT_FALSE=
-fi
-
- if test x$BPOOL = x1; then
-  BPOOL_PRESENT_TRUE=
-  BPOOL_PRESENT_FALSE='#'
-else
-  BPOOL_PRESENT_TRUE='#'
-  BPOOL_PRESENT_FALSE=
-fi
-
- if test x$BSET = x1; then
-  BSET_PRESENT_TRUE=
-  BSET_PRESENT_FALSE='#'
-else
-  BSET_PRESENT_TRUE='#'
-  BSET_PRESENT_FALSE=
-fi
-
- if test x$BHASH = x1; then
-  BHASH_PRESENT_TRUE=
-  BHASH_PRESENT_FALSE='#'
-else
-  BHASH_PRESENT_TRUE='#'
-  BHASH_PRESENT_FALSE=
-fi
-
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gzungetc in -lz" >&5
 $as_echo_n "checking for gzungetc in -lz... " >&6; }
@@ -16005,26 +15955,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEBUG_TRUE}" && test -z "${DEBUG_FALSE}"; then
   as_fn_error $? "conditional \"DEBUG\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BVEC_PRESENT_TRUE}" && test -z "${BVEC_PRESENT_FALSE}"; then
-  as_fn_error $? "conditional \"BVEC_PRESENT\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BLIST_PRESENT_TRUE}" && test -z "${BLIST_PRESENT_FALSE}"; then
-  as_fn_error $? "conditional \"BLIST_PRESENT\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BPOOL_PRESENT_TRUE}" && test -z "${BPOOL_PRESENT_FALSE}"; then
-  as_fn_error $? "conditional \"BPOOL_PRESENT\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BSET_PRESENT_TRUE}" && test -z "${BSET_PRESENT_FALSE}"; then
-  as_fn_error $? "conditional \"BSET_PRESENT\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BHASH_PRESENT_TRUE}" && test -z "${BHASH_PRESENT_FALSE}"; then
-  as_fn_error $? "conditional \"BHASH_PRESENT\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
