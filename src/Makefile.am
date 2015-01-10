@@ -1,6 +1,8 @@
 bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control chksimoutput phenoburden sfs sfsSample
 
+noinst_LTLIBRARIES=libcommon.la
 lib_LTLIBRARIES=libdiseaseSimsHelper.la
+libcommon_la_SOURCES=ccintermediate.cc
 libdiseaseSimsHelper_la_SOURCES=ccintermediate.cc
 #atomic_locker/atomic_locker
 
@@ -17,7 +19,7 @@ sfsSample_SOURCES=sfsSample.cc
 # atomic_locker/atomic_locker
 
 #esm_chisq_zscore_LDFLAGS=-pthread
-make_case_control_LDADD=-ldiseaseSimsHelper
+make_case_control_LDADD=libcommon.la
 AM_CPPFLAGS=-W -Wall -I.
 
 if DEBUG
@@ -43,6 +45,6 @@ endif
 
 TFL2013_LDADD=-lboost_iostreams
 #This will over-ride the above
-if USE_STANDARD
-AM_CPPFLAGS+=-DUSE_STANDARD_CONTAINERS
-endif
+#if USE_STANDARD
+#AM_CPPFLAGS+=-DUSE_STANDARD_CONTAINERS
+#endif

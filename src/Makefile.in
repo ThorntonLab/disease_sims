@@ -87,8 +87,6 @@ bin_PROGRAMS = TFL2013$(EXEEXT) TFL2013_ind$(EXEEXT) \
 #On some systems (or at least recent boost versions, the boost_system is needed to use the boost containers
 #Boost is missing, so we gotta use the standard headers                                                                   
 @BVEC_PRESENT_FALSE@am__append_2 = -DUSE_STANDARD_CONTAINERS
-#This will over-ride the above
-@USE_STANDARD_TRUE@am__append_3 = -DUSE_STANDARD_CONTAINERS
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -131,15 +129,18 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
-LTLIBRARIES = $(lib_LTLIBRARIES)
-libdiseaseSimsHelper_la_LIBADD =
-am_libdiseaseSimsHelper_la_OBJECTS = ccintermediate.lo
-libdiseaseSimsHelper_la_OBJECTS =  \
-	$(am_libdiseaseSimsHelper_la_OBJECTS)
+LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
+libcommon_la_LIBADD =
+am_libcommon_la_OBJECTS = ccintermediate.lo
+libcommon_la_OBJECTS = $(am_libcommon_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libdiseaseSimsHelper_la_LIBADD =
+am_libdiseaseSimsHelper_la_OBJECTS = ccintermediate.lo
+libdiseaseSimsHelper_la_OBJECTS =  \
+	$(am_libdiseaseSimsHelper_la_OBJECTS)
 PROGRAMS = $(bin_PROGRAMS)
 am_TFL2013_OBJECTS = TFL2013.$(OBJEXT)
 TFL2013_OBJECTS = $(am_TFL2013_OBJECTS)
@@ -155,7 +156,7 @@ chksimoutput_DEPENDENCIES =
 am_make_case_control_OBJECTS = make_case_control.$(OBJEXT) \
 	simindex.$(OBJEXT) readSimOutput.$(OBJEXT)
 make_case_control_OBJECTS = $(am_make_case_control_OBJECTS)
-make_case_control_DEPENDENCIES =
+make_case_control_DEPENDENCIES = libcommon.la
 am_phenoburden_OBJECTS = phenoburden.$(OBJEXT)
 phenoburden_OBJECTS = $(am_phenoburden_OBJECTS)
 phenoburden_LDADD = $(LDADD)
@@ -202,11 +203,12 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(libdiseaseSimsHelper_la_SOURCES) $(TFL2013_SOURCES) \
-	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
-	$(make_case_control_SOURCES) $(phenoburden_SOURCES) \
-	$(sfs_SOURCES) $(sfsSample_SOURCES)
-DIST_SOURCES = $(libdiseaseSimsHelper_la_SOURCES) $(TFL2013_SOURCES) \
+SOURCES = $(libcommon_la_SOURCES) $(libdiseaseSimsHelper_la_SOURCES) \
+	$(TFL2013_SOURCES) $(TFL2013_ind_SOURCES) \
+	$(chksimoutput_SOURCES) $(make_case_control_SOURCES) \
+	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES)
+DIST_SOURCES = $(libcommon_la_SOURCES) \
+	$(libdiseaseSimsHelper_la_SOURCES) $(TFL2013_SOURCES) \
 	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
 	$(make_case_control_SOURCES) $(phenoburden_SOURCES) \
 	$(sfs_SOURCES) $(sfsSample_SOURCES)
@@ -356,7 +358,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+noinst_LTLIBRARIES = libcommon.la
 lib_LTLIBRARIES = libdiseaseSimsHelper.la
+libcommon_la_SOURCES = ccintermediate.cc
 libdiseaseSimsHelper_la_SOURCES = ccintermediate.cc
 #atomic_locker/atomic_locker
 
@@ -373,9 +377,8 @@ sfsSample_SOURCES = sfsSample.cc
 # atomic_locker/atomic_locker
 
 #esm_chisq_zscore_LDFLAGS=-pthread
-make_case_control_LDADD = -ldiseaseSimsHelper
-AM_CPPFLAGS = -W -Wall -I. $(am__append_1) $(am__append_2) \
-	$(am__append_3)
+make_case_control_LDADD = libcommon.la
+AM_CPPFLAGS = -W -Wall -I. $(am__append_1) $(am__append_2)
 LDADD = 
 TFL2013_LDADD = -lboost_iostreams
 all: all-am
@@ -447,6 +450,20 @@ clean-libLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
+
+libcommon.la: $(libcommon_la_OBJECTS) $(libcommon_la_DEPENDENCIES) $(EXTRA_libcommon_la_DEPENDENCIES) 
+	$(AM_V_CXXLD)$(CXXLINK)  $(libcommon_la_OBJECTS) $(libcommon_la_LIBADD) $(LIBS)
 
 libdiseaseSimsHelper.la: $(libdiseaseSimsHelper_la_OBJECTS) $(libdiseaseSimsHelper_la_DEPENDENCIES) $(EXTRA_libdiseaseSimsHelper_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK) -rpath $(libdir) $(libdiseaseSimsHelper_la_OBJECTS) $(libdiseaseSimsHelper_la_LIBADD) $(LIBS)
@@ -696,7 +713,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool mostlyclean-am
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -768,20 +785,24 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean \
 	clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool cscopelist-am ctags ctags-am distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-libLTLIBRARIES install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-libLTLIBRARIES
+	clean-libtool clean-noinstLTLIBRARIES cscopelist-am ctags \
+	ctags-am distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
+#This will over-ride the above
+#if USE_STANDARD
+#AM_CPPFLAGS+=-DUSE_STANDARD_CONTAINERS
+#endif
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
