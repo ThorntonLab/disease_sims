@@ -7,8 +7,12 @@
 #include <iosfwd>
 #include <Sequence/SimData.hpp>
 #include <diseaseSims/mutation_with_age.hpp>
+#include <cstdint>
 #include <zlib.h>
 
+std::vector<int> decode(const std::vector<std::int8_t> & d);
+std::vector<std::int8_t> encode( const std::vector<std::string> &,
+				 const std::vector<std::string> & );
 struct cc_intermediate
 {
   unsigned ncontrols,ncases;

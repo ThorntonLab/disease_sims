@@ -426,3 +426,86 @@ void grab_putative_CC( const pair<double,double> & mean_sd,
   sort( put_controls.begin(), put_controls.end() );
   sort( put_cases.begin(), put_cases.end() );
 }
+
+std::vector<int> decode(const std::vector<std::int8_t> & d)
+{
+  std::vector<int> rv;
+  for( unsigned pos = 0 ; pos < d.size() ; ++pos )
+    {
+      for(unsigned byte=0;byte<8;byte+=2)
+        {
+          bool i = (d[pos]&(1<<byte));
+          bool j = (d[pos]&(1<<(byte+1)));
+          if(!i && !j) return rv;
+          else if (!i && j ) rv.push_back(0);
+          else if (i && !j ) rv.push_back(1);
+          else if (i&&j) rv.push_back(2);
+        }
+    }
+  return rv;
+}
+
+std::vector<std::int8_t> encode( const std::vector<std::string> & neutral,
+				 const std::vector<std::string> & causative)
+{
+  std::vector<std::int8_t> rv;
+  unsigned nsites = (neutral.empty()) ? 0 : neutral[0].size(),
+    csites = (causative.empty()) ? 0 : causative[0].size();
+  
+  for( unsigned ind = 0 ; ind < neutral.size() ; ind += 2 )
+    {
+      std::int8_t i8=0;
+      unsigned byte = 0;
+      for( unsigned site = 0 ; site < nsites ;++site )
+        {
+          unsigned c = (neutral[ind][site] == '1' ? 1 : 0) +  (neutral[ind+1][site] == '1' ? 1 : 0);
+          if( c== 0)
+            {
+              i8 |= (1 <<(byte+1));
+            }
+          else if ( c == 1 )
+            {
+              i8 |= (1 <<(byte));
+            }
+          else if (c==2)
+            {
+              i8 |= (1 <<(byte));
+              i8 |= (1 <<(byte+1));
+            }
+          byte+=2;
+          if(byte==8 || (site == nsites-1 && causative.empty()))
+            {
+              rv.push_back(i8);
+              i8=0;
+              byte=0;
+            }
+        }
+      for( unsigned site = 0 ; site < csites ; ++site )
+	{
+	  unsigned c = (causative[ind][site] == '1' ? 1 : 0) +  (causative[ind+1][site] == '1' ? 1 : 0);
+          if( c== 0)
+            {
+              i8 |= (1 <<(byte+1));
+
+            }
+          else if ( c == 1 )
+            {
+              i8 |= (1 <<(byte));
+            }
+          else if (c==2)
+            {
+              i8 |= (1 <<(byte));
+              i8 |= (1 <<(byte+1));
+            }
+          byte+=2;
+          if(byte==8 || site == csites-1)
+            {
+              rv.push_back(i8);
+              i8=0;
+              byte=0;
+            }
+	}
+    }
+  return rv;
+}
+
