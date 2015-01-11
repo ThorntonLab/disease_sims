@@ -9,18 +9,12 @@
 
 #include <zlib.h>
 
-#ifndef USE_STANDARD_CONTAINERS
 #include <boost/container/list.hpp>
 #include <boost/container/vector.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/functional/hash.hpp>
-#else
 #include <vector>
-#include <list>
-#include <unordered_set>
-#include <functional>
-#endif
 
 struct mutation_with_age : public KTfwd::mutation_base
 {
