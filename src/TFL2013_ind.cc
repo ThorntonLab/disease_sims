@@ -53,7 +53,7 @@ struct mutation_model
 };
 
 //fitness models
-enum MODEL { GENE_RECESSIVE, GENE_ADDITIVE, MULTIPLICATIVE, POPGEN };
+enum class MODEL { GENE_RECESSIVE = 0, GENE_ADDITIVE, MULTIPLICATIVE, POPGEN };
 
 struct simparams
 {
@@ -80,7 +80,7 @@ simparams::simparams(void) : N(20000),N2(20000),
 			     optimum(0.),
 			     dominance(0.),
 			     dist_effects(true),
-			     model( GENE_RECESSIVE ),
+			     model( MODEL::GENE_RECESSIVE ),
 			     indexfile(string()),
 			     hapfile(string()),
 			     phenofile(string()),
@@ -147,16 +147,16 @@ int main(int argc, char ** argv)
   std::function<double(const glist::const_iterator &,
 		       const glist::const_iterator &)> dipfit = std::bind(TFL2013_recessive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
 
-  if( params.model == GENE_ADDITIVE )
+  if( params.model == MODEL::GENE_ADDITIVE )
     {
       dipfit = std::bind(TFL2013_additive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
     }
-  else if( params.model == MULTIPLICATIVE )
+  else if( params.model == MODEL::MULTIPLICATIVE )
     {
       dipfit = std::bind(multiplicative_disease_effect_to_fitness(),std::placeholders::_1,std::placeholders::_2,
 			 params.sd,params.sd_s,params.optimum,r);
     }
-  else if ( params.model == POPGEN )
+  else if ( params.model == MODEL::POPGEN )
     {
       dipfit = std::bind(popgen_disease_effect_to_fitness(),std::placeholders::_1,std::placeholders::_2,params.dominance,
 			 params.sd,params.sd_s,params.optimum,r);
@@ -219,7 +219,7 @@ int main(int argc, char ** argv)
   phenobuffer.write( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
   for( unsigned i = 0 ; i < diploids.size() ; ++i )
     {
-      if (params.model == GENE_RECESSIVE) 
+      if (params.model == MODEL::GENE_RECESSIVE) 
 	{
 	  pair<double,double> pheno = TFL2013_recessive_disease_effect()(diploids[i].first,
 									 diploids[i].second,
@@ -230,7 +230,7 @@ int main(int argc, char ** argv)
 	  x = pheno.second;
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
 	}
-      if (params.model == GENE_ADDITIVE) 
+      if (params.model == MODEL::GENE_ADDITIVE) 
 	{
 	  pair<double,double> pheno = TFL2013_additive_disease_effect()(diploids[i].first,
 									diploids[i].second,
@@ -241,7 +241,7 @@ int main(int argc, char ** argv)
 	  x = pheno.second;
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
 	}
-      else if (params.model == MULTIPLICATIVE) 
+      else if (params.model == MODEL::MULTIPLICATIVE) 
 	{
 	  double x = multiplicative_phenotype()(diploids[i].first,
 						diploids[i].second);
@@ -249,7 +249,7 @@ int main(int argc, char ** argv)
 	  x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
 	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
 	}
-      else if (params.model == POPGEN)
+      else if (params.model == MODEL::POPGEN)
 	{
 	  double x = popgen_phenotype()(diploids[i].first,
 					diploids[i].second,params.dominance);
@@ -367,26 +367,26 @@ simparams parse_command_line(const int & argc,
 
   if (vm.count("multiplicative"))
     {
-      rv.model = MULTIPLICATIVE;
+      rv.model = MODEL::MULTIPLICATIVE;
     }
   if (vm.count("additive"))
     {
-      if( rv.model != GENE_RECESSIVE )
+      if( rv.model != MODEL::GENE_RECESSIVE )
 	{
 	  cerr << "Error, it looks like multiple phenotype models have been chosen.  Please choose one!\n";
 	  exit(10);
 	}
-      rv.model = GENE_ADDITIVE;
+      rv.model = MODEL::GENE_ADDITIVE;
     }
   if( vm.count("popgen") )
     {
-      if( rv.model != GENE_RECESSIVE )
+      if( rv.model != MODEL::GENE_RECESSIVE )
 	{
 	  cerr << "Error, it looks like multiple phenotype models have been chosen.  Please choose one!\\
 n";    
 	  exit(10);
 	}
-      rv.model = POPGEN;
+      rv.model = MODEL::POPGEN;
     }
 
   if( vm.count("constant") )
