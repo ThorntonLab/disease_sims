@@ -111,8 +111,8 @@ RCPP_MODULE(SimPopData)
 {
   class_<SimPopData>( "SimPopData" )
     .constructor<string,unsigned long>("Constructor takes a file name and an offset (in bytes")
-    .method("ngeno",&SimPopData::neutralGenotype,"Returns a list containing the positions of neutral markers on each haplotype of the i-th diploid.  The argument must be an integer in the range 1 <= x <= populaiton size.")
-    .method("sgeno",&SimPopData::selectedGenotype,"Returns a list containing the positions of selected markers on each haplotype of the i-th diploid.  The argument must be an integer in the range 1 <= x <= populaiton size.")
+    .method("ngeno",&SimPopData::neutralGenotype,"Returns a list containing the positions of neutral markers on each haplotype of the i-th diploid.  The argument must be an integer in the range 1 <= x <= population size.")
+    .method("sgeno",&SimPopData::selectedGenotype,"Returns a list containing the positions of selected markers on each haplotype of the i-th diploid.  The argument must be an integer in the range 1 <= x <= population size.")
     .method("popsize",&SimPopData::popsize,"Returns the number of diploids.")
     ;
 }
