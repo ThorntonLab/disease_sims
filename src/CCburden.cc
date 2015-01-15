@@ -20,6 +20,7 @@
 
 //#include <boost/bind.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/program_options.hpp>
 
 #include <readCC.hpp>
@@ -201,6 +202,7 @@ int main( int argc, char ** argv )
       
       //flock o_lock = get_whole_flock();
       file_lock o_lock(options.ofile.c_str());
+      scoped_lock<file_lock> s_lock(o_lock);
       //make sure our locking functions work..
       /*.
       assert( o_lock.l_type == F_WRLCK );

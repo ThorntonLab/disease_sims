@@ -19,6 +19,7 @@
 
 //#include <boost/bind.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/program_options.hpp>
 
 #include <diseaseSims/mutation_with_age.hpp>
@@ -155,6 +156,7 @@ int main( int argc, char ** argv )
       int o_fd = fileno(o_fh);
       
       file_lock o_lock(options.ofile.c_str());
+      scoped_lock<file_lock> s_lock(o_lock);
       //flock o_lock = get_whole_flock();
       
       //make sure our locking functions work...

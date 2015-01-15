@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/program_options.hpp>
 
 #include <zlib.h>
@@ -283,6 +284,7 @@ int main(int argc, char ** argv)
   //lock index file ASAP
   ofstream indexstream(params.indexfile.c_str(),ios::out|ios::app);
   file_lock flock(params.indexfile.c_str());
+  scoped_lock<file_lock> slock(flock);
 
   gzFile gzout = gzopen(params.hapfile.c_str(),"a");
   int hapswritten = gzwrite(gzout,popbuffer.str().c_str(),popbuffer.str().size());
@@ -319,7 +321,6 @@ int main(int argc, char ** argv)
 	      << phenowritten << ' ' << hapswritten << '\n';
   //release the locks
   indexstream.close();
-  flock.unlock();
   exit(0);
 }
 

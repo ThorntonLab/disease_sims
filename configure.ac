@@ -51,6 +51,7 @@ AC_CHECK_HEADER(fwdpp/internal/rec_gamete_updater.hpp,HAVE_FWDPP_OK=1 , [AC_MSG_
 AC_CHECK_HEADER(boost/container/vector.hpp,, [AC_MSG_ERROR([boost/container/vector.hpp not found])])
 AC_CHECK_HEADER(boost/container/list.hpp,,  [AC_MSG_ERROR([boost/container/vector.hpp not found])])
 AC_CHECK_HEADER(boost/interprocess/sync/file_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/file_lock.hpp not found])])
+AC_CHECK_HEADER(boost/interprocess/sync/scoped_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/scoped_lock.hpp not found])])
 AC_CHECK_HEADER(gsl/gsl_rng.h,,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
 AC_CHECK_HEADER(gsl/gsl_randist.h,,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
 AC_CHECK_HEADER(zlib.h,,[AC_MSG_ERROR([zlib.h not found.  zlib >= 1.2.5 is requred])])

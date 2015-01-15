@@ -15506,6 +15506,14 @@ else
 fi
 
 
+ac_fn_cxx_check_header_mongrel "$LINENO" "boost/interprocess/sync/scoped_lock.hpp" "ac_cv_header_boost_interprocess_sync_scoped_lock_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_interprocess_sync_scoped_lock_hpp" = xyes; then :
+
+else
+  as_fn_error $? "boost/interprocess/sync/scoped_lock.hpp not found" "$LINENO" 5
+fi
+
+
 ac_fn_cxx_check_header_mongrel "$LINENO" "gsl/gsl_rng.h" "ac_cv_header_gsl_gsl_rng_h" "$ac_includes_default"
 if test "x$ac_cv_header_gsl_gsl_rng_h" = xyes; then :
 

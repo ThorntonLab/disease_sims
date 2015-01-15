@@ -14,6 +14,7 @@ CXXFLAGS=-std=c++11
 AC_CHECK_HEADER(diseaseSims/ccintermediate.hpp,,[AC_MSG_ERROR(diseaseSims headers not found -- please install)])
 AC_CHECK_HEADER(diseaseSims/mutation_with_age.hpp,,[AC_MSG_ERROR(diseaseSims headers not found -- please install)])
 AC_CHECK_HEADER(boost/interprocess/sync/file_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/file_lock.hpp not found])])
+AC_CHECK_HEADER(boost/interprocess/sync/scoped_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/scoped_lock.hpp not found])])
 AC_CHECK_HEADER(gsl/gsl_rng.h,,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
 AC_CHECK_HEADER(gsl/gsl_randist.h,,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
 AC_CHECK_HEADER(zlib.h,,[AC_MSG_ERROR([zlib.h not found.  zlib >= 1.2.5 is requred])])

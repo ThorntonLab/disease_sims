@@ -1,6 +1,7 @@
 #include <Rcpp.h>
 
 #include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
 #include <sstream>
 #include <cstdio>
 
@@ -71,6 +72,7 @@ void writePVblock( const char * outfilename,
 	  Rcpp::stop(error.str());
 	}
       file_lock index_flock(indexfilename);
+      scoped_lock<file_lock> s_lock(index_flock);
       /*
       if (fcntl(index_fd, F_SETLKW,&index_flock) == -1) 
 	{

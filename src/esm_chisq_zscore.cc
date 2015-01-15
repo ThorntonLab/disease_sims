@@ -18,6 +18,7 @@
 #include <thread>
 
 #include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/program_options.hpp>
 
 #include <gsl/gsl_rng.h>
@@ -123,7 +124,7 @@ int main(int argc, char ** argv)
 
   //struct flock fd_lock = get_whole_flock();
   file_lock fd_lock(options.outfile.c_str());
-  /*
+  scoped_lock<file_lock> s_locl(fd_lock);  /*
   if (fcntl(fd,F_SETLKW,&fd_lock) == -1)
     {
       cerr << "ERROR: could not obtain lock on " << options.outfile << '\n';

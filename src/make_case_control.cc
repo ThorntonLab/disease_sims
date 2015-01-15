@@ -60,6 +60,7 @@
 #include <set>
 
 #include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/program_options.hpp>
 
 #include <gsl/gsl_rng.h>
@@ -278,6 +279,7 @@ int main(int argc, char ** argv)
   int ai_fd = fileno(ai_fh);
   
   file_lock ai_lock(options.anova_indexfile.c_str());
+  scoped_lock<file_lock> s_lock(ai_lock);
 
   gzFile gzout = gzopen( options.anovafile.c_str(),"a" );
   int written = gzwrite( gzout, ccbuffer.str().c_str(), ccbuffer.str().size() );
