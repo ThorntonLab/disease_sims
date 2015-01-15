@@ -5,12 +5,12 @@ AC_CONFIG_MACRO_DIR([m4])
 CC=`R CMD config CC`
 CPP=`R CMD config CPP`
 CFLAGS=`R CMD config CFLAGS`
-CPPFLAGS=`R CMD config CPPFLAGS`
+CPPFLAGS=`R CMD config CPPFLAGS` $CPPFLAGS
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_CXX
 AC_LANG(C++)
-CXXFLAGS=-std=c++11
+CXXFLAGS="-std=c++11 $CXXFLAGS"
 AC_CHECK_HEADER(diseaseSims/ccintermediate.hpp,,[AC_MSG_ERROR(diseaseSims headers not found -- please install)])
 AC_CHECK_HEADER(diseaseSims/mutation_with_age.hpp,,[AC_MSG_ERROR(diseaseSims headers not found -- please install)])
 AC_CHECK_HEADER(boost/interprocess/sync/file_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/file_lock.hpp not found])])
@@ -33,4 +33,8 @@ AC_LANG_SAVE
 AC_LANG_RESTORE
 
 AC_CONFIG_FILES([src/Makevars])
+XTRA_CPPFLAGS=$CPPFLAGS
+XTRA_LDFLAGS=$LDFLAGS
+AC_SUBST(XTRA_CPPFLAGS)
+AC_SUBST(XTRA_LDFLAGS)
 AC_OUTPUT
