@@ -52,6 +52,6 @@ procIndex = function(index,column,recordno)
             }
         else
             {
-                return( sum(index[1:(record-1),column]) )
+                return( sum(as.numeric(index[1:(record-1),column])) )
             }
     }
