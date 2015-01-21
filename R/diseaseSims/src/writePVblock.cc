@@ -121,8 +121,8 @@ void writePVblock( const char * outfilename,
 	}
       */
       fflush( index_fh );
-      fclose(index_fh);
       index_flock.unlock();
+      fclose(index_fh);
     }
   else
     {
