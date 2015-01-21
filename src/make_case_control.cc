@@ -319,8 +319,8 @@ int main(int argc, char ** argv)
     }
 
   fflush(ai_fh);
-  fclose(ai_fh);
   ai_lock.unlock();
+  fclose(ai_fh);
   exit(0);
 }
 

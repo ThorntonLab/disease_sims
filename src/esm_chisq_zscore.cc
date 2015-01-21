@@ -141,8 +141,9 @@ int main(int argc, char ** argv)
       exit(10);
     }
   */
-  fclose(fp);
+  fflush(fp);
   fd_lock.unlock();
+  fclose(fp);
 }
 
 void permute( const CCblock * ccdata,

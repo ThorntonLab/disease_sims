@@ -186,8 +186,8 @@ int main( int argc, char ** argv )
 	}
       */
       fflush(o_fh);
-      fclose(o_fh);
       o_lock.unlock();
+      fclose(o_fh);
     }
   else
     {

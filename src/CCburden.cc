@@ -235,6 +235,7 @@ int main( int argc, char ** argv )
       */
       o_lock.unlock();
       fflush(o_fh);
+      o_lock.unlock();
       fclose(o_fh);
     }
   else

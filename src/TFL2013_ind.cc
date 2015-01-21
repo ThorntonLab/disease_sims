@@ -320,6 +320,8 @@ int main(int argc, char ** argv)
   indexstream << params.replicate_no << ' ' << effectwritten << ' '
 	      << phenowritten << ' ' << hapswritten << '\n';
   //release the locks
+  indexstream.flush();
+  flock.unlock();
   indexstream.close();
   exit(0);
 }
