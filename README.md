@@ -41,6 +41,16 @@ The above may be mixed and matched as needed.
 
 On many systems, LD_LIBRARY_PATH may be needed to run make_case_control.
 
+#The simulation programs
+
+##TFL2013_ind
+
+This is a complete rewrite of the program used in our previous paper (Thornton _et al._. 2013, doi:10.1371/journal.pgen.1003258).  If you run the program without arguments, you'll get an extensive printout to screen about its usage.  This section of this document will attempt to put that information into context.
+
+###The demographic model
+
+The program simulates a single population of $N$ diploids for $n_1$ generations.
+
 #Example workflow on UCI HPC
 
 See the scripts in the workflow directory.
