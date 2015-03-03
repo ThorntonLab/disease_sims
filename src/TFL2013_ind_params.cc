@@ -62,7 +62,7 @@ simparams parse_command_line(const int & argc,
     ("additive,a","Use additive model to calculate phenotype.  Default is Thornton, Foran & Long (2013) recessive model")
     ("indexfile,i",value<string>(&rv.indexfile)->default_value(string()),"Name of index file")
     ("popfile,p",value<string>(&rv.hapfile)->default_value(string()),"Name of output file for population")
-    ("phenotypes,P",value<string>(&rv.phenofile)->default_value(string()),"Name of output file for phenotypes")
+    ("phenotypes,P",value<string>(&rv.phenofile)->default_value(string()),"Name of output file for phenotypes.  Not used for Eyre-Walker model.")
     ("effectsfile,E",value<string>(&rv.effectsfile)->default_value(string()),"Name of output file for effect sizes of causative mutations")
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed (unsigned integer)")
     ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.  Not allowed for the Eyre-Walker model")
@@ -124,7 +124,7 @@ simparams parse_command_line(const int & argc,
     {
       rv.mmp.dist_effects = false;
     }
-  if( rv.indexfile.empty() || rv.hapfile.empty() || rv.phenofile.empty() )
+  if( rv.indexfile.empty() || rv.hapfile.empty() || (rv.phenofile.empty()&&rv.model!=MODEL::EYREWALKER) )
     {
       if (rv.indexfile.empty())
 	{
@@ -136,7 +136,7 @@ simparams parse_command_line(const int & argc,
 	  cerr << "Error: population output file name required.  Use -h to see options\n";
 	}
 	
-      if( rv.phenofile.empty() )
+      if( rv.phenofile.empty() && rv.model != MODEL::EYREWALKER )
 	{
 	  cerr << "Error: phenotypes output file name required.  Use -h to see options\n";
 	}

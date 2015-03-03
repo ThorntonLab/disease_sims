@@ -267,46 +267,49 @@ int main(int argc, char ** argv)
   //Write out the phenotypes
   ostringstream phenobuffer;
   unsigned nphenos = diploids.size();
-  phenobuffer.write( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
-  for( unsigned i = 0 ; i < diploids.size() ; ++i )
+  if (params.model != MODEL::EYREWALKER) 
     {
-      if (params.model == MODEL::GENE_RECESSIVE) 
+      phenobuffer.write( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
+      for( unsigned i = 0 ; i < diploids.size() ; ++i )
 	{
-	  pair<double,double> pheno = TFL2013_recessive_disease_effect()(diploids[i].first,
-									 diploids[i].second,
-									 params.sd,
-									 r);
-	  double x = pheno.first;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	  x = pheno.second;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	}
-      if (params.model == MODEL::GENE_ADDITIVE) 
-	{
-	  pair<double,double> pheno = TFL2013_additive_disease_effect()(diploids[i].first,
-									diploids[i].second,
-									params.sd,
-									r);
-	  double x = pheno.first;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	  x = pheno.second;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	}
-      else if (params.model == MODEL::MULTIPLICATIVE) 
-	{
-	  double x = multiplicative_phenotype()(diploids[i].first,
-						diploids[i].second);
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	  x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	}
-      else if (params.model == MODEL::POPGEN)
-	{
-	  double x = popgen_phenotype()(diploids[i].first,
-					diploids[i].second,params.dominance);
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	  x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	  if (params.model == MODEL::GENE_RECESSIVE) 
+	    {
+	      pair<double,double> pheno = TFL2013_recessive_disease_effect()(diploids[i].first,
+									     diploids[i].second,
+									     params.sd,
+									     r);
+	      double x = pheno.first;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	      x = pheno.second;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	    }
+	  if (params.model == MODEL::GENE_ADDITIVE) 
+	    {
+	      pair<double,double> pheno = TFL2013_additive_disease_effect()(diploids[i].first,
+									    diploids[i].second,
+									    params.sd,
+									    r);
+	      double x = pheno.first;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	      x = pheno.second;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	    }
+	  else if (params.model == MODEL::MULTIPLICATIVE) 
+	    {
+	      double x = multiplicative_phenotype()(diploids[i].first,
+						    diploids[i].second);
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	      x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	    }
+	  else if (params.model == MODEL::POPGEN)
+	    {
+	      double x = popgen_phenotype()(diploids[i].first,
+					    diploids[i].second,params.dominance);
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	      x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	    }
 	}
     }
 
@@ -342,19 +345,24 @@ int main(int argc, char ** argv)
     {
       cerr << "Error writing population to " 
 	   << params.hapfile << '\n';
-      exit(10);
+      exit(EXIT_FAILURE);
     }
   gzclose(gzout);
 
-  gzout = gzopen(params.phenofile.c_str(),"a");
-  int phenowritten = gzwrite(gzout,phenobuffer.str().c_str(),phenobuffer.str().size());
-  if ( ! phenowritten && !phenobuffer.str().empty() )
+  int phenowritten = -1;
+  if( params.model != MODEL::EYREWALKER )
     {
-      cerr << "Error writing population to " 
-	   << params.phenofile << '\n';
-      exit(10);
+      gzout = gzopen(params.phenofile.c_str(),"a");
+      phenowritten = gzwrite(gzout,phenobuffer.str().c_str(),phenobuffer.str().size());
+      if ( ! phenowritten && !phenobuffer.str().empty() )
+	{
+	  cerr << "Error writing population to " 
+	       << params.phenofile << '\n';
+	  exit(EXIT_FAILURE);
+	}
+      gzclose(gzout);
     }
-  gzclose(gzout);
+
 
   gzout = gzopen(params.effectsfile.c_str(),"a");
   int effectwritten = gzwrite(gzout,effectstream.str().c_str(),effectstream.str().size());
@@ -362,9 +370,10 @@ int main(int argc, char ** argv)
     {
       cerr << "Error writing population to " 
 	   << params.effectsfile << '\n';
-      exit(10);
+      exit(EXIT_FAILURE);
     }
   gzclose(gzout);
+    
 
   //Now we can write to the index file
   indexstream << params.replicate_no << ' ' << effectwritten << ' '
