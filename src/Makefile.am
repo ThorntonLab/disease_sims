@@ -8,7 +8,7 @@ libdiseaseSimsHelper_la_SOURCES=ccintermediate.cc
 
 #TFL2013_ind_SOURCES=
 TFL2013_SOURCES=TFL2013.cc
-TFL2013_ind_SOURCES=TFL2013_ind.cc
+TFL2013_ind_SOURCES=TFL2013_ind.cc TFL2013_ind_params.cc
 make_case_control_SOURCES=make_case_control.cc simindex.cc readSimOutput.cc
 #esm_chisq_zscore_SOURCES=esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc
 chksimoutput_SOURCES=chksimoutput.cc simindex.cc

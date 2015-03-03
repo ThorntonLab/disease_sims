@@ -141,7 +141,8 @@ PROGRAMS = $(bin_PROGRAMS)
 am_TFL2013_OBJECTS = TFL2013.$(OBJEXT)
 TFL2013_OBJECTS = $(am_TFL2013_OBJECTS)
 TFL2013_DEPENDENCIES =
-am_TFL2013_ind_OBJECTS = TFL2013_ind.$(OBJEXT)
+am_TFL2013_ind_OBJECTS = TFL2013_ind.$(OBJEXT) \
+	TFL2013_ind_params.$(OBJEXT)
 TFL2013_ind_OBJECTS = $(am_TFL2013_ind_OBJECTS)
 TFL2013_ind_LDADD = $(LDADD)
 am_chksimoutput_OBJECTS = chksimoutput.$(OBJEXT) simindex.$(OBJEXT)
@@ -357,7 +358,7 @@ libdiseaseSimsHelper_la_SOURCES = ccintermediate.cc
 
 #TFL2013_ind_SOURCES=
 TFL2013_SOURCES = TFL2013.cc
-TFL2013_ind_SOURCES = TFL2013_ind.cc
+TFL2013_ind_SOURCES = TFL2013_ind.cc TFL2013_ind_params.cc
 make_case_control_SOURCES = make_case_control.cc simindex.cc readSimOutput.cc
 #esm_chisq_zscore_SOURCES=esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc
 chksimoutput_SOURCES = chksimoutput.cc simindex.cc
@@ -543,6 +544,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFL2013.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFL2013_ind.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFL2013_ind_params.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ccintermediate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chksimoutput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make_case_control.Po@am__quote@

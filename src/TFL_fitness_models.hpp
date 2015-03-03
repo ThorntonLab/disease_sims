@@ -5,5 +5,5 @@
 #include <gene_based_model.hpp>
 #include <multiplicative_model.hpp>
 #include <popgen_model.hpp>
-
+#include <EyreWalker_fitness.hpp>
 #endif
