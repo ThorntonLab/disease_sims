@@ -8,7 +8,7 @@ enum class MODEL { GENE_RECESSIVE = 0, GENE_ADDITIVE, MULTIPLICATIVE, POPGEN, EY
 struct mut_model_params
 {
   double mu_disease,mu_neutral,s,shape;
-  unsigned N_current;
+  unsigned * N_current;
   bool dist_effects;
   mut_model_params(void);
 };

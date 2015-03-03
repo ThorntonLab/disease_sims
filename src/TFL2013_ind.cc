@@ -110,11 +110,12 @@ inline TFLmtype mut_model_details<ew_tag>(gsl_rng * r, const unsigned int & ttl_
 					  const mut_model_params & mmp,
 					  lookup_table_type * lookup)
 {
+  assert( mmp.N_current != nullptr );
   double pos = get_unique_pos(r,lookup);
   if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
     {
       //4Ns ~ \Gamma with shape mmp.shape and mean mmp.s, so s = 4Ns/4N...
-      double s = gsl_ran_gamma(r,mmp.shape,mmp.s/mmp.shape)/(4.*double(mmp.N_current));
+      double s = gsl_ran_gamma(r,mmp.shape,mmp.s/mmp.shape)/(4.*double(*mmp.N_current));
       return TFLmtype(pos,s,1,ttl_generations,'A',false);
     }
   return TFLmtype(pos,0.,1,ttl_generations,'S',true);
@@ -159,6 +160,12 @@ int main(int argc, char ** argv)
   std::function<double(void)> recmap = std::bind(gsl_rng_uniform,r);
 
   std::function<TFLmtype(mlist *)> MMODEL = std::bind(mut_model2<fixed_tag>,r,ttl_gen,params.mmp,&lookup);
+
+  unsigned N_current = params.N;
+  unsigned N_next = N_current;
+
+  //Critical: mmp is getting bound to policies here, so we need to set the pointer to current N PRIOR to binding
+  params.mmp.N_current = &N_next;
   if(params.mmp.dist_effects)
     MMODEL = std::bind(mut_model2<dist_tag>,r,ttl_gen,params.mmp,&lookup);
   if(params.model == MODEL::EYREWALKER)
@@ -173,7 +180,6 @@ int main(int argc, char ** argv)
 			    &mutations,
 			    params.N,
 			    params.mmp.mu_neutral,
-			    //std::bind(mutation_model(),r,ttl_gen,params.s,0.,params.mu_neutral,&lookup,params.dist_effects),
 			    MMODEL,
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 				      &gametes,
@@ -186,7 +192,7 @@ int main(int argc, char ** argv)
 			    std::bind(KTfwd::mutation_remover(),std::placeholders::_1,0,2*params.N));
       KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
     }
-  unsigned N_current = params.N;
+
 
   //Fitness model for phase w/selection.  The default is the recessive model of TFL 2013
   std::function<double(const glist::const_iterator &,
@@ -220,7 +226,6 @@ int main(int argc, char ** argv)
 			    &mutations,
 			    params.N,
 			    params.mmp.mu_disease+params.mmp.mu_neutral,
-			    //std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&lookup,params.dist_effects),
 			    MMODEL,
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 				      &gametes,
@@ -236,7 +241,7 @@ int main(int argc, char ** argv)
   //Exp. growth phase w/disease model
   for( generation = 0 ; generation < params.ngens_evolve_growth ; ++generation,++ttl_gen )
     {
-      unsigned N_next = round( params.N*pow(G,generation+1) );
+      N_next = round( params.N*pow(G,generation+1) );
       wbar = sample_diploid(r,
 			    &gametes,
 			    &diploids,
@@ -244,7 +249,6 @@ int main(int argc, char ** argv)
 			    N_current,
 			    N_next,
 			    params.mmp.mu_disease+params.mmp.mu_neutral,
-			    //std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&lookup,params.dist_effects),
 			    MMODEL,
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 				      &gametes,
@@ -257,7 +261,7 @@ int main(int argc, char ** argv)
 			    std::bind(KTfwd::mutation_remover(),std::placeholders::_1,0,2*N_next));
       KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*N_next);
       //update N
-      params.mmp.N_current = N_current = N_next;
+      N_current = N_next;
     }
 
   //Write out the population
