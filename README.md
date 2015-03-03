@@ -106,7 +106,7 @@ The index file contains rows of 4 integer columns:
 3. The size of the data written to the "phenotypes file", in bytes.  (A value of -1 is used when the phenotypes file is not written.)
 4. The size of the data written to the "population file", in bytes.
 
-The index file is plain-text, and human-readable.  The remaining files are not human-readable.  Their data are written in a native binary format and the files them selves are gzip-compressed.
+The index file is plain-text, and human-readable.  The remaining files are not human-readable.  Their data are written in a native binary format and the files themselves are gzip-compressed.
 
 #### The phenotypes file
 
@@ -119,7 +119,7 @@ A record may be read into R using the readBin function:
 
 ~~~{r}
 #open for reading in binary mode
-f=file("phenotypes.bin.gz","rb");
+f=gzfile("phenotypes.bin.gz","rb");
 D=readBin(f,"integer",1)
 m=matrix(readBin(f,"numeric",2*D),ncol=2,byrow=TRUE)
 ~~~
@@ -132,6 +132,33 @@ h2 = var( m[,1] )/( var(m[,1]) + var(m[,2]) )
 
 You may read all the replicates in from a file using a for loop, etc.  Please note that seeking within a gzipped file doesn't work all that well in R.
 
+### The effect sizes file
+
+For each simulated replicate, the following data are recorded:
+
+1. A 32-bit unsigned integer representing the number of mutations segregating in the replicate. Let's call this number _M_.
+2. There are then _M_ sets of 4 doubles.  These doubles are the mutation position, its effect size (or selection coefficient), its number of occurrences in the population, and its age in generations.
+
+Again, this file is mean for easy processing in R:
+
+~~~{r}
+f=gzfile("effectsfile.bin.gz","rb")
+M=readBin(f,"integer",1)
+muts = matrix(readBin(f,"numeric",4*M),ncol=4,byrow=TRUE)
+~~~
+
+### The population file.
+
+This file contains everything about the currently-segregating variation in the population.  Its format is complex, and not readable in R, python, etc., because it contains "deep copies" of internal [fwdpp](http://molpopgen.github.io/fwdpp/) data structures.  If you want to write programs accessing the data in this file, please see the following resources:
+
+1. The fwdpp reference manual, found [here](http://molpopgen.github.io/fwdpp/).  Take a look at "Related Pages", and then "Tutorial 3: Data serialization".
+2. The first several lines of the main routine of make_case_control.cc, in the src subdirectory of this repository.  People with C++ experience should look for this function call:
+
+~~~{cpp}
+read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+~~~
+
+When you understand what goes into that, you'll much of what you need to be able to process the contents of this file.
 
 #Example workflow on UCI HPC
 
