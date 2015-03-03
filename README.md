@@ -132,7 +132,7 @@ h2 = var( m[,1] )/( var(m[,1]) + var(m[,2]) )
 
 You may read all the replicates in from a file using a for loop, etc.  Please note that seeking within a gzipped file doesn't work all that well in R.
 
-### The effect sizes file
+#### The effect sizes file
 
 For each simulated replicate, the following data are recorded:
 
@@ -147,7 +147,7 @@ M=readBin(f,"integer",1)
 muts = matrix(readBin(f,"numeric",4*M),ncol=4,byrow=TRUE)
 ~~~
 
-### The population file.
+#### The population file.
 
 This file contains everything about the currently-segregating variation in the population.  Its format is complex, and not readable in R, python, etc., because it contains "deep copies" of internal [fwdpp](http://molpopgen.github.io/fwdpp/) data structures.  If you want to write programs accessing the data in this file, please see the following resources:
 
@@ -159,6 +159,12 @@ read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::pla
 ~~~
 
 When you understand what goes into that, you'll much of what you need to be able to process the contents of this file.
+
+### File locking: you do not need to write each replicate to a separate file!
+
+The program implements something called "file locking", which allows multiple independent processes to share the same output file.  If you want to run a bunch of replicates with the same parameters but different seeds, you simply need to change the replicated ID number (--replicate/-R) and specify the same output file for each process.  When a replicate is done, the program will talk to the system and request access to the output file.  If it gets access, it "locks" the file, and appends its data to the end.  If another process has locked the file, it'll wait until that lock is released.
+
+This file locking makes the output of the simulation much more manageable, and it is very easily used on cluster systems supporting "array jobs".
 
 #Example workflow on UCI HPC
 
