@@ -49,7 +49,13 @@ This is a complete rewrite of the program used in our previous paper (Thornton _
 
 ###The demographic model
 
-The program simulates a single population of $N$ diploids for $n_1$ generations.
+The program simulates a single population of _N_ diploids for _n1_ generations.  Optionally, the simulation may continue for another _n2_ generations, during which the population size changes (exponentially) from _N_ to _N2_.
+
+For example, to simulation a population of _N=10,000_ for 50,000 generations, and then grow it to _N=100,000_ over a period of 10,000 generations, say
+
+~~~
+-1 10000 -g 50000 -2 100000 -G 10000
+~~~
 
 #Example workflow on UCI HPC
 
