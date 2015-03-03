@@ -114,8 +114,7 @@ inline TFLmtype mut_model_details<ew_tag>(gsl_rng * r, const unsigned int & ttl_
   if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
     {
       //4Ns ~ \Gamma with shape mmp.shape and mean mmp.s, so s = 4Ns/4N...
-      //And, mutations assumed deleterious, hence the -
-      double s = -gsl_ran_gamma(r,mmp.shape,mmp.s/mmp.shape)/(4.*double(mmp.N_current));
+      double s = gsl_ran_gamma(r,mmp.shape,mmp.s/mmp.shape)/(4.*double(mmp.N_current));
       return TFLmtype(pos,s,1,ttl_generations,'A',false);
     }
   return TFLmtype(pos,0.,1,ttl_generations,'S',true);
