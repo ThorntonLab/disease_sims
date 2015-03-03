@@ -25,7 +25,7 @@ struct EWfitness
 			0.,
 			[]( const double & a,
 			    const itr & i ) { return a + i->s; } );
-    return std::max(0.,sum);
+    return std::max(0.,1.-sum);
   }
 };
 
