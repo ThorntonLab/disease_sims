@@ -204,7 +204,7 @@ int main(int argc, char ** argv)
 
   if( params.model == MODEL::GENE_ADDITIVE )
     {
-      dipfit = std::bind(TFL2013_additive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
+      dipfit = std::bind(TFL2013_additive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,params.optimum,r);
     }
   else if( params.model == MODEL::MULTIPLICATIVE )
     {
