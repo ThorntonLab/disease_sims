@@ -181,6 +181,7 @@ Parameter [value] | Interpretation
 -e/--esize [positive double] | The effect size of a causative mutation.  By default, this is the mean of an exponential distribution ("lambda" in the PLoS Genetics paper).  If -C/--constant is used, the effect sizes are fixed at the input value
 --noise [positive double] | The standard deviation of Gaussian noise added to phenotype (the mean of the Gaussian equals 0).  The default is the value used in the TFL2013 paper.  This parameter is used to tune the heritability.  A value of 0 will make the heritability equal to 1.  The trait value of a diploid is P = G + E, where G is the geometric mean of maternal and paternal haplotype effect sizes, and E is a Gaussian noise term with mean zero.
 --sigma [positive double] | The standard deviation of the Gaussian fitness function.  Leave this at 1 (the default) unless you want to go insane.
+--optimum [double] | For growth models, change the optimum trait value from 0 to the user-input value.  This changes the Gaussian fitness function from N(0,sigma) to N(optimum,sigma)
 
 #### Additive and multiplicative models.
 
@@ -191,6 +192,7 @@ Model | Description
 --additive | Change the genetic model to additive across causative mutations.  For this model, G becomes the sum of the effect sizes of all causative mutations in a diploid.
 --multiplicative | Change the genetic model to multiplicative across causative mutations.  For this model, G becomes the (product of (1 + e_i)) - 1, where e_i is the effect size of the i-th mutation.  This is Risch's model, with an additional - 1 subtracted from G such that the trait value in the absence of causative mutations equals 0.
 
+
 The parameters for this model are the same as the above:
 
 Parameter [value] | Interpretation
@@ -198,6 +200,7 @@ Parameter [value] | Interpretation
 -e/--esize [positive double] | The effect size of a causative mutation.  By default, this is the mean of an exponential distribution ("lambda" in the PLoS Genetics paper).  If -C/--constant is used, the effect sizes are fixed at the input value
 --noise [positive double] | The standard deviation of Gaussian noise added to phenotype (the mean of the Gaussian equals 0).  The default is the value used in the TFL2013 paper.  This parameter is used to tune the heritability.  A value of 0 will make the heritability equal to 1.  The trait value of a diploid is P = G + E, where G is the geometric mean of maternal and paternal haplotype effect sizes, and E is a Gaussian noise term with mean zero.
 --sigma [positive double] | The standard deviation of the Gaussian fitness function.  Leave this at 1 (the default) unless you want to go insane.
+--optimum [double] | For growth models, change the optimum trait value from 0 to the user-input value.  This changes the Gaussian fitness function from N(0,sigma) to N(optimum,sigma)
 
 #### Eyre-Walker's model
 
@@ -215,6 +218,7 @@ Parameter [value] | Interpretation
 --ewshape [positive double] | This value will be used for __Beta__.
 --noise [positive double] | Has no effect.
 --sigma [positive double] | Has no effect.
+--optimum [double] | Has no effect
 --phenotypes/-P [string] | Has no effect.  No trait values are actually simulated, so there are no phenotypes to write out.
 
 What does the scaled selection parameter 4Ns mean in a growing population?  If we consider the demographic model described above, we have a population growing from size _N1_ to size _N2_ in _G_ generations.  Given that the simulation works forwards in time, we have implemented the most "natural" definition of 4Ns, which is to take it to refer to 4N1s.  In other words, selection coefficients are scaled __with resepct to the ancestral population size__ in growth models.  Be very careful when comparing results of different simulations, as some may take 4Ns to mean 4N2s!!!!!!
