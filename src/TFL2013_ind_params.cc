@@ -14,23 +14,23 @@ mut_model_params::mut_model_params(void) : mu_disease(0.000125),
 {
 }
 
-  simparams::simparams(void) : mmp(mut_model_params()),
-			       N(20000),N2(20000),
-			       ngens_burnin(0),
-			       ngens_evolve(160000),
-			       ngens_evolve_growth(0),
-			       replicate_no(0),
-			       seed(0),
-			       littler(0.00125),
-			       sd(0.075),
-			       sd_s(1),
-			       optimum(0.),
-			       dominance(0.),
-			       model( MODEL::GENE_RECESSIVE ),
-			       indexfile(string()),
-			       hapfile(string()),
-			       phenofile(string()),
-			       effectsfile(string())
+simparams::simparams(void) : mmp(mut_model_params()),
+			     N(20000),N2(20000),
+			     ngens_burnin(0),
+			     ngens_evolve(160000),
+			     ngens_evolve_growth(0),
+			     replicate_no(0),
+			     seed(0),
+			     littler(0.00125),
+			     sd(0.075),
+			     sd_s(1),
+			     optimum(0.),
+			     dominance(0.),
+			     model( MODEL::GENE_RECESSIVE ),
+			     indexfile(string()),
+			     hapfile(string()),
+			     phenofile(string()),
+			     effectsfile(string())
 {
 }
 
