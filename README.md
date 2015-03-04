@@ -202,6 +202,26 @@ Parameter [value] | Interpretation
 --sigma [positive double] | The standard deviation of the Gaussian fitness function.  Leave this at 1 (the default) unless you want to go insane.
 --optimum [double] | For growth models, change the optimum trait value from 0 to the user-input value.  This changes the Gaussian fitness function from N(0,sigma) to N(optimum,sigma)
 
+#### Multiplicative with dominance
+
+For the multiplicative model above, G = (product of (1 + e_i)) - 1.  However, it is common in population genetics to allow the dominance of a causative mutation to vary.  If we consider the following 
+
+Genotype | Meaning | Contribution to trait value
+-------  | ------- | ----------
+AA | Homozygous non-mutant | 1
+Aa | Heterozygous mutant | 1 + h*e
+aa | Homozygous mutant | 1 + 2*e
+
+For the model with dominance, G = (product of (1+g_i)) -1, where g_i is the genotype at the i-th position containing a causative mutation.
+
+Parameter [value] | Interpretation
+--------- | ------------
+-e/--esize [positive double] | The effect size of a causative mutation.  By default, this is the mean of an exponential distribution ("lambda" in the PLoS Genetics paper).  If -C/--constant is used, the effect sizes are fixed at the input value
+-d/--dominance [positive double] | The dominance of a causative mutation
+--noise [positive double] | The standard deviation of Gaussian noise added to phenotype (the mean of the Gaussian equals 0).  The default is the value used in the TFL2013 paper.  This parameter is used to tune the heritability.  A value of 0 will make the heritability equal to 1.  The trait value of a diploid is P = G + E, where G is the geometric mean of maternal and paternal haplotype effect sizes, and E is a Gaussian noise term with mean zero.
+--sigma [positive double] | The standard deviation of the Gaussian fitness function.  Leave this at 1 (the default) unless you want to go insane.
+--optimum [double] | For growth models, change the optimum trait value from 0 to the user-input value.  This changes the Gaussian fitness function from N(0,sigma) to N(optimum,sigma)
+
 #### Eyre-Walker's model
 
 Model | Description
