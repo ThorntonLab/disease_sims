@@ -93,7 +93,7 @@ The program generates up to three output files plus an index file recording the 
 * -i/--indexfile _filename_ specifies the name of the index file.
 * --popfile/-p _filename_ specifies an output file where the entire population will be written.
 * --effectsfile/-E _filename_ specifies and output file where some information about segregating mutations will be written.
-* --phenotypes/-O _filename_ specifies an output file where individual diploid phenotypes will be written. (_This file is not written for all genetic models._)
+* --phenotypes/-P _filename_ specifies an output file where individual diploid phenotypes will be written. (_This file is not written for all genetic models._)
 
 Only the first three are mandatory.
 
@@ -191,13 +191,31 @@ Model | Description
 --additive | Change the genetic model to additive across causative mutations.  For this model, G becomes the sum of the effect sizes of all causative mutations in a diploid.
 --multiplicative | Change the genetic model to multiplicative across causative mutations.  For this model, G becomes the (product of (1 + e_i)) - 1, where e_i is the effect size of the i-th mutation.  This is Risch's model, with an additional - 1 subtracted from G such that the trait value in the absence of causative mutations equals 0.
 
+The parameters for this model are the same as the above:
+
 Parameter [value] | Interpretation
 --------- | ------------
 -e/--esize [positive double] | The effect size of a causative mutation.  By default, this is the mean of an exponential distribution ("lambda" in the PLoS Genetics paper).  If -C/--constant is used, the effect sizes are fixed at the input value
 --noise [positive double] | The standard deviation of Gaussian noise added to phenotype (the mean of the Gaussian equals 0).  The default is the value used in the TFL2013 paper.  This parameter is used to tune the heritability.  A value of 0 will make the heritability equal to 1.  The trait value of a diploid is P = G + E, where G is the geometric mean of maternal and paternal haplotype effect sizes, and E is a Gaussian noise term with mean zero.
 --sigma [positive double] | The standard deviation of the Gaussian fitness function.  Leave this at 1 (the default) unless you want to go insane.
 
-The parameters for this model are the same as the above:
+#### Eyre-Walker's model
+
+Model | Description
+------ | -------
+--eyre-walker | Change the genetic model to that of Eyre-Walker (2010), www.pnas.org/cgi/doi/10.1073/pnas.0906182107.
+
+For this model, no phenotypes are actually simulated.  Rather, the simulation is performed with selection under an additive model.  Thus, the usage of the program changes somewhat.
+
+For this model, scaled selection coefficients (4Ns) are drawn from a Gamma distribution with shape parameter __Beta__ and mean __S__.
+
+Parameter [value] | Interpretation
+--------- | ------------
+-e/--esize [positive double] | This value will be used for __S__.
+--ewshape [positive double] | This value will be used for __Beta__.
+--noise [positive double] | Has no effect.
+--sigma [positive double] | Has no effect.
+--phenotypes/-P [string] | Has no effect.  No trait values are actually simulated, so there are no phenotypes to write out.
 
 #Example workflow on UCI HPC
 
