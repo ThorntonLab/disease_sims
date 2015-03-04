@@ -11,7 +11,14 @@ struct popgen_phenotype_updater_hom
   template<typename iterator_type>
   inline void operator()(double & fitness, const iterator_type & m1) const
   {
-    fitness *= (1. + m1->s);
+    /*
+      Bug fix March 4, 2016
+      Old code:     fitness *= (1. + m1->s);
+      It was a bug b/c the trait values
+      didn't scale as they would for homozygote
+      in Risch model.
+    */
+    fitness *= (1. + 2.*m1->s);
   }
 };
 
