@@ -179,8 +179,25 @@ The relevant program parameters and their intrepretation are:
 Parameter [value] | Interpretation
 --------- | ------------
 -e/--esize [positive double] | The effect size of a causative mutation.  By default, this is the mean of an exponential distribution ("lambda" in the PLoS Genetics paper).  If -C/--constant is used, the effect sizes are fixed at the input value
---noise [float] | The standard deviation of Gaussian noise added to phenotype.  The default is the value used in the TFL2013 paper.
---sigma [floag] | The standard deviation of the Gaussian fitness function.  Leave this at 1 (the default) unless you want to go insane.
+--noise [positive double] | The standard deviation of Gaussian noise added to phenotype (the mean of the Gaussian equals 0).  The default is the value used in the TFL2013 paper.  This parameter is used to tune the heritability.  A value of 0 will make the heritability equal to 1.  The trait value of a diploid is P = G + E, where G is the geometric mean of maternal and paternal haplotype effect sizes, and E is a Gaussian noise term with mean zero.
+--sigma [positive double] | The standard deviation of the Gaussian fitness function.  Leave this at 1 (the default) unless you want to go insane.
+
+#### Additive and multiplicative models.
+
+I lump these two models together as the former approximates the latter very closely for small effect sizes.
+
+Model | Description
+------ | ----------
+--additive | Change the genetic model to additive across causative mutations.  For this model, G becomes the sum of the effect sizes of all causative mutations in a diploid.
+--multiplicative | Change the genetic model to multiplicative across causative mutations.  For this model, G becomes the (product of (1 + e_i)) - 1, where e_i is the effect size of the i-th mutation.  This is Risch's model, with an additional - 1 subtracted from G such that the trait value in the absence of causative mutations equals 0.
+
+Parameter [value] | Interpretation
+--------- | ------------
+-e/--esize [positive double] | The effect size of a causative mutation.  By default, this is the mean of an exponential distribution ("lambda" in the PLoS Genetics paper).  If -C/--constant is used, the effect sizes are fixed at the input value
+--noise [positive double] | The standard deviation of Gaussian noise added to phenotype (the mean of the Gaussian equals 0).  The default is the value used in the TFL2013 paper.  This parameter is used to tune the heritability.  A value of 0 will make the heritability equal to 1.  The trait value of a diploid is P = G + E, where G is the geometric mean of maternal and paternal haplotype effect sizes, and E is a Gaussian noise term with mean zero.
+--sigma [positive double] | The standard deviation of the Gaussian fitness function.  Leave this at 1 (the default) unless you want to go insane.
+
+The parameters for this model are the same as the above:
 
 #Example workflow on UCI HPC
 
