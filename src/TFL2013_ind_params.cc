@@ -144,10 +144,13 @@ simparams parse_command_line(const int & argc,
     }
 
   //Sanity checks on parameter values
-  if( params.mu_neutral < 0. )
+  if( rv.mmp.mu_neutral < 0. )
     {
     }
-  if( params.mu_neutral < 0. )
+  if( rv.mmp.mu_neutral < 0. )
+    {
+    }
+  if( rv.mmp.s < 0. )
     {
     }
   return rv;
