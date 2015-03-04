@@ -82,7 +82,7 @@ Example:
 
 The mutation rates are _per gamete, per generation_, and are taken as the mean of a Poisson distribution.  The scale of the value pased to --esize/-e depends on the specific genetic model (more on this below).
 
-####The model of a locus
+###The model of a locus
 
 In this simulation, a "gene region" is modeled as a series of positions on the continuous, half-open interval (0,1].  Mutations and crossover events occur uniformly along this region.  Mutations occur according to the infinitely-many sites model, meaning that each new mutation in the population occurs at a novel position.
 
@@ -165,6 +165,22 @@ When you understand what goes into that, you'll much of what you need to be able
 The program implements something called "file locking", which allows multiple independent processes to share the same output file.  If you want to run a bunch of replicates with the same parameters but different seeds, you simply need to change the replicated ID number (--replicate/-R) and specify the same output file for each process.  When a replicate is done, the program will talk to the system and request access to the output file.  If it gets access, it "locks" the file, and appends its data to the end.  If another process has locked the file, it'll wait until that lock is released.
 
 This file locking makes the output of the simulation much more manageable, and it is very easily used on cluster systems supporting "array jobs".
+
+### Genetic models implemented
+
+The program implements a suite of different models of gene action ("genetic models").
+
+#### "TFL2013"
+
+This is the model of non-complementing recessive mutations that we introduced in Thornton _et al._. 2013, doi:10.1371/journal.pgen.1003258.  This is the default genetic model, and you can see the quantitative details of the model in the PLoS Genetics paper.
+
+The relevant program parameters and their intrepretation are:
+
+Parameter [value] | Interpretation
+--------- | ------------
+-e/--esize [positive double] | The effect size of a causative mutation.  By default, this is the mean of an exponential distribution ("lambda" in the PLoS Genetics paper).  If -C/--constant is used, the effect sizes are fixed at the input value
+--noise [float] | The standard deviation of Gaussian noise added to phenotype.  The default is the value used in the TFL2013 paper.
+--sigma [floag] | The standard deviation of the Gaussian fitness function.  Leave this at 1 (the default) unless you want to go insane.
 
 #Example workflow on UCI HPC
 
