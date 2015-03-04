@@ -48,7 +48,7 @@ simparams parse_command_line(const int & argc,
     ("generation-growth,G",value<unsigned>(&rv.ngens_evolve_growth)->default_value(0), "No. generation to grow exponentially from population size popsize1 to popsize2. Default is 0, meaning growth does not happen")
     ("replicate,R",value<unsigned>(&rv.replicate_no)->default_value(0),"Label of this replicate.  Must be >= 0")
     ("neutral,n",value<double>(&rv.mmp.mu_neutral)->default_value(0.00125),"Neutral mutation rate (per region per generation")
-    ("causative,c",value<double>(&rv.mmp.mu_neutral)->default_value(0.000125),"Mutation rate to causative mutations(per region per generation")
+    ("causative,c",value<double>(&rv.mmp.mu_disease)->default_value(0.000125),"Mutation rate to causative mutations(per region per generation")
     ("recrate,r",value<double>(&rv.littler)->default_value(0.00125),"Recombination rate (per diploid per region per generation")
     ("esize,e",value<double>(&rv.mmp.s)->default_value(0.1),"Effect size of causative mutation.  Mean of exponential dist by default.  Constant effect size if dist 0 or -d 0 is used")
     ("noise",value<double>(&rv.sd)->default_value(0.075),"Std. deviation in Gaussian noise to be added to phenotype")
@@ -144,5 +144,11 @@ simparams parse_command_line(const int & argc,
     }
 
   //Sanity checks on parameter values
+  if( params.mu_neutral < 0. )
+    {
+    }
+  if( params.mu_neutral < 0. )
+    {
+    }
   return rv;
 }
