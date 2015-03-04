@@ -34,6 +34,15 @@ mut_model_params::mut_model_params(void) : mu_disease(0.000125),
 {
 }
 
+void param_error(const char * param,
+		 const char * condition,
+		 const int & val)
+{
+  cerr << "Error: " << param << ' '
+       << condition << '\n';
+  exit(val);
+}
+
 simparams parse_command_line(const int & argc,
 			     char ** argv)
 {
@@ -113,6 +122,10 @@ simparams parse_command_line(const int & argc,
 	  cerr << "Error: shape parameter required for Eyre-Walker model.\n";
 	  exit(EXIT_FAILURE);
 	}
+      else if (	rv.mmp.shape <= 0. )
+	{
+	  param_error("shape parameter for Gamma distribution (--ewshape) ","is <= 0",EXIT_FAILURE);
+	}
       if(rv.optimum != 0.)
 	{
 	  cerr << "Error: optimum shift currently not allowed for the Eyre-Walker model.\n";
@@ -146,12 +159,23 @@ simparams parse_command_line(const int & argc,
   //Sanity checks on parameter values
   if( rv.mmp.mu_neutral < 0. )
     {
+      param_error("neutral mutation rate (-n/--neutral)","is < 0",EXIT_FAILURE);
     }
-  if( rv.mmp.mu_neutral < 0. )
+  if( rv.mmp.mu_disease < 0. )
     {
+      param_error("causative mutation rate (-c/--causative)","is < 0",EXIT_FAILURE);
     }
   if( rv.mmp.s < 0. )
     {
+      param_error("effect size (-e/--esize)","is < 0",EXIT_FAILURE);
+    }
+  if( rv.sd < 0. )
+    {
+      param_error("Gaussian noise sigma (--noise)","is < 0",EXIT_FAILURE);
+    }
+  if( rv.sd_s < 0. )
+    {
+      param_error("Gaussian fitness function sigma (--sigma)","is < 0",EXIT_FAILURE);
     }
   return rv;
 }
