@@ -2,6 +2,7 @@
 #define __TLF_IND_PARAMS_HPP__
 
 #include <string>
+#include <iosfwd>
 //fitness models
 enum class MODEL { GENE_RECESSIVE = 0, GENE_ADDITIVE, MULTIPLICATIVE, POPGEN, EYREWALKER };
 
@@ -18,12 +19,15 @@ struct simparams
   mut_model_params mmp;
   unsigned N,N2,ngens_burnin,ngens_evolve,ngens_evolve_growth,replicate_no,seed;
   double littler,s,sd,sd_s,optimum,dominance;
-  //double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum,dominance;
-  //bool dist_effects;
   MODEL model;
   std::string indexfile, hapfile, phenofile, effectsfile ;
+  bool verbose;
   simparams(void);
+  std::ostream & print(std::ostream &) const;
 };
+
+std::ostream & operator<<(std::ostream &, const simparams &);
+std::ostream & operator<<(std::ostream &, const MODEL &);
 
 simparams parse_command_line(const int & argc,
 			     char ** argv);

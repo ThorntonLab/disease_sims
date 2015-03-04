@@ -132,6 +132,11 @@ TFLmtype mut_model2(gsl_rng * r, const unsigned int & ttl_generations,
 int main(int argc, char ** argv)
 {
   simparams params = parse_command_line(argc,argv);
+  if( params.verbose )
+    {
+      cerr << params << '\n';
+      exit(EXIT_SUCCESS);
+    }
 
   //Determine growth rate under exponential growth model.
   double G = 0.;

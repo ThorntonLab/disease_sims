@@ -14,6 +14,28 @@ mut_model_params::mut_model_params(void) : mu_disease(0.000125),
 {
 }
 
+std::ostream & operator<<(std::ostream & o, const MODEL & m) 
+{
+  switch (m) {
+  case MODEL::GENE_RECESSIVE:
+    o << "gene-based recessive";
+    break;
+  case MODEL::GENE_ADDITIVE:
+    o << "additive";
+    break;
+  case MODEL::MULTIPLICATIVE:
+    o << "multiplicative";
+    break;
+  case MODEL::POPGEN:
+    o << "multiplicative with dominance";
+    break;
+  case MODEL::EYREWALKER:
+    o << "Eyre-Walker 2010";
+    break;
+  }
+  return o;
+}
+
 simparams::simparams(void) : mmp(mut_model_params()),
 			     N(20000),N2(20000),
 			     ngens_burnin(0),
@@ -30,8 +52,44 @@ simparams::simparams(void) : mmp(mut_model_params()),
 			     indexfile(string()),
 			     hapfile(string()),
 			     phenofile(string()),
-			     effectsfile(string())
+			     effectsfile(string()),
+			     verbose(false)
 {
+}
+
+ostream & simparams::print(ostream & o) const
+{
+  o << "Population parameters:\n"
+    << "\tN1 = " << N << '\n'
+    << "\tN2 = " << N2 << '\n'
+    << "\tduration of burnin = " << ngens_burnin << " generations\n"
+    << "\tduration of evolution with constant size " << N << " = " << ngens_burnin << " generations\n"
+    << "\tduration of growth = " << ngens_evolve_growth << " generations\n"
+    << "Locus parameters:\n"
+    << "\tneutral mutation rate = " << mmp.mu_neutral << '\n'
+    << "\tcausative mutation rate = " << mmp.mu_disease << '\n'
+    << "\teffect size = " << mmp.s << '\n'
+    << "\teffect sizes follow a distribution = " << mmp.dist_effects << '\n'
+    << "\trecombination rate = " << littler << '\n'
+    << "Genetic model parameters:\n"
+    << "\tGenetic model = " << model << '\n'
+    << "\tGaussian noise term = " << sd << '\n'
+    << "\tGaussian fitness parameter = " << sd_s << '\n'
+    << "\tDominance coefficient = " << dominance << '\n'
+    << "\tOptimum trait value = " << optimum << '\n'
+    << "Output files:\n"
+    << "\tpopulation file = " << hapfile << '\n'
+    << "\teffect sizes file = " << effectsfile << '\n'
+    << "\tphenotypes file = " << phenofile << '\n'
+    << "\tindex file = " << indexfile << '\n'
+    << "Misc. parameters:\n"
+    << "\tSeed = " << seed;
+  return o;
+}
+
+ostream & operator<<(ostream & o, const simparams &p) 
+{
+  return p.print(o);
 }
 
 void param_error(const char * param,
@@ -75,6 +133,7 @@ simparams parse_command_line(const int & argc,
     ("effectsfile,E",value<string>(&rv.effectsfile)->default_value(string()),"Name of output file for effect sizes of causative mutations")
     ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed (unsigned integer)")
     ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.  Not allowed for the Eyre-Walker model")
+    ("verbose","Print parameters to stderr and exit");
     ;
 
   variables_map vm;
@@ -86,6 +145,8 @@ simparams parse_command_line(const int & argc,
       cerr << desc << '\n';
       exit(0);
     }
+
+  if(vm.count("verbose")) { rv.verbose = true; }
 
   if (vm.count("multiplicative"))
     {
