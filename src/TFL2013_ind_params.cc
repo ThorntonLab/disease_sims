@@ -9,7 +9,7 @@ mut_model_params::mut_model_params(void) : mu_disease(0.000125),
 					   mu_neutral(0.00125),
 					   s(0.1),
 					   shape(std::numeric_limits<double>::min()),
-					   N_current(nullptr),
+					   N_ancestral(0u),
 					   dist_effects(true)
 {
 }
@@ -142,5 +142,7 @@ simparams parse_command_line(const int & argc,
 	}
       exit(EXIT_FAILURE);
     }
+
+  //Sanity checks on parameter values
   return rv;
 }
