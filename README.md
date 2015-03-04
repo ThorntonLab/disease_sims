@@ -217,7 +217,7 @@ Parameter [value] | Interpretation
 --sigma [positive double] | Has no effect.
 --phenotypes/-P [string] | Has no effect.  No trait values are actually simulated, so there are no phenotypes to write out.
 
-What does the scaled selection parameter 4Ns mean in a growing population?  If we consider the demographic model described above, we have a population growing from size _N1_ to size _N2_ in _G_ generations.  Given that the simulation works forwards in time, we have implemented the most "natural" definition of 4Ns, which is to take it to refer to 4_N1_s.  In other words, selection coefficients are scaled __with resepct to the ancestral population size__ in growth models.  Be very careful when comparing results of different simulations, as some may take 4Ns to mean 4_N2_s!!!!!!
+What does the scaled selection parameter 4Ns mean in a growing population?  If we consider the demographic model described above, we have a population growing from size _N1_ to size _N2_ in _G_ generations.  Given that the simulation works forwards in time, we have implemented the most "natural" definition of 4Ns, which is to take it to refer to 4N1s.  In other words, selection coefficients are scaled __with resepct to the ancestral population size__ in growth models.  Be very careful when comparing results of different simulations, as some may take 4Ns to mean 4N2s!!!!!!
 
 #Example workflow on UCI HPC
 
