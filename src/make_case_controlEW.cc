@@ -111,6 +111,9 @@ params::params() : indexfile(string()),
 
 params process_command_line(int argc, char ** argv);
 
+vector<pair<double,double> > EWphenos( const vector< pair< glist::iterator,glist::iterator > > & diploids,
+				       const vector< pair<mlist::iterator, double> > & ESIZES );
+
 int main(int argc, char ** argv)
 {
   params options = process_command_line(argc,argv);
@@ -172,14 +175,14 @@ int main(int argc, char ** argv)
       ESIZES.push_back( make_pair(mitr,__delta*pow(4.*double(options.N)*(mitr->s),options.tau)*(1. + gsl_ran_gaussian(r,options.sigma))) );
     }
   //Read in the phenotype data
-  vector< pair<double,double> > phenotypes;
+  vector< pair<double,double> > phenotypes = EWphenos(diploids,ESIZES);
 
   assert( phenotypes.size() == diploids.size() );
   //The real work starts here
 
   //1. get mean, sd, and upper quantile of pheno distribution
   double cutoff;
-  pair<double,double> mean_sd;// = phenosums(phenotypes,options.case_proportion,&cutoff);
+  pair<double,double> mean_sd = phenosums(phenotypes,options.case_proportion,&cutoff);
 
   /*
     2. Assign an individual to be a putative case, control, nor not included
@@ -333,6 +336,56 @@ int main(int argc, char ** argv)
   ai_lock.unlock();
   fclose(ai_fh);
   exit(0);
+}
+
+/*
+  This is likely not the fastest way to do things...
+
+  ...screw it.
+*/
+vector<pair<double,double> > EWphenos( const vector< pair< glist::iterator,glist::iterator > > & diploids,
+				       const vector< pair<mlist::iterator, double> > & ESIZES )
+{
+  vector<pair<double,double> > rv;
+
+  for( unsigned i = 0 ; i < diploids.size() ; ++i )
+    {
+      double trait = 0.;
+      for( const auto & mitr : diploids[i].first->smutations )
+	{
+	  auto __cc = find_if( ESIZES.begin(), ESIZES.end(),
+			       [&mitr]( const pair<mlist::iterator, double> & __p ) 
+			       {
+				 return __p.first == mitr;
+			       } );
+	  assert(__cc != ESIZES.end());
+	  if(__cc == ESIZES.end())
+	    {
+	      cerr << "FATAL ERROR: mutation carried by a gamete is not present in the population. "
+		   << "Line " << __LINE__ << " of " << __FILE__ << '\n';
+	      exit(EXIT_FAILURE);
+	    }
+	  trait += __cc->second;
+	}
+      for( const auto & mitr : diploids[i].second->smutations )
+	{
+	  auto __cc = find_if( ESIZES.begin(), ESIZES.end(),
+			       [&mitr]( const pair<mlist::iterator, double> & __p ) 
+			       {
+				 return __p.first == mitr;
+			       } );
+	  assert(__cc != ESIZES.end());
+	  if(__cc == ESIZES.end())
+	    {
+	      cerr << "FATAL ERROR: mutation carried by a gamete is not present in the population. "
+		   << "Line " << __LINE__ << " of " << __FILE__ << '\n';
+	      exit(EXIT_FAILURE);
+	    }
+	  trait += __cc->second;
+	}
+      rv.emplace_back( make_pair( trait, 0. ) ) ; //It's all "G", kids!
+    }
+  return rv;
 }
 
 params process_command_line(int argc, char ** argv)
