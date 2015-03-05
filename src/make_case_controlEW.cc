@@ -171,12 +171,15 @@ int main(int argc, char ** argv)
   vector< pair<mlist::iterator, double> > ESIZES;
   for( auto mitr = mutations.begin(); mitr != mutations.end() ; ++mitr )
     {
-      double __delta = (gsl_rng_uniform(r) <= options.pdelta) ? 1. : -1.;
-      ESIZES.push_back( make_pair(mitr,__delta*pow(4.*double(options.N)*(mitr->s),options.tau)*(1. + gsl_ran_gaussian(r,options.sigma))) );
+      if( ! mitr->neutral )
+	{
+	  double __delta = (gsl_rng_uniform(r) <= options.pdelta) ? 1. : -1.;
+	  ESIZES.push_back( make_pair(mitr,__delta*pow(4.*double(options.N)*(mitr->s),options.tau)*(1. + gsl_ran_gaussian(r,options.sigma))) );
+	}
     }
-  //Read in the phenotype data
-  vector< pair<double,double> > phenotypes = EWphenos(diploids,ESIZES);
 
+  //Generate the phenotype data
+  vector< pair<double,double> > phenotypes = EWphenos(diploids,ESIZES);
   assert( phenotypes.size() == diploids.size() );
   //The real work starts here
 
