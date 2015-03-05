@@ -181,12 +181,14 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 		     const vector<unsigned> & indlist,
 		     const unsigned & maxnum,
 		     const unsigned & ttl,
-		     const unsigned & offset)
+		     const unsigned & offset,
+		     vector<unsigned> & IDS)
 {
   vector< pair<double,string> >::iterator itr;
   for( unsigned i = 0 ; i < maxnum ; ++i )
     {
       assert( i < maxnum );
+      IDS.push_back(indlist[i]); //record the individual who is a case or control
       assert(indlist[i] < diploids.size());
       //ccphenos.push_back( popphenos[ indlist[i] ] );
       ccG.push_back( popphenos[ indlist[i] ].first );
@@ -314,7 +316,7 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 		  put_controls,
 		  ncontrols,
 		  2*(ncontrols+ncases),
-		  0 );
+		  0, rv.control_ids );
   //cases
   process_subset( neutral, selected,
 		  rv.G,rv.E,
@@ -323,7 +325,7 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
 		  put_cases,
 		  ncases,
 		  2*(ncontrols+ncases),
-		  2*ncontrols);
+		  2*ncontrols, rv.case_ids);
 
   sort( neutral.begin(), neutral.end(), 
 	[](std::pair<double,std::string> lhs,
