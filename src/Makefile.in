@@ -153,7 +153,7 @@ am_make_case_control_OBJECTS = make_case_control.$(OBJEXT) \
 	simindex.$(OBJEXT) readSimOutput.$(OBJEXT)
 make_case_control_OBJECTS = $(am_make_case_control_OBJECTS)
 make_case_control_DEPENDENCIES = libcommon.la
-am_make_case_controlEW_OBJECTS = make_case_control.$(OBJEXT) \
+am_make_case_controlEW_OBJECTS = make_case_controlEW.$(OBJEXT) \
 	simindex.$(OBJEXT) readSimOutput.$(OBJEXT)
 make_case_controlEW_OBJECTS = $(am_make_case_controlEW_OBJECTS)
 make_case_controlEW_DEPENDENCIES = libcommon.la
@@ -366,7 +366,7 @@ libdiseaseSimsHelper_la_SOURCES = ccintermediate.cc
 TFL2013_SOURCES = TFL2013.cc
 TFL2013_ind_SOURCES = TFL2013_ind.cc TFL2013_ind_params.cc
 make_case_control_SOURCES = make_case_control.cc simindex.cc readSimOutput.cc
-make_case_controlEW_SOURCES = make_case_control.cc simindex.cc readSimOutput.cc
+make_case_controlEW_SOURCES = make_case_controlEW.cc simindex.cc readSimOutput.cc
 #esm_chisq_zscore_SOURCES=esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc
 chksimoutput_SOURCES = chksimoutput.cc simindex.cc
 phenoburden_SOURCES = phenoburden.cc
@@ -560,6 +560,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ccintermediate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chksimoutput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make_case_control.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make_case_controlEW.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/phenoburden.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readSimOutput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfs.Po@am__quote@
