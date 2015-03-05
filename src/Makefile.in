@@ -81,7 +81,8 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = TFL2013$(EXEEXT) TFL2013_ind$(EXEEXT) \
 	make_case_control$(EXEEXT) chksimoutput$(EXEEXT) \
-	phenoburden$(EXEEXT) sfs$(EXEEXT) sfsSample$(EXEEXT)
+	phenoburden$(EXEEXT) sfs$(EXEEXT) sfsSample$(EXEEXT) \
+	genburden$(EXEEXT)
 @DEBUG_FALSE@am__append_1 = -DNDEBUG
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -147,6 +148,9 @@ TFL2013_ind_LDADD = $(LDADD)
 am_chksimoutput_OBJECTS = chksimoutput.$(OBJEXT) simindex.$(OBJEXT)
 chksimoutput_OBJECTS = $(am_chksimoutput_OBJECTS)
 chksimoutput_LDADD = $(LDADD)
+am_genburden_OBJECTS = genburden.$(OBJEXT)
+genburden_OBJECTS = $(am_genburden_OBJECTS)
+genburden_LDADD = $(LDADD)
 am_make_case_control_OBJECTS = make_case_control.$(OBJEXT) \
 	simindex.$(OBJEXT) readSimOutput.$(OBJEXT)
 make_case_control_OBJECTS = $(am_make_case_control_OBJECTS)
@@ -196,13 +200,14 @@ am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libcommon_la_SOURCES) $(libdiseaseSimsHelper_la_SOURCES) \
 	$(TFL2013_SOURCES) $(TFL2013_ind_SOURCES) \
-	$(chksimoutput_SOURCES) $(make_case_control_SOURCES) \
-	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES)
+	$(chksimoutput_SOURCES) $(genburden_SOURCES) \
+	$(make_case_control_SOURCES) $(phenoburden_SOURCES) \
+	$(sfs_SOURCES) $(sfsSample_SOURCES)
 DIST_SOURCES = $(libcommon_la_SOURCES) \
 	$(libdiseaseSimsHelper_la_SOURCES) $(TFL2013_SOURCES) \
 	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
-	$(make_case_control_SOURCES) $(phenoburden_SOURCES) \
-	$(sfs_SOURCES) $(sfsSample_SOURCES)
+	$(genburden_SOURCES) $(make_case_control_SOURCES) \
+	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -362,6 +367,7 @@ make_case_control_SOURCES = make_case_control.cc simindex.cc readSimOutput.cc
 #esm_chisq_zscore_SOURCES=esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc
 chksimoutput_SOURCES = chksimoutput.cc simindex.cc
 phenoburden_SOURCES = phenoburden.cc
+genburden_SOURCES = genburden.cc
 #CCburden_SOURCES=CCburden.cc readCC.cc
 sfs_SOURCES = sfs.cc readSimOutput.cc
 sfsSample_SOURCES = sfsSample.cc
@@ -519,6 +525,10 @@ chksimoutput$(EXEEXT): $(chksimoutput_OBJECTS) $(chksimoutput_DEPENDENCIES) $(EX
 	@rm -f chksimoutput$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(chksimoutput_OBJECTS) $(chksimoutput_LDADD) $(LIBS)
 
+genburden$(EXEEXT): $(genburden_OBJECTS) $(genburden_DEPENDENCIES) $(EXTRA_genburden_DEPENDENCIES) 
+	@rm -f genburden$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(genburden_OBJECTS) $(genburden_LDADD) $(LIBS)
+
 make_case_control$(EXEEXT): $(make_case_control_OBJECTS) $(make_case_control_DEPENDENCIES) $(EXTRA_make_case_control_DEPENDENCIES) 
 	@rm -f make_case_control$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(make_case_control_OBJECTS) $(make_case_control_LDADD) $(LIBS)
@@ -545,6 +555,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFL2013_ind.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ccintermediate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chksimoutput.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/genburden.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make_case_control.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/phenoburden.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readSimOutput.Po@am__quote@
