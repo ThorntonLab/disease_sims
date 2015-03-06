@@ -37,6 +37,25 @@ To install the simulation in your user's $HOME:
 
 The above may be mixed and matched as needed.
 
+##Installing the R package
+
+Once the main simulation is installed, you may install the diseaseSims R package.  The R package requires headers and a shared library installed when the simulation is installed.
+
+The R package has the following additional dependencies:
+
+1. [Rcpp](http://cran.r-project.org/web/packages/Rcpp/index.html)
+2. [plyr](http://cran.r-project.org/web/packages/plyr/index.html), although this really should be changed to dplyr eventually...
+3. [buRden](http://github.com/molpopgen/buRden)
+
+###Vanilla instructions for installing the R package
+
+Once the above dependencies are accounted for,
+
+```
+cd R
+R CMD INSTALL diseaseSims
+```
+
 ##Notes
 
 On many systems, LD_LIBRARY_PATH may be needed to run make_case_control.
