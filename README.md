@@ -56,6 +56,12 @@ cd R
 R CMD INSTALL diseaseSims
 ```
 
+### Build the documentation for the R package
+
+```
+R CMD Rd2pdf diseaseSims
+```
+
 ##Notes
 
 On many systems, LD_LIBRARY_PATH may be needed to run make_case_control.
