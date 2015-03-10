@@ -67,13 +67,11 @@ int main( int argc, char ** argv)
     {
       double p = double(d.first)/(2.*double(popsize));
       double mv = mean(d.second.second);
-      //double xx =  mv*gsl_ran_exponential_pdf(mv,0.1)*(double(d.second.first)/double(nrisk))*p*(1.-p);
       double xx =  mv*(double(d.second.first)/double(nrisk))*p*(1.-p);
       SUM += 0.5*xx;
       vals[d.first] = xx;
       cout << p << ' ' << SUM << '\n';
     }
-  //for(auto v : vals) { cout << double(v.first)/(2.*double(popsize)) << ' ' << v.second/SUM << '\n'; }
 }
 
 double getVG( gzFile gzpin )
