@@ -63,7 +63,7 @@ ostream & simparams::print(ostream & o) const
     << "\tN1 = " << N << '\n'
     << "\tN2 = " << N2 << '\n'
     << "\tduration of burnin = " << ngens_burnin << " generations\n"
-    << "\tduration of evolution with constant size " << N << " = " << ngens_burnin << " generations\n"
+    << "\tduration of evolution with constant size " << N << " = " << ngens_evolve << " generations\n"
     << "\tduration of growth = " << ngens_evolve_growth << " generations\n"
     << "Locus parameters:\n"
     << "\tneutral mutation rate = " << mmp.mu_neutral << '\n'
