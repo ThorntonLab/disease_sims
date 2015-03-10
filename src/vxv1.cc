@@ -62,14 +62,12 @@ int main( int argc, char ** argv)
 	}
     }
   double SUM = 0.;
-  map<unsigned,double> vals;
   for( const auto & d : data )
     {
       double p = double(d.first)/(2.*double(popsize));
       double mv = mean(d.second.second);
       double xx =  mv*(double(d.second.first)/double(nrisk))*p*(1.-p);
       SUM += 0.5*xx;
-      vals[d.first] = xx;
       cout << p << ' ' << SUM << '\n';
     }
 }
