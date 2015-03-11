@@ -71,12 +71,17 @@ inline double get_unique_pos(gsl_rng * r, lookup_table_type * lookup)
   return pos;
 }
 
-template<typename tag_type> 
+/*
+  This is a nonsensical version of the function. Essentially a place-holder
+  for the explicit speclizations that come later.
+ */
+template<typename tag_type>
 TFLmtype mut_model_details(gsl_rng * r, const unsigned int & ttl_generations,
 			   const mut_model_params & mmp,
 			   lookup_table_type * lookup)
 {
-  return TFLmtype();
+  //Return a nonsensical value that will definitely cause assertions to fail, etc. :)
+  return TFLmtype(-1.,-1.,numeric_limits<unsigned>::max(),numeric_limits<unsigned>::max(),'Z',true);
 }
 
 template<>
