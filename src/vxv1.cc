@@ -24,6 +24,7 @@
 using namespace std;
 using namespace boost::accumulators;
 using mean_acc = accumulator_set<double, stats<tag::mean> >;
+using diploid_t = std::pair<glist::const_iterator,glist::const_iterator>;
 
 struct vxv1params
 {
