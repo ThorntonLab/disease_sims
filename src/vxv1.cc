@@ -24,6 +24,13 @@ using mean_acc = accumulator_set<double, stats<tag::mean> >;
 
 double getVG( gzFile gzpin ); //not used...
 
+struct fdata 
+{
+  unsigned nm; //number of mutations at this frequency
+  mean_acc ez,ezsq;
+  fdata() : nm(0u),ez(mean_acc()),ezsq(mean_acc()) {}
+};
+
 int main( int argc, char ** argv)
 {
   int argn=1;
@@ -32,7 +39,8 @@ int main( int argc, char ** argv)
 
   gzFile gzin = gzopen(popfilename,"rb");
 
-  map<unsigned, pair<unsigned,mean_acc> > data;
+  //map<unsigned, pair<unsigned,mean_acc> > data;
+  map<unsigned,fdata> data;
   unsigned nrisk = 0;
   unsigned popsize= 0;
   for( unsigned i = 0 ; i < nreps ; ++i )
@@ -50,25 +58,36 @@ int main( int argc, char ** argv)
 	      auto __i = data.find( mitr->n );
 	      if(__i == data.end())
 		{
-		  data[mitr->n] = make_pair(1u,mean_acc());
-		  data[mitr->n].second(pow(mitr->s,2.));
+		  data[mitr->n] = fdata();
+		  data[mitr->n].nm++;
+		  data[mitr->n].ez(mitr->s);
+		  data[mitr->n].ezsq(pow(mitr->s,2.));
 		}
 	      else
 		{
-		  __i->second.second( pow( mitr->s,2. ) );
-		  __i->second.first++;
+		  __i->second.nm++;
+		  __i->second.ez(mitr->s);
+		  __i->second.ezsq( pow(mitr->s,2.) );
 		}
 	    }
 	}
     }
-  double SUM = 0.;
+  double SUM = 0.,SUM2=0.;
   for( const auto & d : data )
     {
-      double p = double(d.first)/(2.*double(popsize));
-      double mv = mean(d.second.second);
-      double xx =  mv*(double(d.second.first)/double(nrisk))*p*(1.-p);
-      SUM += 0.5*xx;
-      cout << p << ' ' << SUM << '\n';
+      double x = double(d.first)/(2.*double(popsize));
+      double ez_x = mean(d.second.ezsq);
+      double fx = double(d.second.nm)/double(nrisk);
+      SUM += 0.5*ez_x*fx*x*(1.-x);
+
+      //double x2 = 0.;
+      //for( const auto & d2 : data ) {
+	//double p2 = double(d2.first)/(2.*double(popsize));
+	  //x2 += mean(d.second.second)*mean(d2.second.second)*double(d2.second.first)/double(nrisk)*((d.first == d2.first) ? p*p : 2.*p*p2);
+      //}
+      //SUM2 += 0.5*(double(d.second.first)/double(nrisk))*x2;
+      cout << x << ' ' << SUM << '\n';
+      //cout << p << ' ' << SUM << ' ' << SUM2 << '\n';
     }
 }
 
