@@ -83,6 +83,15 @@ struct additiveg
   }
 };
 
+vector<double> getG( const dipvector & diploids,
+		     const std::function<double(const glist::const_iterator &,
+						const glist::const_iterator &)> dipG )
+{
+  vector<double> rv;
+  for_each( diploids.begin(),diploids.end(),[&rv,&dipG](const diploid_t & __d ) { rv.push_back( dipG(__d.first,__d.second) ); } );
+  return rv;
+}
+
 int main( int argc, char ** argv)
 {
   const vxv1params pars = parse_argv(argc, argv);
@@ -124,6 +133,7 @@ int main( int argc, char ** argv)
       glist gametes;
       dipvector diploids;
       KTfwd::read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+      auto Gvals = getG(diploids,dipG);
     }
   gzclose(gzin);
 }
