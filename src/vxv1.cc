@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include <map>
+#include <numeric>
 #include <zlib.h>
 #include <fwdpp/diploid.hh>
 #include <diseaseSims/mutation_with_age.hpp>
@@ -17,11 +18,12 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/program_options.hpp>
 #include <gsl/gsl_randist.h>
-
+#include <sys/stat.h>
 #include <TFL_fitness_models.hpp>
 
 using namespace std;
 using namespace boost::accumulators;
+using mean_acc = accumulator_set<double, stats<tag::mean> >;
 
 struct vxv1params
 {
@@ -33,11 +35,96 @@ struct vxv1params
 
 vxv1params parse_argv( int argc, char ** argv );
   
-using mean_acc = accumulator_set<double, stats<tag::mean> >;
+/*
+  Functions for TFL2013 and additive trait calculators.
+  The simulation uses calculators that return pairs of doubles.
+  The pair is the G,E components of trait value.
+  Here, we just need the G, so we do this as a quick fix:
+
+  (These should later be added right to gene_based_model.hpp!!!)
+*/
+struct TFL2013g
+{
+  using return_type = double;
+  inline double operator()( const glist::const_iterator & g1,
+			    const glist::const_iterator & g2) const
+  {
+    double e1 = std::accumulate( g1->smutations.begin(),
+				 g1->smutations.end(),
+				 0.,
+				 [](const double & a,
+				    const gtype::mutation_list_type_iterator & b) { return a + b->s; } );
+    double e2 = std::accumulate( g2->smutations.begin(),
+				 g2->smutations.end(),
+				 0.,
+				 [](const double & a,
+				    const gtype::mutation_list_type_iterator & b) { return a + b->s; } );
+    return (sqrt(e1*e2));
+  }
+};
+
+struct additiveg
+{
+  using return_type = double;
+  inline double operator()( const glist::const_iterator & g1,
+			    const glist::const_iterator & g2) const
+  {
+    return std::accumulate( g1->smutations.begin(),
+			    g1->smutations.end(),
+			    0.,
+			    [](const double & a,
+			       const gtype::mutation_list_type_iterator & b) { return a + b->s; } )
+      + std::accumulate( g2->smutations.begin(),
+			 g2->smutations.end(),
+			 0.,
+			 [](const double & a,
+			    const gtype::mutation_list_type_iterator & b) { return a + b->s; } );
+  }
+};
 
 int main( int argc, char ** argv)
 {
   const vxv1params pars = parse_argv(argc, argv);
+
+  /*
+    We now need to determine how to calculate the genetic 
+    component of a diploid's trait value.
+
+    The default will be the gene-based recessive model, aka TFL2013
+  */
+  std::function<double(const glist::const_iterator &,
+		       const glist::const_iterator &)> dipG = std::bind(TFL2013g(),std::placeholders::_1,std::placeholders::_2);
+  //handle user options
+  switch( pars.m )
+    {
+    case MODEL::GENE_RECESSIVE:
+      //default, do nothing
+      break;
+    case MODEL::GENE_ADDITIVE:
+      dipG = std::bind(additiveg(),std::placeholders::_1,std::placeholders::_2);
+      break;
+    case MODEL::MULTIPLICATIVE:
+      dipG = std::bind(multiplicative_phenotype(),std::placeholders::_1,std::placeholders::_2);
+      break;
+    case MODEL::POPGEN:
+      dipG = std::bind(popgen_phenotype(),std::placeholders::_1,std::placeholders::_2,pars.h);
+      break;
+    case MODEL::EYREWALKER:
+      cerr << "Eyre-Walker model not implemented yet\n";
+      exit(EXIT_SUCCESS);
+      break;
+    }
+
+  //Read each population in and process it
+  gzFile gzin = gzopen( pars.popfile.c_str(),"rb" );
+  for( unsigned i = 0 ; i < pars.nreps ; ++i )
+    {
+      mlist mutations;
+      glist gametes;
+      dipvector diploids;
+      KTfwd::read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+    }
+  gzclose(gzin);
 }
 
 vxv1params parse_argv( int argc, char ** argv )
@@ -54,7 +141,7 @@ vxv1params parse_argv( int argc, char ** argv )
     ("nreps,n",value<unsigned>(&rv.nreps)->default_value(0u),"Number of replicates stored in popfile")
     ("additive,a","Assume additive genetic model.  (Default is TFL2013)")
     ("multiplicative,m","Assume multiplicative genetic model.  (Default is TFL2013)")
-    ("popgen,p","Assume multiplicative genetic model with dominance.  (Default is TFL2013)")
+    ("popgen,P","Assume multiplicative genetic model with dominance.  (Default is TFL2013)")
     ("dominance,d",value<double>(&rv.h)->default_value(0.0),"Dominance for multiplicative model with dominance")
     ("eyrewalker,e","Use Eyre-Walker 2010 model (not implemented yet!)")
     ;
@@ -73,6 +160,15 @@ vxv1params parse_argv( int argc, char ** argv )
     {
       cerr << "Error, no popfile specified.\n";
       exit(EXIT_SUCCESS);
+    }
+  else
+    {
+      struct stat buf;
+      if (stat(rv.popfile.c_str(), &buf) != 0) {
+	cerr << "Error: " << rv.popfile
+	     << " does not exist.\n";
+	exit(EXIT_FAILURE);
+      }
     }
   if( !rv.nreps )
     {
