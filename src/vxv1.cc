@@ -25,7 +25,8 @@ using namespace std;
 using namespace boost::accumulators;
 using mean_acc = accumulator_set<double, stats<tag::mean> >;
 using diploid_t = std::pair<glist::const_iterator,glist::const_iterator>;
-
+using Gfxn_t = std::function<double(const glist::const_iterator &,
+				    const glist::const_iterator &)>;
 struct vxv1params
 {
   MODEL m;
@@ -84,8 +85,7 @@ struct additiveg
 };
 
 vector<double> getG( const dipvector & diploids,
-		     const std::function<double(const glist::const_iterator &,
-						const glist::const_iterator &)> dipG )
+		     const Gfxn_t & dipG )
 {
   vector<double> rv;
   for_each( diploids.begin(),diploids.end(),[&rv,&dipG](const diploid_t & __d ) { rv.push_back( dipG(__d.first,__d.second) ); } );
@@ -102,8 +102,7 @@ int main( int argc, char ** argv)
 
     The default will be the gene-based recessive model, aka TFL2013
   */
-  std::function<double(const glist::const_iterator &,
-		       const glist::const_iterator &)> dipG = std::bind(TFL2013g(),std::placeholders::_1,std::placeholders::_2);
+  Gfxn_t dipG = std::bind(TFL2013g(),std::placeholders::_1,std::placeholders::_2);
   //handle user options
   switch( pars.m )
     {
