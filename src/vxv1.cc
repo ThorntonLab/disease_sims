@@ -52,11 +52,11 @@ vxv1params parse_argv( int argc, char ** argv )
     ("help,h","Print usage information to screen")
     ("popfile,p",value<string>(&rv.popfile),"Name of file containing simulation output")
     ("nreps,n",value<unsigned>(&rv.nreps)->default_value(0u),"Number of replicates stored in popfile")
-    ("additive","Assume additive genetic model.  (Default is TFL2013)")
-    ("multiplicative","Assume multiplicative genetic model.  (Default is TFL2013)")
-    ("popgen","Assume multiplicative genetic model with dominance.  (Default is TFL2013)")
-    ("dominance",value<double>(&rv.h)->default_value(0.0),"Dominance for multiplicative model with dominance")
-    ("eyrewalker","Use Eyre-Walker 2010 model (not implemented yet!)")
+    ("additive,a","Assume additive genetic model.  (Default is TFL2013)")
+    ("multiplicative,m","Assume multiplicative genetic model.  (Default is TFL2013)")
+    ("popgen,p","Assume multiplicative genetic model with dominance.  (Default is TFL2013)")
+    ("dominance,d",value<double>(&rv.h)->default_value(0.0),"Dominance for multiplicative model with dominance")
+    ("eyrewalker,e","Use Eyre-Walker 2010 model (not implemented yet!)")
     ;
 
   variables_map vm;
@@ -69,6 +69,16 @@ vxv1params parse_argv( int argc, char ** argv )
       exit(0);
     }
 
+  if(!vm.count("popfile"))
+    {
+      cerr << "Error, no popfile specified.\n";
+      exit(EXIT_SUCCESS);
+    }
+  if( !rv.nreps )
+    {
+      cerr << "Error, number of replicates == 0.\n";
+      exit(EXIT_SUCCESS);
+    }
   if(vm.count("additive"))
     {
       rv.m = MODEL::GENE_ADDITIVE;
