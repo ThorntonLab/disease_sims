@@ -3,8 +3,8 @@
 
 #include <string>
 #include <iosfwd>
+#include <TFL_fitness_models.hpp>
 //fitness models
-enum class MODEL { GENE_RECESSIVE = 0, GENE_ADDITIVE, MULTIPLICATIVE, POPGEN, EYREWALKER };
 
 struct mut_model_params
 {
