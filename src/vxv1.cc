@@ -76,17 +76,22 @@ int main( int argc, char ** argv)
   for( const auto & d : data )
     {
       double x = double(d.first)/(2.*double(popsize));
-      double ez_x = mean(d.second.ezsq);
+      double ezsq_x = mean(d.second.ezsq);
       double fx = double(d.second.nm)/double(nrisk);
-      SUM += 0.5*ez_x*fx*x*(1.-x);
+      SUM += 0.5*ezsq_x*fx*x*(1.-x);
 
-      //double x2 = 0.;
-      //for( const auto & d2 : data ) {
-	//double p2 = double(d2.first)/(2.*double(popsize));
-	  //x2 += mean(d.second.second)*mean(d2.second.second)*double(d2.second.first)/double(nrisk)*((d.first == d2.first) ? p*p : 2.*p*p2);
+      double ez_x = mean(d.second.ez);
+      double __y = 0;
+      for( const auto & d2 : data ) {
+	double y = double(d2.first)/(2.*double(popsize));
+	double ez_y = mean(d2.second.ez);
+	double fy = double(d2.second.nm)/double(nrisk);
+	__y += (ez_x*ez_y)*fy*y*(1.-y);
+      }
+      SUM2 += 0.5 * fx*x*(1.-x)*__y;
       //}
       //SUM2 += 0.5*(double(d.second.first)/double(nrisk))*x2;
-      cout << x << ' ' << SUM << '\n';
+      cout << x << ' ' << SUM << ' ' << SUM2 << '\n';
       //cout << p << ' ' << SUM << ' ' << SUM2 << '\n';
     }
 }

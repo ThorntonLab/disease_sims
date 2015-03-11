@@ -82,7 +82,7 @@ host_triplet = @host@
 bin_PROGRAMS = TFL2013$(EXEEXT) TFL2013_ind$(EXEEXT) \
 	make_case_control$(EXEEXT) make_case_controlEW$(EXEEXT) \
 	chksimoutput$(EXEEXT) phenoburden$(EXEEXT) sfs$(EXEEXT) \
-	sfsSample$(EXEEXT)
+	sfsSample$(EXEEXT) vxv1$(EXEEXT)
 @DEBUG_FALSE@am__append_1 = -DNDEBUG
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -166,6 +166,9 @@ sfs_LDADD = $(LDADD)
 am_sfsSample_OBJECTS = sfsSample.$(OBJEXT)
 sfsSample_OBJECTS = $(am_sfsSample_OBJECTS)
 sfsSample_LDADD = $(LDADD)
+am_vxv1_OBJECTS = vxv1.$(OBJEXT)
+vxv1_OBJECTS = $(am_vxv1_OBJECTS)
+vxv1_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -204,12 +207,13 @@ SOURCES = $(libcommon_la_SOURCES) $(libdiseaseSimsHelper_la_SOURCES) \
 	$(TFL2013_SOURCES) $(TFL2013_ind_SOURCES) \
 	$(chksimoutput_SOURCES) $(make_case_control_SOURCES) \
 	$(make_case_controlEW_SOURCES) $(phenoburden_SOURCES) \
-	$(sfs_SOURCES) $(sfsSample_SOURCES)
+	$(sfs_SOURCES) $(sfsSample_SOURCES) $(vxv1_SOURCES)
 DIST_SOURCES = $(libcommon_la_SOURCES) \
 	$(libdiseaseSimsHelper_la_SOURCES) $(TFL2013_SOURCES) \
 	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
 	$(make_case_control_SOURCES) $(make_case_controlEW_SOURCES) \
-	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES)
+	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES) \
+	$(vxv1_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -373,6 +377,7 @@ phenoburden_SOURCES = phenoburden.cc
 #CCburden_SOURCES=CCburden.cc readCC.cc
 sfs_SOURCES = sfs.cc readSimOutput.cc
 sfsSample_SOURCES = sfsSample.cc
+vxv1_SOURCES = vxv1.cc
 # atomic_locker/atomic_locker
 
 #esm_chisq_zscore_LDFLAGS=-pthread
@@ -548,6 +553,10 @@ sfsSample$(EXEEXT): $(sfsSample_OBJECTS) $(sfsSample_DEPENDENCIES) $(EXTRA_sfsSa
 	@rm -f sfsSample$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(sfsSample_OBJECTS) $(sfsSample_LDADD) $(LIBS)
 
+vxv1$(EXEEXT): $(vxv1_OBJECTS) $(vxv1_DEPENDENCIES) $(EXTRA_vxv1_DEPENDENCIES) 
+	@rm -f vxv1$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(vxv1_OBJECTS) $(vxv1_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -566,6 +575,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfsSample.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simindex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vxv1.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
