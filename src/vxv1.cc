@@ -36,7 +36,10 @@ struct vxv1params
 };
 
 vxv1params parse_argv( int argc, char ** argv );
-  
+Gfxn_t set_model( const vxv1params & pars );
+vector<double> getG( const dipvector & diploids,
+		     const Gfxn_t & dipG );
+
 /*
   Functions for TFL2013 and additive trait calculators.
   The simulation uses calculators that return pairs of doubles.
@@ -84,14 +87,6 @@ struct additiveg
   }
 };
 
-vector<double> getG( const dipvector & diploids,
-		     const Gfxn_t & dipG )
-{
-  vector<double> rv;
-  for_each( diploids.begin(),diploids.end(),[&rv,&dipG](const diploid_t & __d ) { rv.push_back( dipG(__d.first,__d.second) ); } );
-  return rv;
-}
-
 int main( int argc, char ** argv)
 {
   const vxv1params pars = parse_argv(argc, argv);
@@ -102,27 +97,7 @@ int main( int argc, char ** argv)
 
     The default will be the gene-based recessive model, aka TFL2013
   */
-  Gfxn_t dipG = std::bind(TFL2013g(),std::placeholders::_1,std::placeholders::_2);
-  //handle user options
-  switch( pars.m )
-    {
-    case MODEL::GENE_RECESSIVE:
-      //default, do nothing
-      break;
-    case MODEL::GENE_ADDITIVE:
-      dipG = std::bind(additiveg(),std::placeholders::_1,std::placeholders::_2);
-      break;
-    case MODEL::MULTIPLICATIVE:
-      dipG = std::bind(multiplicative_phenotype(),std::placeholders::_1,std::placeholders::_2);
-      break;
-    case MODEL::POPGEN:
-      dipG = std::bind(popgen_phenotype(),std::placeholders::_1,std::placeholders::_2,pars.h);
-      break;
-    case MODEL::EYREWALKER:
-      cerr << "Eyre-Walker model not implemented yet\n";
-      exit(EXIT_SUCCESS);
-      break;
-    }
+  Gfxn_t dipG = set_model(pars);
 
   //Read each population in and process it
   gzFile gzin = gzopen( pars.popfile.c_str(),"rb" );
@@ -203,5 +178,39 @@ vxv1params parse_argv( int argc, char ** argv )
       cerr << "Eyre-Walker 2010 not implemented yet!\n";
       exit(EXIT_SUCCESS);
     }
+  return rv;
+}
+
+Gfxn_t set_model( const vxv1params & pars )
+{
+  Gfxn_t dipG = std::bind(TFL2013g(),std::placeholders::_1,std::placeholders::_2);
+  //handle user options
+  switch( pars.m )
+    {
+    case MODEL::GENE_RECESSIVE:
+      //default, do nothing
+      break;
+    case MODEL::GENE_ADDITIVE:
+      dipG = std::bind(additiveg(),std::placeholders::_1,std::placeholders::_2);
+      break;
+    case MODEL::MULTIPLICATIVE:
+      dipG = std::bind(multiplicative_phenotype(),std::placeholders::_1,std::placeholders::_2);
+      break;
+    case MODEL::POPGEN:
+      dipG = std::bind(popgen_phenotype(),std::placeholders::_1,std::placeholders::_2,pars.h);
+      break;
+    case MODEL::EYREWALKER:
+      cerr << "Eyre-Walker model not implemented yet\n";
+      exit(EXIT_SUCCESS);
+      break;
+    }
+  return dipG;
+}
+
+vector<double> getG( const dipvector & diploids,
+		     const Gfxn_t & dipG )
+{
+  vector<double> rv;
+  for_each( diploids.begin(),diploids.end(),[&rv,&dipG](const diploid_t & __d ) { rv.push_back( dipG(__d.first,__d.second) ); } );
   return rv;
 }
