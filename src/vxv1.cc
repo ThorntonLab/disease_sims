@@ -10,6 +10,7 @@
 #include <map>
 #include <numeric>
 #include <cstdint>
+#include <sstream>
 #include <zlib.h>
 #include <fwdpp/diploid.hh>
 #include <diseaseSims/mutation_with_age.hpp>
@@ -32,7 +33,7 @@ struct vxv1params
 {
   MODEL m;
   double h;
-  std::string popfile;
+  std::string popfile,outfile;
   unsigned nreps;
 };
 
@@ -197,13 +198,18 @@ int main( int argc, char ** argv)
   unsigned ttl_muts  = 0;
   for( auto ditr = data.begin() ; ditr != data.end() ; ++ditr ) ttl_muts += ditr->second.nm;
 
+  ostringstream buffer;
+  buffer << "p\tVp\td\n";
   double SUM=0.;
   for( auto ditr = data.begin() ; ditr != data.end() ; ++ditr )
     {
       double fx = double(ditr->second.nm)/double(ttl_muts);
       SUM += 0.5*mean(ditr->second.z)*fx*(ditr->first)*(1.-ditr->first);
-      cout << ditr->first << ' ' << SUM << '\n';
+      buffer << ditr->first << '\t' << SUM << '\t' << mean(ditr->second.d) << '\n';
     }
+  gzin = gzopen(pars.outfile.c_str(),"w");
+  gzwrite(gzin,buffer.str().c_str(),buffer.str().size());
+  gzclose(gzin);
 }
 
 vxv1params parse_argv( int argc, char ** argv )
@@ -212,7 +218,7 @@ vxv1params parse_argv( int argc, char ** argv )
   
   vxv1params rv;
   rv.m = MODEL::GENE_RECESSIVE;
-  
+  rv.outfile = "vxv1.out.gz";  
   options_description desc("Calculate stuff");
   desc.add_options()
     ("help,h","Print usage information to screen")
