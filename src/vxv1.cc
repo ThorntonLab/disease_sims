@@ -9,6 +9,7 @@
 #include <iostream>
 #include <map>
 #include <numeric>
+#include <cstdint>
 #include <zlib.h>
 #include <fwdpp/diploid.hh>
 #include <diseaseSims/mutation_with_age.hpp>
@@ -35,11 +36,30 @@ struct vxv1params
   unsigned nreps;
 };
 
+struct mphenos
+{
+  mean_acc AA,Aa,aa;
+  mphenos() : AA(mean_acc()),Aa(mean_acc()),aa(mean_acc()) {}
+};
+
+struct running_means
+{
+  mean_acc z,d; //effect sizes, dominance
+  unsigned nm; //number of mutations
+  running_means() : z(mean_acc()),d(mean_acc()),nm(0u) {}
+};
+
+using mpheno_t = pair<mlist::iterator,mphenos>;
+using mutphenovec_t = vector<mpheno_t>;
+using vmcount_t = vector<pair<mlist::iterator,int8_t> >;
+
 vxv1params parse_argv( int argc, char ** argv );
 Gfxn_t set_model( const vxv1params & pars );
 vector<double> getG( const dipvector & diploids,
 		     const Gfxn_t & dipG );
-
+mutphenovec_t init_mphenovec( mlist & mutations );
+vmcount_t get_mut_counts( const glist::const_iterator & g1,
+			  const glist::const_iterator & g2 );
 /*
   Functions for TFL2013 and additive trait calculators.
   The simulation uses calculators that return pairs of doubles.
@@ -101,15 +121,89 @@ int main( int argc, char ** argv)
 
   //Read each population in and process it
   gzFile gzin = gzopen( pars.popfile.c_str(),"rb" );
-  for( unsigned i = 0 ; i < pars.nreps ; ++i )
+  map< double, running_means > data;
+  for( unsigned rep = 0 ; rep < pars.nreps ; ++rep )
     {
       mlist mutations;
       glist gametes;
       dipvector diploids;
       KTfwd::read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
       auto Gvals = getG(diploids,dipG);
+      mutphenovec_t mpv = init_mphenovec(mutations);
+      for( auto & __m : mpv )
+	{
+	  for( unsigned ind = 0 ; ind < diploids.size() ; ++ind )
+	    {
+	      unsigned c = std::count(diploids[ind].first->smutations.begin(),
+				      diploids[ind].first->smutations.end(),__m.first) +
+		std::count(diploids[ind].second->smutations.begin(),
+			   diploids[ind].second->smutations.end(),__m.first);
+	      if( ! c )
+		{
+		  __m.second.aa( Gvals[ind] );
+		}
+	      else if (c == 1)
+		{
+		  __m.second.Aa( Gvals[ind] );
+		}
+	      else if (c == 2)
+		{
+		  __m.second.AA( Gvals[ind] );
+		}
+	      else
+		{
+		  cerr << "Error: impossible number of copies of a single mutation in a diploid ("
+		       << c << "), line " << __LINE__ << " of " << __FILE__ << '\n';
+		  exit(EXIT_FAILURE);
+		}
+	    }
+	  double mAA = mean(__m.second.AA),mAa=mean(__m.second.Aa),maa=mean(__m.second.aa);
+	  if( isfinite(mAA) && isfinite(mAa) && isfinite(maa) )
+	    {
+	      double dist = abs(mAA-maa);
+	      double d2 = dist/2.;
+	      //double d = 0.5*mAa/d2;
+	      double d = (mAa/mAA)*d2;
+	      double pa = dist/2.,ma=-dist/2.;
+	      double p = double(__m.first->n)/(2.*diploids.size());
+	      double esize = pa + d*((1.-p)-p);
+
+	      auto __ditr = data.find(p);
+	      if(__ditr == data.end())
+		{
+		  data.insert(make_pair(p,running_means()));
+		  __ditr=data.find(p);
+		  __ditr->second.z(pow(esize,2.));
+		  __ditr->second.d(d);
+		  __ditr->second.nm++;
+		}
+	      else
+		{
+		  __ditr->second.z(pow(esize,2.));
+		  __ditr->second.d(d);
+		  __ditr->second.nm++;
+		}
+	      /*
+	      cout << p << ' ' << __m.first->s << ' ' << mAA << ' ' << mAa << ' ' << maa << ' '
+		   << pa/d2 << ' ' << d << ' ' << ma/d2 << ' ' << esize << ' '
+		   << " | "
+		   << d*mAA/d2 << '\n';
+	      */
+	    }
+	}
     }
   gzclose(gzin);
+
+  unsigned ttl_muts  = 0;
+  for( auto ditr = data.begin() ; ditr != data.end() ; ++ditr ) ttl_muts += ditr->second.nm;
+
+  double SUM=0.;
+  for( auto ditr = data.begin() ; ditr != data.end() ; ++ditr )
+    {
+      double fx = double(ditr->second.nm)/double(ttl_muts);
+      SUM += 0.5*mean(ditr->second.z)*fx*(ditr->first)*(1.-ditr->first);
+      cout << ditr->first << ' ' << SUM << '\n';
+    }
 }
 
 vxv1params parse_argv( int argc, char ** argv )
@@ -212,5 +306,34 @@ vector<double> getG( const dipvector & diploids,
 {
   vector<double> rv;
   for_each( diploids.begin(),diploids.end(),[&rv,&dipG](const diploid_t & __d ) { rv.push_back( dipG(__d.first,__d.second) ); } );
+  return rv;
+}
+
+mutphenovec_t init_mphenovec( mlist & mutations )
+{
+  mutphenovec_t rv;
+  for( auto i = mutations.begin();i!=mutations.end();++i )
+    {
+      rv.push_back(make_pair(i,mphenos()));
+    }
+  return rv;
+}
+
+vmcount_t get_mut_counts( const glist::const_iterator & g1,
+			  const glist::const_iterator & g2 )
+{
+  vmcount_t rv;
+
+  auto updater = [&rv](const mlist::iterator & __mut) {
+    auto __itr =  find_if(rv.begin(),rv.end(),[&__mut](const pair<mlist::iterator,unsigned> & __p) {
+	return __p.first == __mut;
+      } );
+    if(__itr == rv.end())
+      rv.push_back(make_pair(__mut,1u));
+    else
+      __itr->second++;
+  };
+  for_each( g1->smutations.begin(), g1->smutations.end(),updater );
+  for_each( g2->smutations.begin(), g2->smutations.end(),updater );
   return rv;
 }
