@@ -46,8 +46,8 @@ struct mphenos
 struct running_means
 {
   mean_acc z,d; //effect sizes, dominance
-  unsigned nm; //number of mutations
-  running_means() : z(mean_acc()),d(mean_acc()),nm(0u) {}
+  //unsigned nm; //number of mutations
+  running_means() : z(mean_acc()),d(mean_acc()){}//,nm(0u) {}
 };
 
 using mpheno_t = pair<mlist::iterator,mphenos>;
@@ -177,13 +177,13 @@ int main( int argc, char ** argv)
 		  __ditr=data.find(p);
 		  __ditr->second.z(pow(esize,2.));
 		  __ditr->second.d(d);
-		  __ditr->second.nm++;
+		  //__ditr->second.nm++;
 		}
 	      else
 		{
 		  __ditr->second.z(pow(esize,2.));
 		  __ditr->second.d(d);
-		  __ditr->second.nm++;
+		  //__ditr->second.nm++;
 		}
 	      /*
 	      cout << p << ' ' << __m.first->s << ' ' << mAA << ' ' << mAa << ' ' << maa << ' '
@@ -197,14 +197,15 @@ int main( int argc, char ** argv)
   gzclose(gzin);
 
   unsigned ttl_muts  = 0;
-  for( auto ditr = data.begin() ; ditr != data.end() ; ++ditr ) ttl_muts += ditr->second.nm;
+  for( auto ditr = data.begin() ; ditr != data.end() ; ++ditr ) ttl_muts += extract::count(ditr->second.z);//ttl_muts += ditr->second.nm;
 
   ostringstream buffer;
   buffer << "p\tVp\td\n";
   double SUM=0.;
   for( auto ditr = data.begin() ; ditr != data.end() ; ++ditr )
     {
-      double fx = double(ditr->second.nm)/double(ttl_muts);
+      double fx = extract::count(ditr->second.z)/double(ttl_muts);
+      //double fx = double(ditr->second.nm)/double(ttl_muts);
       SUM += 0.5*mean(ditr->second.z)*fx*(ditr->first)*(1.-ditr->first);
       buffer << ditr->first << '\t' << SUM << '\t' << mean(ditr->second.d) << '\n';
     }
