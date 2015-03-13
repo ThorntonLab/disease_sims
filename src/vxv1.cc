@@ -164,8 +164,9 @@ int main( int argc, char ** argv)
 	      double dist = abs(mAA-maa);
 	      double d2 = dist/2.;
 	      //double d = 0.5*mAa/d2;
-	      double d = (mAa/mAA)*d2;
+	      //double d = (mAa/mAA)*d2;
 	      double pa = dist/2.,ma=-dist/2.;
+	      double d = pa+(mAa - mAA);
 	      double p = double(__m.first->n)/(2.*diploids.size());
 	      double esize = pa + d*((1.-p)-p);
 
