@@ -25,7 +25,7 @@
 
 using namespace std;
 using namespace boost::accumulators;
-using mean_acc = accumulator_set<double, stats<tag::mean> >;
+using mean_acc = accumulator_set<double, stats<tag::mean,tag::count> >;
 using diploid_t = std::pair<glist::const_iterator,glist::const_iterator>;
 using Gfxn_t = std::function<double(const glist::const_iterator &,
 				    const glist::const_iterator &)>;
