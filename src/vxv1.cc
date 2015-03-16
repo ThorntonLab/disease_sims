@@ -162,13 +162,10 @@ int main( int argc, char ** argv)
 	  if( isfinite(mAA) && isfinite(mAa) && isfinite(maa) )
 	    {
 	      double dist = abs(mAA-maa);
-	      double d2 = dist/2.;
-	      //double d = 0.5*mAa/d2;
-	      //double d = (mAa/mAA)*d2;
-	      double pa = dist/2.,ma=-dist/2.;
-	      double d = pa+(mAa - mAA);
+	      double a = dist/2.;
+	      double d = mAa-dist/2.;
 	      double p = double(__m.first->n)/(2.*diploids.size());
-	      double esize = pa + d*((1.-p)-p);
+	      double esize = a + d*((1.-p)-p);
 
 	      auto __ditr = data.find(p);
 	      if(__ditr == data.end())
@@ -177,20 +174,12 @@ int main( int argc, char ** argv)
 		  __ditr=data.find(p);
 		  __ditr->second.z(pow(esize,2.));
 		  __ditr->second.d(d);
-		  //__ditr->second.nm++;
 		}
 	      else
 		{
 		  __ditr->second.z(pow(esize,2.));
 		  __ditr->second.d(d);
-		  //__ditr->second.nm++;
 		}
-	      /*
-	      cout << p << ' ' << __m.first->s << ' ' << mAA << ' ' << mAa << ' ' << maa << ' '
-		   << pa/d2 << ' ' << d << ' ' << ma/d2 << ' ' << esize << ' '
-		   << " | "
-		   << d*mAA/d2 << '\n';
-	      */
 	    }
 	}
     }
