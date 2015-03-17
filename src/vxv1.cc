@@ -220,6 +220,7 @@ vxv1params parse_argv( int argc, char ** argv )
     ("popgen,P","Assume multiplicative genetic model with dominance.  (Default is TFL2013)")
     ("dominance,d",value<double>(&rv.h)->default_value(0.0),"Dominance for multiplicative model with dominance")
     ("eyrewalker,e","Use Eyre-Walker 2010 model (not implemented yet!)")
+    ("outfile,o",value<string>(&rv.outfile)->default_value("vxv1.out.gz"),"Output file name")
     ;
 
   variables_map vm;
