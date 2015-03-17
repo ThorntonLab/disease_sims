@@ -82,7 +82,7 @@ host_triplet = @host@
 bin_PROGRAMS = TFL2013$(EXEEXT) TFL2013_ind$(EXEEXT) \
 	make_case_control$(EXEEXT) make_case_controlEW$(EXEEXT) \
 	chksimoutput$(EXEEXT) phenoburden$(EXEEXT) sfs$(EXEEXT) \
-	sfsSample$(EXEEXT) vxv1$(EXEEXT)
+	sfsSample$(EXEEXT) vxv1$(EXEEXT) riskmatrix$(EXEEXT)
 @DEBUG_FALSE@am__append_1 = -DNDEBUG
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -160,6 +160,9 @@ make_case_controlEW_DEPENDENCIES = libcommon.la
 am_phenoburden_OBJECTS = phenoburden.$(OBJEXT)
 phenoburden_OBJECTS = $(am_phenoburden_OBJECTS)
 phenoburden_LDADD = $(LDADD)
+am_riskmatrix_OBJECTS = riskmatrix.$(OBJEXT)
+riskmatrix_OBJECTS = $(am_riskmatrix_OBJECTS)
+riskmatrix_LDADD = $(LDADD)
 am_sfs_OBJECTS = sfs.$(OBJEXT) readSimOutput.$(OBJEXT)
 sfs_OBJECTS = $(am_sfs_OBJECTS)
 sfs_LDADD = $(LDADD)
@@ -207,13 +210,14 @@ SOURCES = $(libcommon_la_SOURCES) $(libdiseaseSimsHelper_la_SOURCES) \
 	$(TFL2013_SOURCES) $(TFL2013_ind_SOURCES) \
 	$(chksimoutput_SOURCES) $(make_case_control_SOURCES) \
 	$(make_case_controlEW_SOURCES) $(phenoburden_SOURCES) \
-	$(sfs_SOURCES) $(sfsSample_SOURCES) $(vxv1_SOURCES)
+	$(riskmatrix_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES) \
+	$(vxv1_SOURCES)
 DIST_SOURCES = $(libcommon_la_SOURCES) \
 	$(libdiseaseSimsHelper_la_SOURCES) $(TFL2013_SOURCES) \
 	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
 	$(make_case_control_SOURCES) $(make_case_controlEW_SOURCES) \
-	$(phenoburden_SOURCES) $(sfs_SOURCES) $(sfsSample_SOURCES) \
-	$(vxv1_SOURCES)
+	$(phenoburden_SOURCES) $(riskmatrix_SOURCES) $(sfs_SOURCES) \
+	$(sfsSample_SOURCES) $(vxv1_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -378,6 +382,7 @@ phenoburden_SOURCES = phenoburden.cc
 sfs_SOURCES = sfs.cc readSimOutput.cc
 sfsSample_SOURCES = sfsSample.cc
 vxv1_SOURCES = vxv1.cc
+riskmatrix_SOURCES = riskmatrix.cc
 # atomic_locker/atomic_locker
 
 #esm_chisq_zscore_LDFLAGS=-pthread
@@ -545,6 +550,10 @@ phenoburden$(EXEEXT): $(phenoburden_OBJECTS) $(phenoburden_DEPENDENCIES) $(EXTRA
 	@rm -f phenoburden$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(phenoburden_OBJECTS) $(phenoburden_LDADD) $(LIBS)
 
+riskmatrix$(EXEEXT): $(riskmatrix_OBJECTS) $(riskmatrix_DEPENDENCIES) $(EXTRA_riskmatrix_DEPENDENCIES) 
+	@rm -f riskmatrix$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(riskmatrix_OBJECTS) $(riskmatrix_LDADD) $(LIBS)
+
 sfs$(EXEEXT): $(sfs_OBJECTS) $(sfs_DEPENDENCIES) $(EXTRA_sfs_DEPENDENCIES) 
 	@rm -f sfs$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(sfs_OBJECTS) $(sfs_LDADD) $(LIBS)
@@ -572,6 +581,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make_case_controlEW.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/phenoburden.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readSimOutput.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/riskmatrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfsSample.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simindex.Po@am__quote@
