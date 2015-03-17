@@ -194,7 +194,6 @@ int main( int argc, char ** argv)
   for( auto ditr = data.begin() ; ditr != data.end() ; ++ditr )
     {
       double fx = extract::count(ditr->second.z)/double(ttl_muts);
-      //double fx = double(ditr->second.nm)/double(ttl_muts);
       SUM += 0.5*mean(ditr->second.z)*fx*(ditr->first)*(1.-ditr->first);
       buffer << ditr->first << '\t' << SUM << '\t' << mean(ditr->second.d) << '\n';
     }
