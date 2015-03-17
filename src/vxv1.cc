@@ -47,7 +47,7 @@ struct running_means
 {
   mean_acc z,d; //effect sizes, dominance
   //unsigned nm; //number of mutations
-  running_means() : z(mean_acc()),d(mean_acc()){}//,nm(0u) {}
+  running_means() : z(mean_acc()),d(mean_acc()){}
 };
 
 using mpheno_t = pair<mlist::iterator,mphenos>;
