@@ -61,52 +61,6 @@ vector<double> getG( const dipvector & diploids,
 mutphenovec_t init_mphenovec( mlist & mutations );
 vmcount_t get_mut_counts( const glist::const_iterator & g1,
 			  const glist::const_iterator & g2 );
-/*
-  Functions for TFL2013 and additive trait calculators.
-  The simulation uses calculators that return pairs of doubles.
-  The pair is the G,E components of trait value.
-  Here, we just need the G, so we do this as a quick fix:
-
-  (These should later be added right to gene_based_model.hpp!!!)
-*/
-struct TFL2013g
-{
-  using return_type = double;
-  inline double operator()( const glist::const_iterator & g1,
-			    const glist::const_iterator & g2) const
-  {
-    double e1 = std::accumulate( g1->smutations.begin(),
-				 g1->smutations.end(),
-				 0.,
-				 [](const double & a,
-				    const gtype::mutation_list_type_iterator & b) { return a + b->s; } );
-    double e2 = std::accumulate( g2->smutations.begin(),
-				 g2->smutations.end(),
-				 0.,
-				 [](const double & a,
-				    const gtype::mutation_list_type_iterator & b) { return a + b->s; } );
-    return (sqrt(e1*e2));
-  }
-};
-
-struct additiveg
-{
-  using return_type = double;
-  inline double operator()( const glist::const_iterator & g1,
-			    const glist::const_iterator & g2) const
-  {
-    return std::accumulate( g1->smutations.begin(),
-			    g1->smutations.end(),
-			    0.,
-			    [](const double & a,
-			       const gtype::mutation_list_type_iterator & b) { return a + b->s; } )
-      + std::accumulate( g2->smutations.begin(),
-			 g2->smutations.end(),
-			 0.,
-			 [](const double & a,
-			    const gtype::mutation_list_type_iterator & b) { return a + b->s; } );
-  }
-};
 
 int main( int argc, char ** argv)
 {
