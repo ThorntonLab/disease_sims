@@ -3,27 +3,6 @@
 
 #include <fwdpp/fitness_models.hpp>
 
-//Define a model where phenotype is 1, 1+s, (1+s)^2 for a site, then total value is product over sites
-// struct multiplicative_phenotype_updater_hom
-// {
-//   typedef void result_type;
-//   template<typename iterator_type>
-//   inline void operator()(double & fitness, const iterator_type & m1) const
-//   {
-//     fitness *= ( std::pow(1. + m1->s,2.) );
-//   }
-// };
-
-// struct multiplicative_phenotype_updater_het
-// {
-//   typedef void result_type;
-//   template<typename iterator_type>
-//   inline void operator()(double & fitness, const iterator_type & m1) const
-//   {
-//     fitness *= ( 1. + m1->s );
-//   }
-// };
-
 struct multiplicative_phenotype
 {
   typedef double result_type;
@@ -40,8 +19,6 @@ struct multiplicative_phenotype
 					   {
 					     fitness *= ( 1. + mut->s ); 
 					   },
-					   //std::bind(multiplicative_phenotype_updater_hom(),std::placeholders::_1,std::placeholders::_2),
-					   //std::bind(multiplicative_phenotype_updater_het(),std::placeholders::_1,std::placeholders::_2),
 					   1.);
   }
 };
