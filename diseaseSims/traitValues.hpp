@@ -4,10 +4,7 @@
 #include <fwdpp/fitness_models.hpp>
 
 /*
-  Functions for TFL2013 and additive trait calculators.
-  The simulation uses calculators that return pairs of doubles.
-  The pair is the G,E components of trait value.
-  Here, we just need the G, so we do this as a quick fix:
+  Geometric mean of maternal/paternal haplotypes.
 */
 struct TFL2013g
 {
@@ -29,6 +26,7 @@ struct TFL2013g
   }
 };
 
+//Additive
 struct additiveg
 {
   using return_type = double;
@@ -49,7 +47,6 @@ struct additiveg
 };
 
 //Popgen-like model for trait values
-
 struct popgen_phenotype_updater_hom
 {
   typedef void result_type;
