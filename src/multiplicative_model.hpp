@@ -2,26 +2,7 @@
 #define __MULTIPLICATIVE_MODEL_HPP__
 
 #include <fwdpp/fitness_models.hpp>
-
-struct multiplicative_phenotype
-{
-  typedef double result_type;
-  template< typename iterator_type>
-  inline double operator()(const iterator_type & g1, const iterator_type & g2) const
-  {
-    using __mtype =  typename iterator_type::value_type::mutation_list_type_iterator;
-    return KTfwd::site_dependent_fitness()(g1,g2,
-					   [](double & fitness,const __mtype & mut)
-					   {
-					     fitness *= ( std::pow(1. + mut->s,2.) ); 
-					   },
-					   [](double & fitness,const __mtype & mut)
-					   {
-					     fitness *= ( 1. + mut->s ); 
-					   },
-					   1.);
-  }
-};
+#include <diseaseSims/traitValues.hpp>
 
 struct multiplicative_disease_effect_to_fitness
 {
