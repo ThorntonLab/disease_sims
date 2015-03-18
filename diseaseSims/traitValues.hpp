@@ -2,7 +2,7 @@
 #define __TRAIT_VALUES_HPP__
 
 #include <fwdpp/fitness_models.hpp>
-
+#include <diseaseSims/mutation_with_age.hpp>
 /*
   Geometric mean of maternal/paternal haplotypes.
 */
