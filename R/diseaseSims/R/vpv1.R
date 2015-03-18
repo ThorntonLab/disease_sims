@@ -12,7 +12,7 @@ vpv1 = function( data )
         LLold=array()
         for( P in 1:twoN )
             {
-                LL=which(data$genos.S <= P)
+                LL=which(data.genos.S <= P)
                 mm[P,1] = P/twoN
                 LENDIFF = ifelse(length(LLold)!=length(LL),TRUE,FALSE)
                 DATADIFF = ifelse( LENDIFF == TRUE, TRUE, FALSE )

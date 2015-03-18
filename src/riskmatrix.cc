@@ -27,11 +27,10 @@
 #include <gsl/gsl_randist.h>
 #include <sys/stat.h>
 #include <TFL_fitness_models.hpp>
-
+#include <diseaseSims/util.hpp>
 using namespace std;
 using namespace boost::accumulators;
 using var_acc = accumulator_set<double, stats<tag::variance> >;
-using diploid_t = std::pair<glist::const_iterator,glist::const_iterator>;
 using Gfxn_t = std::function<double(const glist::const_iterator &,
 				    const glist::const_iterator &)>;
 struct riskmatrix_params
@@ -42,15 +41,10 @@ struct riskmatrix_params
   unsigned nreps;
 };
 
-using vmcount_t = vector<pair<mlist::iterator,int8_t> >;
+//using vmcount_t = vector<pair<mlist::iterator,int8_t> >;
 
 riskmatrix_params parse_argv( int argc, char ** argv );
 Gfxn_t set_model( const riskmatrix_params & pars );
-vector<double> getG( const dipvector & diploids,
-		     const Gfxn_t & dipG );
-
-vmcount_t get_mut_counts( const glist::const_iterator & g1,
-			  const glist::const_iterator & g2 );
 
 int main( int argc, char ** argv)
 {
@@ -208,32 +202,5 @@ Gfxn_t set_model( const riskmatrix_params & pars )
       break;
     }
   return dipG;
-}
-
-vector<double> getG( const dipvector & diploids,
-		     const Gfxn_t & dipG )
-{
-  vector<double> rv;
-  for_each( diploids.begin(),diploids.end(),[&rv,&dipG](const diploid_t & __d ) { rv.push_back( dipG(__d.first,__d.second) ); } );
-  return rv;
-}
-
-vmcount_t get_mut_counts( const glist::const_iterator & g1,
-			  const glist::const_iterator & g2 )
-{
-  vmcount_t rv;
-
-  auto updater = [&rv](const mlist::iterator & __mut) {
-    auto __itr =  find_if(rv.begin(),rv.end(),[&__mut](const pair<mlist::iterator,unsigned> & __p) {
-	return __p.first == __mut;
-      } );
-    if(__itr == rv.end())
-      rv.push_back(make_pair(__mut,1u));
-    else
-      __itr->second++;
-  };
-  for_each( g1->smutations.begin(), g1->smutations.end(),updater );
-  for_each( g2->smutations.begin(), g2->smutations.end(),updater );
-  return rv;
 }
 

@@ -14,12 +14,12 @@ getRiskVariantMatrix = function(popfilename,
         if( popfileOffset < 0 ) {
             stop("Error: popfileOffset must be >= 0")
         }
-        if( modelname != "recessive" |
-           modelname != "additive" |
-           modelname != "multiplicative" |
-           modelname != "popgen" )
+        if( modelName != "recessive" &
+           modelName != "additive" &
+           modelName != "multiplicative" &
+           modelName != "popgen" )
             {
                 stop("Error: invalid model name.  Must be one of: recessive, additive, multiplicative, or popgen")
             }
-        return (.getRiskVariantMatrixDetails(model,popfilename,popfileOffset,recordID,dominance))
+        return (.getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,recordID,dominance))
     }

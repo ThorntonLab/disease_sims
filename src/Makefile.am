@@ -2,8 +2,8 @@ bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control make_case_controlEW chksimout
 
 noinst_LTLIBRARIES=libcommon.la
 lib_LTLIBRARIES=libdiseaseSimsHelper.la
-libcommon_la_SOURCES=ccintermediate.cc
-libdiseaseSimsHelper_la_SOURCES=ccintermediate.cc
+libcommon_la_SOURCES=ccintermediate.cc util.cc
+libdiseaseSimsHelper_la_SOURCES=ccintermediate.cc util.cc
 #atomic_locker/atomic_locker
 
 #TFL2013_ind_SOURCES=
@@ -24,6 +24,9 @@ riskmatrix_SOURCES=riskmatrix.cc
 #esm_chisq_zscore_LDFLAGS=-pthread
 make_case_control_LDADD=libcommon.la
 make_case_controlEW_LDADD=libcommon.la
+riskmatrix_LDADD=libcommon.la
+vxv1_LDADD=libcommon.la
+
 AM_CPPFLAGS=-W -Wall -I.
 
 if DEBUG

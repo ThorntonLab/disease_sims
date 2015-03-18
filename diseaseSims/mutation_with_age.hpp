@@ -103,6 +103,6 @@ using glist =  boost::container::list<gtype,gam_allocator >;
 using mvector = boost::container::vector<TFLmtype>;
 using ftvector = boost::container::vector<unsigned>;
 using lookup_table_type = boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps >;
-using dipvector = std::vector< std::pair<glist::iterator,glist::iterator> >;
-
+using diploid_t = std::pair<glist::iterator,glist::iterator>;
+using dipvector = std::vector< diploid_t >;
 #endif

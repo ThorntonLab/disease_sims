@@ -128,14 +128,14 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libcommon_la_LIBADD =
-am_libcommon_la_OBJECTS = ccintermediate.lo
+am_libcommon_la_OBJECTS = ccintermediate.lo util.lo
 libcommon_la_OBJECTS = $(am_libcommon_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
 libdiseaseSimsHelper_la_LIBADD =
-am_libdiseaseSimsHelper_la_OBJECTS = ccintermediate.lo
+am_libdiseaseSimsHelper_la_OBJECTS = ccintermediate.lo util.lo
 libdiseaseSimsHelper_la_OBJECTS =  \
 	$(am_libdiseaseSimsHelper_la_OBJECTS)
 PROGRAMS = $(bin_PROGRAMS)
@@ -162,7 +162,7 @@ phenoburden_OBJECTS = $(am_phenoburden_OBJECTS)
 phenoburden_LDADD = $(LDADD)
 am_riskmatrix_OBJECTS = riskmatrix.$(OBJEXT)
 riskmatrix_OBJECTS = $(am_riskmatrix_OBJECTS)
-riskmatrix_LDADD = $(LDADD)
+riskmatrix_DEPENDENCIES = libcommon.la
 am_sfs_OBJECTS = sfs.$(OBJEXT) readSimOutput.$(OBJEXT)
 sfs_OBJECTS = $(am_sfs_OBJECTS)
 sfs_LDADD = $(LDADD)
@@ -171,7 +171,7 @@ sfsSample_OBJECTS = $(am_sfsSample_OBJECTS)
 sfsSample_LDADD = $(LDADD)
 am_vxv1_OBJECTS = vxv1.$(OBJEXT)
 vxv1_OBJECTS = $(am_vxv1_OBJECTS)
-vxv1_LDADD = $(LDADD)
+vxv1_DEPENDENCIES = libcommon.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -366,8 +366,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libcommon.la
 lib_LTLIBRARIES = libdiseaseSimsHelper.la
-libcommon_la_SOURCES = ccintermediate.cc
-libdiseaseSimsHelper_la_SOURCES = ccintermediate.cc
+libcommon_la_SOURCES = ccintermediate.cc util.cc
+libdiseaseSimsHelper_la_SOURCES = ccintermediate.cc util.cc
 #atomic_locker/atomic_locker
 
 #TFL2013_ind_SOURCES=
@@ -388,6 +388,8 @@ riskmatrix_SOURCES = riskmatrix.cc
 #esm_chisq_zscore_LDFLAGS=-pthread
 make_case_control_LDADD = libcommon.la
 make_case_controlEW_LDADD = libcommon.la
+riskmatrix_LDADD = libcommon.la
+vxv1_LDADD = libcommon.la
 AM_CPPFLAGS = -W -Wall -I. $(am__append_1)
 TFL2013_LDADD = -lboost_iostreams
 all: all-am
@@ -585,6 +587,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sfsSample.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simindex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vxv1.Po@am__quote@
 
 .cc.o:
