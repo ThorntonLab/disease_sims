@@ -2097,7 +2097,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
 CC=`R CMD config CC`
 CPP=`R CMD config CPP`
 CFLAGS=`R CMD config CFLAGS`
