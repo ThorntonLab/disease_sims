@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 AC_INIT([diseaseSims], 0.1.0)
-AC_CONFIG_MACRO_DIR([m4])
+dnl AC_CONFIG_MACRO_DIR([m4])
 
 CC=`R CMD config CC`
 CPP=`R CMD config CPP`
