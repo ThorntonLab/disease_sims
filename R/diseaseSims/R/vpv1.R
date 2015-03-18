@@ -1,10 +1,11 @@
 #' Calculate additive variation explained as a function of mutation frequency
 #' @param data A list that is the return value from getRiskVariantMatrix
+#' @param ofilename Output file name.  (Optional)
 #' @return fitted.vals, which is a list of fitted values for each marker
 #' @return mm, which is a 3-column matrix: p, variance explained by all markers with frequency <= p, based on R^2, and then variance explained by all markers with frequency <= p, based on adjusted R^2
 #' @details
 #' This is a general method that goes beyond the simple formula presented in the literature, which is based on additve models
-vpv1 = function( data )
+vpv1 = function( data, ofilename , replicateID, append = FALSE )
     {
         twoN = 2*nrow(data$genos)
         data.genos.S = as.integer(colSums(data$genos))
@@ -36,5 +37,9 @@ vpv1 = function( data )
             }
         ll = lm( data$G ~ data$genos )
         ll.fittedVals = fitted(ll)
+        if (! missing(ofilename) )
+            {
+                .writeVpV1Data(mm,ofilename,replicateID,append);
+            }
         return( list(fitted.vals=ll.fittedVals,vexp=mm) )
     }

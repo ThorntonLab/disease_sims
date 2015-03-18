@@ -20,6 +20,19 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// writeVpV1Data
+void writeVpV1Data(const Rcpp::NumericMatrix& d, const std::string& outfilename, const unsigned& replicate_id, const bool& append);
+RcppExport SEXP diseaseSims_writeVpV1Data(SEXP dSEXP, SEXP outfilenameSEXP, SEXP replicate_idSEXP, SEXP appendSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type d(dSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type outfilename(outfilenameSEXP);
+    Rcpp::traits::input_parameter< const unsigned& >::type replicate_id(replicate_idSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type append(appendSEXP);
+    writeVpV1Data(d, outfilename, replicate_id, append);
+    return R_NilValue;
+END_RCPP
+}
 // getEsizes
 DataFrame getEsizes(const char * filename, const unsigned long& offset);
 RcppExport SEXP diseaseSims_getEsizes(SEXP filenameSEXP, SEXP offsetSEXP) {

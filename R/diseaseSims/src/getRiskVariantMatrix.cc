@@ -43,10 +43,6 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
     }
 
   popstruct pop = readPop(gzin);
-  // mlist mutations;
-  // glist gametes;
-  // dipvector diploids;
-  // KTfwd::read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
   gzclose(gzin);
 
   unsigned RISKMUTIDX=0;
@@ -75,5 +71,20 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
     }
   return Rcpp::List::create(Rcpp::Named("G") = Gvals,
 			    Rcpp::Named("genos") = genos);
-}
+ }
 
+//[[Rcpp::export(".writeVpV1Data")]]
+ void writeVpV1Data( const Rcpp::NumericMatrix & d,
+		     const std::string & outfilename,
+		     const unsigned & replicate_id,
+		     const bool & append ) 
+ {
+   std::string __append = (append) ? "a" : "w";
+   gzFile gzout = gzopen(outfilename.c_str(),__append.c_str());
+
+   for(int row = 0 ; row < d.nrow() ; ++row )
+     {
+       gzprintf(gzout,"%u\t%lf\t%lf\t%lf\n",replicate_id,d(row,0),d(row,1),d(row,2));
+     }
+   gzclose(gzout);
+ }

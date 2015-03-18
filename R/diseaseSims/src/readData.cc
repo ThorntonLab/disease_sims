@@ -185,7 +185,7 @@ List sampleCCfromPop( const char * popfilename,
   SimPopData spd(popfilename,offset);
   NumericMatrix phenos = getPheno(phenofilename,phenooffset);
   vector<pair<double,double> > phenos2; //converted for use by external function
-  for ( unsigned i = 0 ; i < phenos.nrow() ; ++i )
+  for ( int i = 0 ; i < phenos.nrow() ; ++i )
     {
       phenos2.push_back( make_pair( phenos(i,0),phenos(i,1) ) );
     }

@@ -4,10 +4,12 @@
 \alias{vpv1}
 \title{Calculate additive variation explained as a function of mutation frequency}
 \usage{
-vpv1(data)
+vpv1(data, ofilename, replicateID, append = FALSE)
 }
 \arguments{
 \item{data}{A list that is the return value from getRiskVariantMatrix}
+
+\item{ofilename}{Output file name.  (Optional)}
 }
 \value{
 fitted.vals, which is a list of fitted values for each marker

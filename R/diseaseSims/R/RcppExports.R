@@ -5,6 +5,10 @@
     .Call('diseaseSims_getRiskVariantMatrixDetails', PACKAGE = 'diseaseSims', model, popfile, popfile_offset, record_id_no, dominance)
 }
 
+.writeVpV1Data <- function(d, outfilename, replicate_id, append) {
+    invisible(.Call('diseaseSims_writeVpV1Data', PACKAGE = 'diseaseSims', d, outfilename, replicate_id, append))
+}
+
 #' Read effect sizes from a file at a specific position
 #' @param filename The file name.  Should be binary, and either uncompressed or gzip compressed.
 #' @param offset The size in bytes where the desired record begins
