@@ -5,6 +5,10 @@
     .Call('diseaseSims_getRiskVariantMatrixDetails', PACKAGE = 'diseaseSims', model, popfile, popfile_offset, record_id_no, dominance)
 }
 
+.getRiskVariantMatrixDetailsPheno <- function(model, popfile, popfile_offset, phenofile, phenofile_offset, record_id_no, dominance = 0.) {
+    .Call('diseaseSims_getRiskVariantMatrixDetails_Pheno', PACKAGE = 'diseaseSims', model, popfile, popfile_offset, phenofile, phenofile_offset, record_id_no, dominance)
+}
+
 .writeVpV1Data <- function(d, outfilename, replicate_id, append) {
     invisible(.Call('diseaseSims_writeVpV1Data', PACKAGE = 'diseaseSims', d, outfilename, replicate_id, append))
 }

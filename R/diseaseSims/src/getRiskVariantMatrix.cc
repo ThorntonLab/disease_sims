@@ -88,7 +88,7 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
 
   Rcpp::IntegerMatrix genos = MakeRiskMatrik(pop.diploids,risk_indexes);
 
-  return Rcpp::List::create(Rcpp::Named("G") = Gvals,
+  return Rcpp::List::create(Rcpp::Named("trait") = Gvals,
 			    Rcpp::Named("genos") = genos);
  }
 				    

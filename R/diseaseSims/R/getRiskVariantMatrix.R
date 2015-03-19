@@ -1,6 +1,8 @@
 #' Return a genotype matrix based on risk variants from a population
 getRiskVariantMatrix = function(popfilename,
     popfileOffset,
+    phenofilename,
+    phenofileOffset,
     recordID = 0,
     modelName = "recessive",
     dominance = 0)
@@ -14,12 +16,21 @@ getRiskVariantMatrix = function(popfilename,
         if( popfileOffset < 0 ) {
             stop("Error: popfileOffset must be >= 0")
         }
-        if( modelName != "recessive" &
+        if(modelName != "recessive" &
            modelName != "additive" &
            modelName != "multiplicative" &
-           modelName != "popgen" )
+           modelName != "popgen")
             {
                 stop("Error: invalid model name.  Must be one of: recessive, additive, multiplicative, or popgen")
             }
-        return (.getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,recordID,dominance))
+        if( missing(phenofilename) )
+            {
+                return (.getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,recordID,dominance))
+            }
+            
+        if( missing(phenofileOffset) )
+            {
+                stop("Error: offest missing for phenotype file");
+            }
+        return (.getRiskVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,recordID,dominance))
     }

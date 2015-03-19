@@ -4,8 +4,8 @@
 \alias{getRiskVariantMatrix}
 \title{Return a genotype matrix based on risk variants from a population}
 \usage{
-getRiskVariantMatrix(popfilename, popfileOffset, recordID = 0,
-  modelName = "recessive", dominance = 0)
+getRiskVariantMatrix(popfilename, popfileOffset, phenofilename, phenofileOffset,
+  recordID = 0, modelName = "recessive", dominance = 0)
 }
 \description{
 Return a genotype matrix based on risk variants from a population

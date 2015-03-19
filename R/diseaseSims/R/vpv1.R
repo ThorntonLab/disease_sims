@@ -23,7 +23,7 @@ vpv1 = function( data, ofilename , replicateID, append = FALSE )
                     }
                 if( LENDIFF | DATADIFF )
                     {
-                        lm_i = lm( data$G ~ data$genos[,LL])
+                        lm_i = lm( data$trait ~ data$genos[,LL])
                         lm_i.s = summary(lm_i)
                         mm[P,2] = lm_i.s$r.squared
                         mm[P,3] = lm_i.s$adj.r.squared
@@ -35,7 +35,7 @@ vpv1 = function( data, ofilename , replicateID, append = FALSE )
                     }
                 LLold=LL
             }
-        ll = lm( data$G ~ data$genos )
+        ll = lm( data$trait ~ data$genos )
         ll.fittedVals = fitted(ll)
         if (! missing(ofilename) )
             {
