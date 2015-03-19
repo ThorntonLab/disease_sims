@@ -10,6 +10,38 @@
 
 using namespace std;
 
+Gfxn_t setModel( const std::string & model, const double & dominance )
+{
+  Gfxn_t dipG = std::bind(TFL2013g(),std::placeholders::_1,std::placeholders::_2);
+  if( model == "additive" )
+    {
+      dipG = std::bind(additiveg(),std::placeholders::_1,std::placeholders::_2);
+    }
+  else if (model == "multipicative")
+    {
+      dipG = std::bind(multiplicative_phenotype(),std::placeholders::_1,std::placeholders::_2);
+    }
+  else if (model == "popgen")
+    {
+      dipG = std::bind(popgen_phenotype(),std::placeholders::_1,std::placeholders::_2,dominance);
+    }
+  return dipG;
+}
+
+vector<pair<mlist::iterator,unsigned> > getRiskIndexes( mlist & mutations )
+{
+  vector<pair<mlist::iterator,unsigned> > risk_indexes;
+  unsigned RISKMUTIDX=0;
+  for( auto i = mutations.begin();i!=mutations.end();++i )
+    {
+      if( ! i->neutral )
+	{
+	  risk_indexes.push_back( make_pair(i,RISKMUTIDX++) );
+	}
+    }
+  return risk_indexes;
+}
+
 // Details of how to get a genotype matrix for risk variants
 //[[Rcpp::export(".getRiskVariantMatrixDetails")]]
 Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
@@ -28,35 +60,15 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
 
   gzseek(gzin,popfile_offset, SEEK_SET);
 
-  Gfxn_t dipG = std::bind(TFL2013g(),std::placeholders::_1,std::placeholders::_2);
-  if( model == "additive" )
-    {
-      dipG = std::bind(additiveg(),std::placeholders::_1,std::placeholders::_2);
-    }
-  else if (model == "multipicative")
-    {
-      dipG = std::bind(multiplicative_phenotype(),std::placeholders::_1,std::placeholders::_2);
-    }
-  else if (model == "popgen")
-    {
-      dipG = std::bind(popgen_phenotype(),std::placeholders::_1,std::placeholders::_2,dominance);
-    }
+  Gfxn_t dipG = setModel(model,dominance);
 
   popstruct pop = readPop(gzin);
   gzclose(gzin);
 
-  unsigned RISKMUTIDX=0;
-  vector<pair<mlist::iterator,unsigned> > risk_indexes;
-  for( auto i = pop.mutations.begin();i!=pop.mutations.end();++i )
-    {
-      if( ! i->neutral )
-	{
-	  risk_indexes.push_back( make_pair(i,RISKMUTIDX++) );
-	}
-    }
+  vector<pair<mlist::iterator,unsigned> > risk_indexes = getRiskIndexes(pop.mutations);
   auto Gvals = getG(pop.diploids,dipG);
 
-  Rcpp::IntegerMatrix genos(pop.diploids.size(),RISKMUTIDX);
+  Rcpp::IntegerMatrix genos(pop.diploids.size(),risk_indexes.size());
 
   for( unsigned ind = 0 ; ind < pop.diploids.size() ; ++ind )
     {
