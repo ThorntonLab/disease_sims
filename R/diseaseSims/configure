@@ -3701,6 +3701,30 @@ else
 fi
 
 
+ac_fn_cxx_check_header_mongrel "$LINENO" "diseaseSims/traitValues.hpp" "ac_cv_header_diseaseSims_traitValues_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_diseaseSims_traitValues_hpp" = xyes; then :
+
+else
+  as_fn_error $? "diseaseSims headers not found -- please install" "$LINENO" 5
+fi
+
+
+ac_fn_cxx_check_header_mongrel "$LINENO" "diseaseSims/util.hpp" "ac_cv_header_diseaseSims_util_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_diseaseSims_util_hpp" = xyes; then :
+
+else
+  as_fn_error $? "diseaseSims headers not found -- please install" "$LINENO" 5
+fi
+
+
+ac_fn_cxx_check_header_mongrel "$LINENO" "fwdpp/diploid.hh" "ac_cv_header_fwdpp_diploid_hh" "$ac_includes_default"
+if test "x$ac_cv_header_fwdpp_diploid_hh" = xyes; then :
+
+else
+  as_fn_error $? "fwdpp headers not found -- please install" "$LINENO" 5
+fi
+
+
 ac_fn_cxx_check_header_mongrel "$LINENO" "boost/interprocess/sync/file_lock.hpp" "ac_cv_header_boost_interprocess_sync_file_lock_hpp" "$ac_includes_default"
 if test "x$ac_cv_header_boost_interprocess_sync_file_lock_hpp" = xyes; then :
 
