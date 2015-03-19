@@ -44,7 +44,7 @@ Once the main simulation is installed, you may install the diseaseSims R package
 The R package has the following additional dependencies:
 
 1. [Rcpp](http://cran.r-project.org/web/packages/Rcpp/index.html)
-2. [plyr](http://cran.r-project.org/web/packages/plyr/index.html), although this really should be changed to dplyr eventually...
+2. [dplyr](http://cran.r-project.org/web/packages/dplyr/index.html)
 3. [buRden](http://github.com/molpopgen/buRden)
 
 ###Vanilla instructions for installing the R package
