@@ -4,11 +4,11 @@
 #include <fstream>
 #include <sstream>
 #include <random>
-
+#include <functional>
 #include <diseaseSims/ccintermediate.hpp>
 #include <SimPopData.hpp>
 #include <fwdpp/IO.hpp>
-#include <boost/bind.hpp>
+
 using namespace Rcpp;
 using namespace std;
 
@@ -38,7 +38,7 @@ void SimPopData::readPop(const char * filename,
   gzseek( gzin,offset,0 );
   KTfwd::read_binary_pop( &(this->gametes), 
 			  &(this->mutations),
-			  &(this->diploids), boost::bind(gzmreader(),_1),gzin );
+			  &(this->diploids), std::bind(gzmreader(),std::placeholders::_1),gzin );
   gzclose(gzin);
 }
 
