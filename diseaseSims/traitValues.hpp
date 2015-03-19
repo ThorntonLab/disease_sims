@@ -1,6 +1,7 @@
 #ifndef __TRAIT_VALUES_HPP__
 #define __TRAIT_VALUES_HPP__
 
+#include <numeric>
 #include <fwdpp/fitness_models.hpp>
 #include <diseaseSims/mutation_with_age.hpp>
 /*
