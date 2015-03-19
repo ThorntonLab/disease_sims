@@ -3,7 +3,6 @@ getRiskVariantMatrix = function(popfilename,
     popfileOffset,
     phenofilename,
     phenofileOffset,
-    recordID = 0,
     modelName = "recessive",
     dominance = 0)
     {

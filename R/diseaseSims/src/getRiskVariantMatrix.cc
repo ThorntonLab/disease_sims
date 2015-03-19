@@ -65,7 +65,6 @@ Rcpp::IntegerMatrix MakeRiskMatrik( const dipvector & diploids,
 Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
 					const std::string & popfile,
 					const int64_t & popfile_offset,
-					const unsigned & record_id_no,
 					const double & dominance = 0.)
 {
   gzFile gzin = gzopen(popfile.c_str(),"rb");
@@ -99,7 +98,6 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
 					      const int64_t & popfile_offset,
 					      const std::string & phenofile,
 					      const int64_t & phenofile_offset,
-					      const unsigned & record_id_no,
 					      const double & dominance = 0.)
 {
   gzFile gzin = gzopen(popfile.c_str(),"rb");
