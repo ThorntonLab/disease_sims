@@ -84,15 +84,26 @@ ccLD=function(ccblock,pvblock,sig.threshold = 8,minrsq=0,maxvals=-1)
                     cesize = ce,
                     rsq = LD,
                     mx = rep(maxvals,length(sp)))
+
+                rv.mx = rv %>%
+                    dplyr::group_by(sigpos) %>%
+                        dplyr::summarise( cpos = cpos[ bestHits(rsq,mx) ],
+                                         sigfreqs = sigfreq[ bestHits(rsq,mx) ],
+                                         cfreq = cfreq[ bestHits(rsq,mx) ],
+                                         sesize = sesize[ bestHits(rsq,mx) ],
+                                         cesize = cesize[ bestHits(rsq,mx) ],
+                                         rsq = rsq[ bestHits(rsq,mx) ] )
+
+                ##OLD plyr-based code, in case I goofed the dplyr:
                 
-                rv.mx = plyr::ddply( rv,plyr::.(sigpos),
-                    plyr::summarise,
-                    cpos = cpos[ bestHits(rsq,mx) ],
-                    sigfreqs = sigfreq[ bestHits(rsq,mx) ],
-                    cfreq = cfreq[ bestHits(rsq,mx) ],
-                    sesize = sesize[ bestHits(rsq,mx) ],
-                    cesize = cesize[ bestHits(rsq,mx) ],
-                    rsq = rsq[ bestHits(rsq,mx) ] )
+                ## rv.mx = plyr::ddply( rv,plyr::.(sigpos),
+                ##     plyr::summarise,
+                ##     cpos = cpos[ bestHits(rsq,mx) ],
+                ##     sigfreqs = sigfreq[ bestHits(rsq,mx) ],
+                ##     cfreq = cfreq[ bestHits(rsq,mx) ],
+                ##     sesize = sesize[ bestHits(rsq,mx) ],
+                ##     cesize = cesize[ bestHits(rsq,mx) ],
+                ##     rsq = rsq[ bestHits(rsq,mx) ] )
                 return(rv.mx)
             }
     }
