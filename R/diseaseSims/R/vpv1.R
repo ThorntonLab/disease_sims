@@ -1,10 +1,14 @@
 #' Calculate additive variation explained as a function of mutation frequency
 #' @param data A list that is the return value from getRiskVariantMatrix
 #' @param ofilename Output file name.  (Optional)
+#' @param replicateID A unique identifier for this data set (unsigned integers, please!!)
+#' @param append Append to output file?
 #' @return fitted.vals, which is a list of fitted values for each marker
 #' @return mm, which is a 3-column matrix: p, variance explained by all markers with frequency <= p, based on R^2, and then variance explained by all markers with frequency <= p, based on adjusted R^2
 #' @details
-#' This is a general method that goes beyond the simple formula presented in the literature, which is based on additve models
+#' Output to the access file is managed via a POSIX file lock.  This lock scheme allows you to analyze multiple data sets
+#' using your cluster, and then write all the output to a single file.  To make this work, though, be sure that append == TRUE,
+#' otherwise you'll lock the file and then over-write it with each process!
 vpv1 = function( data, ofilename , replicateID, append = FALSE )
     {
         twoN = 2*nrow(data$genos)
