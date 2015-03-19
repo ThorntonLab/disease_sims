@@ -4,7 +4,7 @@
 \alias{vpv1}
 \title{Calculate additive variation explained as a function of mutation frequency}
 \usage{
-vpv1(data, ofilename, replicateID, append = FALSE)
+vpv1(data, ofilename, replicateID, append = FALSE, maxfreq = 1)
 }
 \arguments{
 \item{data}{A list that is the return value from getRiskVariantMatrix}
@@ -14,6 +14,8 @@ vpv1(data, ofilename, replicateID, append = FALSE)
 \item{replicateID}{A unique identifier for this data set (unsigned integers, please!!)}
 
 \item{append}{Append to output file?}
+
+\item{maxfreq}{Maximum frequency to work up to}
 }
 \value{
 fitted.vals, which is a list of fitted values for each marker

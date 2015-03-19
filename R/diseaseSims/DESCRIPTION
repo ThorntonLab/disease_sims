@@ -10,5 +10,5 @@ Imports:
     Rcpp (>= 0.11.0),
     dplyr, 
     buRden (>= 0.1.0)
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppEigen
 RcppModules: SimPopData
