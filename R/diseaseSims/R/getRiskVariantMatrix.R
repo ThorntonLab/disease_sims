@@ -7,6 +7,7 @@
 #' @param dominance The dominance of a risk mutation.  Only applies to the "popgen" model of gene action
 #' @return traits, which is a list of trait (or genetic) values for each individual
 #' @return genos, which is an integer matrix of genotypes. Rows = individuals. Columns = 0,1,2 copies of risk mutation
+#' @return nremoved, which is the number of markers removed because they resulted in duplicate columns in genos
 #' @details
 #' The order of the columns in "genos" is in descending order of both frequency and absolute value of effect size
 #' If phenofilename and phenofileOffset are both provided, then "traits" corresponds to individual phenotypes.
@@ -45,6 +46,7 @@ getRiskVariantMatrix = function(popfilename,
                 XX.dups = duplicated(t(XX$genos))
                 XX$esizes = XX$esizes[XX.dups == FALSE]
                 XX$genos = XX$genos[,XX.dups == FALSE]
+                XX$nremoved = length(which(XX.dups==TRUE))
                 return (XX);
             }
             
@@ -57,5 +59,6 @@ getRiskVariantMatrix = function(popfilename,
         XX.dups = duplicated(t(XX$genos))
         XX$esizes = XX$esizes[XX.dups == FALSE]
         XX$genos = XX$genos[,XX.dups == FALSE]
+        XX$nremoved = length(which(XX.dups==TRUE))
         return (XX);
     }
