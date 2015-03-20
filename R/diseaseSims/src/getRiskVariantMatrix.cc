@@ -3,6 +3,8 @@
 #include <utility>
 #include <string>
 #include <cstdint>
+#include <algorithm>
+#include <set>
 #include <zlib.h>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -30,16 +32,43 @@ Gfxn_t setModel( const std::string & model, const double & dominance )
   return dipG;
 }
 
+/*
+  Return value is sorted by:
+  1. Decreasing mutation frequency
+  2. Within frequency class, by decreasing abs(effect size)
+ */
 vector<pair<mlist::iterator,unsigned> > getRiskIndexes( mlist & mutations )
 {
+  vector<mlist::iterator> v;
+  set<unsigned,greater<unsigned> > counts;
+  for( auto i = mutations.begin();i!=mutations.end();++i ) 
+    {
+      if(!i->neutral)
+	{
+	  v.push_back(i);
+	}
+    }
+  std::sort(v.begin(),v.end(),[&counts]( mlist::iterator & i, mlist::iterator & j ) { 
+      counts.insert(i->n);
+      counts.insert(j->n);
+      return i->n > j->n; 
+    } );
+  //Sort by decreasing |effect size| w/in each freq class
+  for_each( counts.begin(), counts.end(),
+	    [&v]( const unsigned & __u ) {
+	      //First element at this freq.
+	      auto __beg = find_if(v.begin(),v.end(),[&__u](const mlist::iterator & __i) { return __i->n == __u; });
+	      //Last element at this freq.
+	      auto __end = find_if(v.rbegin(),v.rend(),[&__u](const mlist::iterator & __i) { return __i->n == __u; });
+	      sort(__beg,__end.base(),[](mlist::iterator & __i, mlist::iterator & __j) {
+		  return abs(__i->s) > abs(__j->s);
+		});
+	    } );
   vector<pair<mlist::iterator,unsigned> > risk_indexes;
   unsigned RISKMUTIDX=0;
-  for( auto i = mutations.begin();i!=mutations.end();++i )
+  for( auto i = v.begin() ; i != v.end() ; ++i )
     {
-      if( ! i->neutral )
-	{
-	  risk_indexes.push_back( make_pair(i,RISKMUTIDX++) );
-	}
+      risk_indexes.push_back( make_pair(*i,RISKMUTIDX++) );
     }
   return risk_indexes;
 }
