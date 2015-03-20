@@ -73,6 +73,15 @@ vector<pair<mlist::iterator,unsigned> > getRiskIndexes( mlist & mutations )
   return risk_indexes;
 }
 
+vector<double> getEsizes( const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
+{
+  vector<double> rv;
+  for_each(risk_indexes.begin(),risk_indexes.end(),[&rv](const pair<mlist::iterator,unsigned> & __p) {
+      rv.push_back(__p.first->s);
+    });
+  return rv;
+}
+
 Rcpp::IntegerMatrix MakeRiskMatrik( const dipvector & diploids,
 				    const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
 {
@@ -119,6 +128,7 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
   Rcpp::IntegerMatrix genos = MakeRiskMatrik(pop.diploids,risk_indexes);
 
   return Rcpp::List::create(Rcpp::Named("trait") = Gvals,
+			    Rcpp::Named("esizes") = getEsizes(risk_indexes),
 			    Rcpp::Named("genos") = genos);
  }
 				    
@@ -164,6 +174,7 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
   Rcpp::IntegerMatrix genos = MakeRiskMatrik(pop.diploids,risk_indexes);
 
   return Rcpp::List::create(Rcpp::Named("trait") = phenotypes,
+			    Rcpp::Named("esizes") = getEsizes(risk_indexes),
 			    Rcpp::Named("genos") = genos);
  }
 
