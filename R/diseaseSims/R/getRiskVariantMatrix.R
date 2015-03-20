@@ -8,7 +8,7 @@
 #' @return traits, which is a list of trait (or genetic) values for each individual
 #' @return genos, which is an integer matrix of genotypes. Rows = individuals. Columns = 0,1,2 copies of risk mutation
 #' @details
-#' The order of the columns in "genos" is arbitrary.
+#' The order of the columns in "genos" is in descending order of both frequency and absolute value of effect size
 #' If phenofilename and phenofileOffset are both provided, then "traits" corresponds to individual phenotypes.
 #' If these two arguments are NOT provided, then "traits" corresponds to the genetic component of trait value,
 #' which is calculated by the parameter bassed to modelName.
