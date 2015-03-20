@@ -179,19 +179,19 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
  }
 
 //[[Rcpp::export(".writeVpV1Data")]]
- void writeVpV1Data( const Rcpp::NumericMatrix & d,
-		     const std::string & outfilename,
-		     const unsigned & replicate_id,
-		     const bool & append ) 
- {
-   using namespace boost::interprocess;
-   std::string __append = (append) ? "a" : "w";
-   gzFile gzout = gzopen(outfilename.c_str(),__append.c_str());
-   file_lock ofile_flock(outfilename.c_str());
-   scoped_lock<file_lock> s_lock(ofile_flock);
-   for(int row = 0 ; row < d.nrow() ; ++row )
-     {
-       gzprintf(gzout,"%u\t%lf\t%lf\t%lf\n",replicate_id,d(row,0),d(row,1),d(row,2));
-     }
-   gzclose(gzout);
- }
+void writeVpV1Data( const Rcpp::NumericMatrix & d,
+		    const std::string & outfilename,
+		    const unsigned & replicate_id,
+		    const bool & append ) 
+{
+  using namespace boost::interprocess;
+  std::string __append = (append) ? "a" : "w";
+  gzFile gzout = gzopen(outfilename.c_str(),__append.c_str());
+  file_lock ofile_flock(outfilename.c_str());
+  scoped_lock<file_lock> s_lock(ofile_flock);
+  for(int row = 0 ; row < d.nrow() ; ++row )
+    {
+      gzprintf(gzout,"%u\t%lf\t%lf\t%lf\n",replicate_id,d(row,0),d(row,1),d(row,2));
+    }
+  gzclose(gzout);
+}
