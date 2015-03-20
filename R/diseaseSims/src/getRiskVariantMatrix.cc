@@ -82,7 +82,7 @@ vector<double> getEsizes( const vector<pair<mlist::iterator,unsigned> > & risk_i
   return rv;
 }
 
-Rcpp::IntegerMatrix MakeRiskMatrik( const dipvector & diploids,
+Rcpp::IntegerMatrix MakeRiskMatrix( const dipvector & diploids,
 				    const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
 {
   Rcpp::IntegerMatrix genos(diploids.size(),risk_indexes.size());
@@ -125,7 +125,7 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
   vector<pair<mlist::iterator,unsigned> > risk_indexes = getRiskIndexes(pop.mutations);
   auto Gvals = getG(pop.diploids,dipG);
 
-  Rcpp::IntegerMatrix genos = MakeRiskMatrik(pop.diploids,risk_indexes);
+  Rcpp::IntegerMatrix genos = MakeRiskMatrix(pop.diploids,risk_indexes);
 
   return Rcpp::List::create(Rcpp::Named("trait") = Gvals,
 			    Rcpp::Named("esizes") = getEsizes(risk_indexes),
@@ -171,7 +171,7 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
   gzclose(gzin);
   vector<pair<mlist::iterator,unsigned> > risk_indexes = getRiskIndexes(pop.mutations);
 
-  Rcpp::IntegerMatrix genos = MakeRiskMatrik(pop.diploids,risk_indexes);
+  Rcpp::IntegerMatrix genos = MakeRiskMatrix(pop.diploids,risk_indexes);
 
   return Rcpp::List::create(Rcpp::Named("trait") = phenotypes,
 			    Rcpp::Named("esizes") = getEsizes(risk_indexes),
