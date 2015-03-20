@@ -38,12 +38,24 @@ getRiskVariantMatrix = function(popfilename,
             }
         if( missing(phenofilename) )
             {
-                return (.getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance))
+                ##return (.getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance))
+
+                ##Remove duplicate markers (co-linear predictors...)
+                XX = .getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance)
+                XX.dups = duplicated(t(XX$genos))
+                XX$esizes = XX$esizes[XX.dups == FALSE]
+                XX$genos = XX$genos[,XX.dups == FALSE]
+                return (XX);
             }
             
         if( missing(phenofileOffset) )
             {
                 stop("Error: offest missing for phenotype file");
             }
-        return (.getRiskVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance))
+        #return (.getRiskVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance))
+        XX=.getRiskVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance)
+        XX.dups = duplicated(t(XX$genos))
+        XX$esizes = XX$esizes[XX.dups == FALSE]
+        XX$genos = XX$genos[,XX.dups == FALSE]
+        return (XX);
     }
