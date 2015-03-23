@@ -6,7 +6,7 @@
 
 std::vector<int> columnsDuplicated( const Rcpp::IntegerMatrix & m );
 
-void removeDupColumns( Rcpp::IntegerMatrix & m,
-		       const std::vector<int> & lv  );
+void removeColumns( Rcpp::IntegerMatrix & m,
+		    const std::vector<int> & lv  );
 
 #endif

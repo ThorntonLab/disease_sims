@@ -133,7 +133,7 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
   unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
   if(nremoved)
     {
-      removeDupColumns(genos,dupc);
+      removeColumns(genos,dupc);
       for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
 	{
 	  if( *i )
@@ -195,7 +195,7 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
   unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
   if(nremoved)
     {
-      removeDupColumns(genos,dupc);
+      removeColumns(genos,dupc);
       for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
 	{
 	  if( *i )
