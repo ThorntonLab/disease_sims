@@ -4,7 +4,7 @@
 \alias{vpv1aov}
 \title{Fun with aov}
 \usage{
-vpv1aov(data, ofilename, replicateID, append = FALSE)
+vpv1aov(data, ofilename, replicateID, append = FALSE, useSparseM = FALSE)
 }
 \description{
 Fun with aov

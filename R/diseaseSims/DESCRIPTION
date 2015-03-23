@@ -9,7 +9,8 @@ License: GPL
 Imports:
     Rcpp (>= 0.11.0),
     dplyr,
-    SparseM,
     buRden (>= 0.1.0)
+Suggests:
+    SparseM
 LinkingTo: Rcpp
 RcppModules: SimPopData
