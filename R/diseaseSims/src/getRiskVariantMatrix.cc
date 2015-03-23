@@ -49,7 +49,7 @@ vector<pair<mlist::iterator,unsigned> > getRiskIndexes( mlist & mutations )
 	  v.push_back(i);
 	}
     }
-  std::sort(v.begin(),v.end(),[&counts]( mlist::iterator & i, mlist::iterator & j ) { 
+  std::sort(v.begin(),v.end(),[&counts]( mlist::iterator const & i, mlist::iterator const & j ) { 
       counts.insert(i->n);
       counts.insert(j->n);
       return i->n > j->n; 
@@ -61,7 +61,7 @@ vector<pair<mlist::iterator,unsigned> > getRiskIndexes( mlist & mutations )
 	      auto __beg = find_if(v.begin(),v.end(),[&__u](const mlist::iterator & __i) { return __i->n == __u; });
 	      //Last element at this freq.
 	      auto __end = find_if(v.rbegin(),v.rend(),[&__u](const mlist::iterator & __i) { return __i->n == __u; });
-	      sort(__beg,__end.base(),[](mlist::iterator & __i, mlist::iterator & __j) {
+	      sort(__beg,__end.base(),[](mlist::iterator const & __i, mlist::iterator const & __j) {
 		  return abs(__i->s) > abs(__j->s);
 		});
 	    } );
