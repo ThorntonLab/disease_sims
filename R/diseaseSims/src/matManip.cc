@@ -4,6 +4,16 @@
 using namespace std;
 using namespace Rcpp;
 
+/*
+  Return a vector of integers:
+  0 = column i is not a duplicate
+  1 = column 1 is a duplicate of a least 1 column < 1
+
+  Note: it would be tempting to return an Rcpp::LogicalVector
+  here.  However, the Rcpp containers do not contain 
+  reverse_iterator functions that are needed for the removal step 
+  (see below).
+ */
 vector<int> columnsDuplicated( const IntegerMatrix & m )
 {
   std::vector<int> rv(m.ncol(),0);
@@ -28,6 +38,14 @@ vector<int> columnsDuplicated( const IntegerMatrix & m )
   return rv;
 }
 
+/*
+  Removes columns based on the 0/1 (false/true) data in lv.
+
+  This works b/c an Rcpp matrix is "just a vector" with the dimensions
+  added on top of it.
+
+  We have to work backwards through rv so that we correctly remove the desired column.
+*/
 void removeDupColumns( Rcpp::IntegerMatrix & m,
 		       const std::vector<int> & lv  )
 {
