@@ -11,6 +11,7 @@
 #include <fwdpp/IO.hpp>
 #include <diseaseSims/util.hpp>
 #include <diseaseSims/traitValues.hpp>
+#include <matManip.hpp>
 
 using namespace std;
 
@@ -126,10 +127,26 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
   auto Gvals = getG(pop.diploids,dipG);
 
   Rcpp::IntegerMatrix genos = MakeRiskMatrix(pop.diploids,risk_indexes);
-
+  vector<double> esizes = getEsizes(risk_indexes);
+  //Remove duplicated columns, and esizes, if needed
+  vector<int> dupc = columnsDuplicated(genos);
+  unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
+  if(nremoved)
+    {
+      removeDupColumns(genos,dupc);
+      for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
+	{
+	  if( *i )
+	    {
+	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) );
+	    }
+	}
+    }
+  
   return Rcpp::List::create(Rcpp::Named("trait") = Gvals,
-			    Rcpp::Named("esizes") = getEsizes(risk_indexes),
-			    Rcpp::Named("genos") = genos);
+			    Rcpp::Named("esizes") = esizes,
+			    Rcpp::Named("genos") = genos,
+			    Rcpp::Named("nremoved") = nremoved);
  }
 				    
 // Details of how to get a genotype matrix for risk variants
@@ -172,10 +189,25 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
   vector<pair<mlist::iterator,unsigned> > risk_indexes = getRiskIndexes(pop.mutations);
 
   Rcpp::IntegerMatrix genos = MakeRiskMatrix(pop.diploids,risk_indexes);
-
+  vector<double> esizes = getEsizes(risk_indexes);
+  //Remove duplicated columns, and esizes, if needed
+  vector<int> dupc = columnsDuplicated(genos);
+  unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
+  if(nremoved)
+    {
+      removeDupColumns(genos,dupc);
+      for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
+	{
+	  if( *i )
+	    {
+	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) );
+	    }
+	}
+    }
   return Rcpp::List::create(Rcpp::Named("trait") = phenotypes,
-			    Rcpp::Named("esizes") = getEsizes(risk_indexes),
-			    Rcpp::Named("genos") = genos);
+			    Rcpp::Named("esizes") = esizes,
+			    Rcpp::Named("genos") = genos,
+			    Rcpp::Named("nremoved") = nremoved);
  }
 
 //[[Rcpp::export(".writeVpV1Data")]]

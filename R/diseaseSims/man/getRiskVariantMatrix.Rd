@@ -24,6 +24,8 @@ getRiskVariantMatrix(popfilename, popfileOffset, phenofilename, phenofileOffset,
 traits, which is a list of trait (or genetic) values for each individual
 
 genos, which is an integer matrix of genotypes. Rows = individuals. Columns = 0,1,2 copies of risk mutation
+
+nremoved, which is the number of markers removed because they resulted in duplicate columns in genos
 }
 \description{
 Return a genotype matrix based on risk variants from a population

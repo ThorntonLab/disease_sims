@@ -43,10 +43,10 @@ getRiskVariantMatrix = function(popfilename,
 
                 ##Remove duplicate markers (co-linear predictors...)
                 XX = .getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance)
-                XX.dups = duplicated(XX$genos,MARGIN=2)
-                XX$esizes = XX$esizes[XX.dups == FALSE]
-                XX$genos = XX$genos[,XX.dups == FALSE]
-                XX$nremoved = length(which(XX.dups==TRUE))
+                #XX.dups = duplicated(XX$genos,MARGIN=2)
+                #XX$esizes = XX$esizes[XX.dups == FALSE]
+                #XX$genos = XX$genos[,XX.dups == FALSE]
+                #XX$nremoved = length(which(XX.dups==TRUE))
                 return (XX);
             }
             
@@ -56,9 +56,9 @@ getRiskVariantMatrix = function(popfilename,
             }
         #return (.getRiskVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance))
         XX=.getRiskVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance)
-        XX.dups = duplicated(XX$genos,MARGIN=2)
-        XX$esizes = XX$esizes[XX.dups == FALSE]
-        XX$genos = XX$genos[,XX.dups == FALSE]
-        XX$nremoved = length(which(XX.dups==TRUE))
+        #XX.dups = duplicated(XX$genos,MARGIN=2)
+        #XX$esizes = XX$esizes[XX.dups == FALSE]
+        #XX$genos = XX$genos[,XX.dups == FALSE]
+        #XX$nremoved = length(which(XX.dups==TRUE))
         return (XX);
     }
