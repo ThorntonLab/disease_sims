@@ -17,7 +17,7 @@ vpv1aov = function(data, ofilename , replicateID, append = FALSE)
         ##Fit the model and summarize
         ##We coerce the matrix to a data frame so that we can get sum of squares, etc.,
         ##per marker
-        data.aov.s = summary(aov(lm(data$trait ~ ., data=as.data.frame(data$genos))))
+        data.aov.s = summary(aov(SparseM::slm(data$trait ~ ., data=as.data.frame(data$genos)),data=as.data.frame(data$genos)))
 
         twoN = 2*nrow(data$genos)
         ##Get the counts of risk allele frequencies at each marker
