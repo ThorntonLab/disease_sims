@@ -43,7 +43,6 @@ vpv1aov = function(data, ofilename , replicateID, append = FALSE, useSparseM = F
                         USPARSE=FALSE
                     }
             }
-        #data.aov.s = SparseM::slm(data$trait ~ ., data=as.data.frame(data$genos))
         data.aov.s = ifelse(USPARSE==FALSE,summary(aov(lm(data$trait ~ ., data = as.data.frame(data$genos)))),
             summary(aov(SparseM::slm(data$trait ~ ., data=as.data.frame(data$genos)),data=as.data.frame(data$genos))))
         twoN = 2*nrow(data$genos)
