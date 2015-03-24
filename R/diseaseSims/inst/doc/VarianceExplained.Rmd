@@ -4,7 +4,7 @@ author: "Kevin Thornton"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{"Estimating additive variance explained by risk mutations"}
+  %\VignetteIndexEntry{Estimating additive variance explained by risk mutations}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

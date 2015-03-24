@@ -1,0 +1,81 @@
+---
+title: "Running burden tests"
+author: "Kevin Thornton"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Running burden tests}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+How to run a load of burden tests and output z-scores.
+
+Ingredientts:
+
+* ccindex.txt is the index file for case/control panels
+* ccfile.bin.gz is the file containing the case/control panels
+
+This script runs:
+
+* esm
+* C-$\alpha$
+* Madsen-Browning under "general", recessiv, and dominant models
+* Li and Leal's collapaed variant test
+* SKAT/SKAT-O
+
+The script takes the replicate number as an argument, e.g.:
+
+~~~{sh}
+#run on replicate number 10 in ccindex.txt/ccfile.bin/gz:
+R --no-save --args 10 < burdenTests.R
+~~~
+
+~~~{r}
+library(diseaseSims)
+library(buRden)
+library(SKAT)
+
+#idx=read.table(paste(DIR,"/ccindex.txt",sep=""));
+idx=read.table("ccindex.txt")
+
+power=0
+NPERMS=1e4
+n=commandArgs(trailing=TRUE)
+i=as.integer(n[1])
+ofile=paste("buRdens.",idx$V1[i],".txt",sep="")
+write("rep esm calpha MBg MBr MBd LL skat stat.linear skatO skatO.linear",file=ofile)
+#write("rep esm calpha MBg MBr MBd LL skatO",file=ofile)
+NPERMS=1e3
+#NPERMS=10
+
+offset = 0
+if(i>1)
+    {
+        offset=sum(idx$V2[1:(i-1)])
+    }
+ccdata = getCCblock("ccfile.bin.gz",offset)
+status=c(rep(0,ccdata$ncontrols),rep(1,ccdata$ncases))
+keep = filter_sites(ccdata$genos,status,0,0.05,0.8)
+all.p = allBurdenStats.p.perm(ccdata$genos[,which(keep==1)],status,NPERMS,50,0.025)
+obj<-SKAT_Null_Model(status ~ 1, out_type="D")
+skat.default=SKAT(ccdata$genos,obj)
+skat.O=SKAT(ccdata$genos,obj,method="optimal.adj")
+skat.linear=SKAT(ccdata$genos,obj,kernel="linear")
+skat.linear.O=SKAT(ccdata$genos,obj,method="optimal.adj",kernel="linear")
+write.table(cbind(idx$V1[i],
+                  all.p$esm.z.value,
+                  all.p$calpha.z.value,
+                  all.p$MB.general.z.value,
+                  all.p$MB.recessive.z.value,
+                  all.p$MB.dominant.z.value,
+                  all.p$LL.collapse.z.value,
+                  skat.default$p.value,
+                  skat.linear$p.value,
+                  skat.O$p.value,
+                  skat.linear.O$p.value),
+            file=ofile,append=T,
+            row.names=F,
+            col.names=F,
+            quote=F)
+~~~
