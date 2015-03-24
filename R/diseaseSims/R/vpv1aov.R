@@ -55,7 +55,7 @@ vpv1aov = function(data, ofilename , replicateID, append = FALSE, useSparseM = F
 
         sum.sq = data.aov.s[[1]]$'Sum Sq'
         ttl.sum.sq = sum(sum.sq)
-        DF = data.aov.s$'Df'
+        DF = data.aov.s[[1]]$'Df'
         n = length(sum.sq)
 
         ##Populate the matrix, starting with the rares
@@ -70,9 +70,12 @@ vpv1aov = function(data, ofilename , replicateID, append = FALSE, useSparseM = F
                     {
                         stop("NA found...")
                     }
+                ## adj. r^2 due just to mutations at this freq. bin
+                mm[IDX,3] = 1 - ( (sum.sq[n] + sum(sum.sq[which(alleleCounts != ac)]))/ttl.sum.sq )*(sum(DF)/(DF[n] + length(which(alleleCounts != ac))))
                 IDX=IDX+1
             }
         mm[,2] = cumsum(mm[,2])
+        mm[,3] = cumsum(mm[,3])
         if (! missing(ofilename) )
             {
                 #.writeVpV1Data(mm,ofilename,replicateID,append);
