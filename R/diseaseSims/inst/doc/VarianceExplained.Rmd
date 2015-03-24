@@ -43,6 +43,8 @@ library(diseaseSims)
 help(getRiskVariantMatrix)
 ~~~
 
+Here is the script:
+
 ~~~{r}
 library(diseaseSims)
 library(dplyr)
