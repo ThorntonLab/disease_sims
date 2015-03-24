@@ -10,7 +10,6 @@
                 rv[P,3]=mm[i,3]
             }
         ##Courtesy of http://stackoverflow.com/questions/23340150/using-dplyr-window-functions-to-make-trailing-values
-        #as.data.frame(rv) %>%
         rv %>%
             mutate(dummy = cumsum(0 + !is.na(V2))) %>%
                 group_by(dummy,add=TRUE) %>%
