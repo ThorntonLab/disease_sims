@@ -1,8 +1,8 @@
 .fillvpv1matrix = function(mm,twoN)
     {
         require(dplyr)
-        rv = matrix(data=NA,ncol=3,nrow=twoN)
-        rv[,1] = (1:twoN)/twoN
+        rv = data.frame((1:twoN)/twoN,NA,NA)
+        colnames(rv) <- c("V1","V2","V3")
         for( i in 1:nrow(mm) )
             {
                 P = mm[i,1]*twoN
@@ -10,7 +10,8 @@
                 rv[P,3]=mm[i,3]
             }
         ##Courtesy of http://stackoverflow.com/questions/23340150/using-dplyr-window-functions-to-make-trailing-values
-        as.data.frame(rv) %>%
+        #as.data.frame(rv) %>%
+        rv %>%
             mutate(dummy = cumsum(0 + !is.na(V2))) %>%
                 group_by(dummy,add=TRUE) %>%
                     mutate(filled = nth(V2,1)) %>%
