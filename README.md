@@ -47,6 +47,10 @@ The R package has the following additional dependencies:
 2. [dplyr](http://cran.r-project.org/web/packages/dplyr/index.html)
 3. [buRden](http://github.com/molpopgen/buRden)
 
+The following packages are suggested:
+
+1. [SparseM](http://cran.r-project.org/web/packages/SparseM/index.html)
+
 ###Vanilla instructions for installing the R package
 
 Once the above dependencies are accounted for,
