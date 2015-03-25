@@ -1,6 +1,5 @@
 .fillvpv1matrix = function(mm,twoN)
     {
-        require(dplyr)
         rv = data.frame((1:twoN)/twoN,NA,NA)
         colnames(rv) <- c("V1","V2","V3")
         for( i in 1:nrow(mm) )
