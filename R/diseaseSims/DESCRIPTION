@@ -9,7 +9,8 @@ License: GPL
 Imports:
     Rcpp (>= 0.11.0),
     dplyr,
-    buRden (>= 0.1.0)
+    buRden (>= 0.1.0),
+    knitr
 Suggests:
     SparseM
 LinkingTo: Rcpp
