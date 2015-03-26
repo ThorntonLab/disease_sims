@@ -1,4 +1,4 @@
-bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control make_case_controlEW chksimoutput phenoburden sfs sfsSample vxv1 riskmatrix
+bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control make_case_controlEW chksimoutput phenoburden sfs riskmatrix sampleSFS
 
 noinst_LTLIBRARIES=libcommon.la
 lib_LTLIBRARIES=libdiseaseSimsHelper.la
@@ -16,16 +16,14 @@ chksimoutput_SOURCES=chksimoutput.cc simindex.cc
 phenoburden_SOURCES=phenoburden.cc
 #CCburden_SOURCES=CCburden.cc readCC.cc
 sfs_SOURCES=sfs.cc readSimOutput.cc
-sfsSample_SOURCES=sfsSample.cc
-vxv1_SOURCES=vxv1.cc
 riskmatrix_SOURCES=riskmatrix.cc
+sampleSFS_SOURCES=sampleSFS.cc
 # atomic_locker/atomic_locker
 
 #esm_chisq_zscore_LDFLAGS=-pthread
 make_case_control_LDADD=libcommon.la
 make_case_controlEW_LDADD=libcommon.la
 riskmatrix_LDADD=libcommon.la
-vxv1_LDADD=libcommon.la
 
 AM_CPPFLAGS=-W -Wall -I.
 
