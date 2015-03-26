@@ -52,6 +52,8 @@ AC_CHECK_HEADER(boost/container/vector.hpp,, [AC_MSG_ERROR([boost/container/vect
 AC_CHECK_HEADER(boost/container/list.hpp,,  [AC_MSG_ERROR([boost/container/vector.hpp not found])])
 AC_CHECK_HEADER(boost/interprocess/sync/file_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/file_lock.hpp not found])])
 AC_CHECK_HEADER(boost/interprocess/sync/scoped_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/scoped_lock.hpp not found])])
+AC_CHECK_HEADER([boost/accumulators/statistics/stats.hpp],,[AC_MSG_ERROR([boost/accumulators/statustics/stats.hpp not found])])
+AC_CHECK_HEADER([boost/accumulators/statistics/mean.hpp],,[AC_MSG_ERROR([boost/accumulators/statistics/mean.hpp not found])])
 AC_CHECK_HEADER(gsl/gsl_rng.h,,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
 AC_CHECK_HEADER(gsl/gsl_randist.h,,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])
 AC_CHECK_HEADER(zlib.h,,[AC_MSG_ERROR([zlib.h not found.  zlib >= 1.2.5 is requred])])
