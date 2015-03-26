@@ -129,8 +129,8 @@ int main(int argc, char **argv )
   for ( unsigned i = 0; i <params.reps; ++i ) {
   
     read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
-    vector<unsigned> nmom(diploids.size());
-    vector<unsigned> ndad(diploids.size());
+    vector<unsigned long> nmom(diploids.size());
+    vector<unsigned long> ndad(diploids.size());
     vector<double> emom(diploids.size());
     vector<double> edad(diploids.size());
     for( unsigned j = 0 ; j < diploids.size() ; ++j )
