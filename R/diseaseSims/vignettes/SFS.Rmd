@@ -9,6 +9,10 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+# Site-frequency spectrums
+
+The function "sfs" works for both samples and the entire population.
+
 ~~~{r}
 library(diseaseSims)
 library(dplyr)
