@@ -19,6 +19,8 @@
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/statistics/skewness.hpp>
+#include <boost/accumulators/statistics/kurtosis.hpp>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <simindex.hpp>
@@ -86,7 +88,7 @@ popparams parse_command_line(const int & argc, char ** argv)
 {
   popparams rv;
 
-  options_description desc("Summarize genetic burden from TFL2013_ind");
+  options_description desc("Summarize genetic burden from TFL2013");
 
   desc.add_options()
     ("help,h", "Produce help message")
@@ -106,16 +108,6 @@ popparams parse_command_line(const int & argc, char ** argv)
       exit(0);
     }
 
-  if( !vm.count("popfile") )
-    {
-      cerr << "Error, popfile not specified\n";
-      exit(EXIT_FAILURE);
-    }
-  if( !vm.count("ofile") )
-    {
-      cerr << "Error, output file not specificed\n";
-      exit(EXIT_FAILURE);
-    }
   return rv;
 };
 
@@ -132,15 +124,15 @@ int main(int argc, char **argv )
   gzFile gzin = gzopen(params.popfile.c_str(),"rb");
   ofstream output;
   output.open(params.ofile.c_str());
-  output << "mat_mean_nmut"<<' '<< "mat_var_nmut"<<' '
-	 <<"pat_mean_nmut"<<' '<<"pat_var_nmut"<<' '
-	 << "mat_mean_eff"<<' '<< "mat_var_eff"<<' '
-	 <<"pat_mean_eff"<<' '<<"pat_var_eff" <<'\n';
+  output << "mat_mean_nmut"<<' '<< "mat_var_nmut"<<' '<<"mat_skew_nmut"<<' '<<"mat_kurt_nmut" <<' '
+	 <<"pat_mean_nmut"<<' '<<"pat_var_nmut"<<' '<<"pat_skew_nmut"<<' '<<"pat_kurt_nmut" <<' '
+	 << "mat_mean_eff"<<' '<< "mat_var_eff"<<' '<<"mat_skew_eff"<<' '<<"mat_kurt_eff" <<' '
+	 <<"pat_mean_eff"<<' '<<"pat_var_eff" <<' '<<"pat_skew_eff"<<' '<<"pat_kurt_eff" <<'\n';
   for ( unsigned i = 0; i <params.reps; ++i ) {
   
     read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
-    vector<unsigned long> nmom(diploids.size());
-    vector<unsigned long> ndad(diploids.size());
+    vector<unsigned> nmom(diploids.size());
+    vector<unsigned> ndad(diploids.size());
     vector<double> emom(diploids.size());
     vector<double> edad(diploids.size());
     for( unsigned j = 0 ; j < diploids.size() ; ++j )
@@ -154,22 +146,22 @@ int main(int argc, char **argv )
 	for( const auto & ptr : diploids[j].first->smutations ){ emom[j] += ptr->s;}
 	for( const auto & ptr : diploids[j].second->smutations ){ edad[j] += ptr->s;}
       }
-    accumulator_set<double, stats<tag::mean, tag::variance > > nmacc;
+    accumulator_set<double, stats<tag::mean, tag::variance, tag::skewness, tag::kurtosis > > nmacc;
     for_each(nmom.begin(),nmom.end(),bind<void>(ref(nmacc),_1));
     
-    accumulator_set<double, stats<tag::mean, tag::variance > > ndacc;
+    accumulator_set<double, stats<tag::mean, tag::variance, tag::skewness, tag::kurtosis > > ndacc;
     for_each(ndad.begin(),ndad.end(),bind<void>(ref(ndacc),_1));
 
-    accumulator_set<double, stats<tag::mean, tag::variance > > emacc;
+    accumulator_set<double, stats<tag::mean, tag::variance, tag::skewness, tag::kurtosis > > emacc;
     for_each(emom.begin(),emom.end(),bind<void>(ref(emacc),_1));
 
-    accumulator_set<double, stats<tag::mean, tag::variance > > edacc;
+    accumulator_set<double, stats<tag::mean, tag::variance, tag::skewness, tag::kurtosis > > edacc;
     for_each(edad.begin(),edad.end(),bind<void>(ref(edacc),_1));
 
-    output << mean( nmacc ) <<' '<< variance(nmacc) <<' '
-	   << mean( nmacc ) <<' '<< variance(ndacc) <<' '
-	   << mean( emacc ) <<' '<< variance(emacc) <<' '
-	   << mean( edacc ) <<' '<< variance(edacc) <<'\n';
+    output << mean( nmacc ) <<' '<< variance(nmacc) <<' '<< skewness(nmacc) <<' '<< kurtosis(nmacc) <<' '
+	   << mean( nmacc ) <<' '<< variance(ndacc) <<' '<< skewness(ndacc) <<' '<< kurtosis(ndacc) <<' '
+	   << mean( emacc ) <<' '<< variance(emacc) <<' '<< skewness(emacc) <<' '<< kurtosis(emacc) <<' '
+	   << mean( edacc ) <<' '<< variance(edacc) <<' '<< skewness(edacc) <<' '<< kurtosis(edacc) <<'\n';
     
   }
   gzclose(gzin);
