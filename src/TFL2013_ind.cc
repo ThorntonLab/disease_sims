@@ -11,90 +11,137 @@
 #include <fstream>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
-#include <boost/program_options.hpp>
 
 #include <zlib.h>
 
+#include <TFL2013_ind_params.hpp>
 #include <diseaseSims/mutation_with_age.hpp>
 #include <TFL_fitness_models.hpp>
 
 using namespace std;
-using namespace boost::program_options;
 using namespace boost::interprocess;
 using namespace KTfwd;
 
-//The mutation model
-struct mutation_model
-{
-  typedef TFLmtype result_type;
-  inline result_type operator()( gsl_rng * r, const unsigned int & ttl_generations,
-				 const double & s, const double & ud, const double & un,
-				 lookup_table_type * lookup,
-				 const bool dist_effects = false) const
-  {
-    double pos = gsl_rng_uniform(r);
-    while(lookup->find(pos) != lookup->end())
-      {
-	pos = gsl_rng_uniform(r);
-      }
-    lookup->insert(pos);
-    if( gsl_rng_uniform(r) <= ud/(ud+un) )
-      {
-	if( ! dist_effects )
-	  {
-	    return TFLmtype(pos,s,1,ttl_generations,'A',false);
-	  }
-	else
-	  {
-	    return TFLmtype(pos,gsl_ran_exponential(r,s),1,ttl_generations,'A',false);
-	  }
-      }
-    return TFLmtype(pos,0.,1,ttl_generations,'S',true);
-  }
-};
+//"tags" for the mutation model
+struct mut_model_tag {};
+struct fixed_tag : mut_model_tag {};
+struct dist_tag : mut_model_tag {};
+struct ew_tag : mut_model_tag {};  //Eyre-Walker 2010
 
-//fitness models
-enum class MODEL { GENE_RECESSIVE = 0, GENE_ADDITIVE, MULTIPLICATIVE, POPGEN };
+//The mutation model -- old version
+// struct mutation_model
+// {
+//   typedef TFLmtype result_type;
+//   inline result_type operator()( gsl_rng * r, const unsigned int & ttl_generations,
+//   				 const double & s, const double & ud, const double & un,
+//   				 lookup_table_type * lookup,
+//   				 const bool dist_effects = false) const
+//   {
+//     double pos = gsl_rng_uniform(r);
+//     while(lookup->find(pos) != lookup->end())
+//       {
+// 	pos = gsl_rng_uniform(r);
+//       }
+//     lookup->insert(pos);
+//     if( gsl_rng_uniform(r) <= ud/(ud+un) )
+//       {
+// 	if( ! dist_effects )
+// 	  {
+// 	    return TFLmtype(pos,s,1,ttl_generations,'A',false);
+// 	  }
+// 	else
+// 	  {
+// 	    return TFLmtype(pos,gsl_ran_exponential(r,s),1,ttl_generations,'A',false);
+// 	  }
+//       }
+//     return TFLmtype(pos,0.,1,ttl_generations,'S',true);
+//   }
+// };
 
-struct simparams
-{
-  unsigned N,N2,ngens_burnin,ngens_evolve,ngens_evolve_growth,replicate_no,seed;
-  double mu_disease,mu_neutral,littler,s,sd,sd_s,optimum,dominance;
-  bool dist_effects;
-  MODEL model;
-  string indexfile, hapfile, phenofile, effectsfile ;
-  simparams(void);
-};
+//New version, tag/dispatch model
 
-simparams::simparams(void) : N(20000),N2(20000),
-			     ngens_burnin(0),
-			     ngens_evolve(160000),
-			     ngens_evolve_growth(0),
-			     replicate_no(0),
-			     seed(0),
-			     mu_disease(0.000125),
-			     mu_neutral(0.00125),
-			     littler(0.00125),
-			     s(0.1),
-			     sd(0.075),
-			     sd_s(1),
-			     optimum(0.),
-			     dominance(0.),
-			     dist_effects(true),
-			     model( MODEL::GENE_RECESSIVE ),
-			     indexfile(string()),
-			     hapfile(string()),
-			     phenofile(string()),
-			     effectsfile(string())
+inline double get_unique_pos(gsl_rng * r, lookup_table_type * lookup)
 {
+  double pos = gsl_rng_uniform(r);
+  while(lookup->find(pos) != lookup->end())
+    {
+      pos = gsl_rng_uniform(r);
+    }
+  lookup->insert(pos);
+  return pos;
 }
 
-simparams parse_command_line(const int & argc,
-			     char ** argv);
+/*
+  This is a nonsensical version of the function. Essentially a place-holder
+  for the explicit speclizations that come later.
+ */
+template<typename tag_type>
+TFLmtype mut_model_details(gsl_rng * r, const unsigned int & ttl_generations,
+			   const mut_model_params & mmp,
+			   lookup_table_type * lookup)
+{
+  //Return a nonsensical value that will definitely cause assertions to fail, etc. :)
+  return TFLmtype(-1.,-1.,numeric_limits<unsigned>::max(),numeric_limits<unsigned>::max(),'Z',true);
+}
+
+template<>
+inline TFLmtype mut_model_details<fixed_tag>(gsl_rng * r, const unsigned int & ttl_generations,
+					     const mut_model_params & mmp,
+					     lookup_table_type * lookup)
+{
+  double pos = get_unique_pos(r,lookup);
+  if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
+    {
+      return TFLmtype(pos,mmp.s,1,ttl_generations,'A',false);      
+    }
+  return TFLmtype(pos,0.,1,ttl_generations,'S',true);
+}
+
+template<>
+inline TFLmtype mut_model_details<dist_tag>(gsl_rng * r, const unsigned int & ttl_generations,
+					    const mut_model_params & mmp,
+					    lookup_table_type * lookup)
+{
+  double pos = get_unique_pos(r,lookup);
+  if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
+    {
+      return TFLmtype(pos,gsl_ran_exponential(r,mmp.s),1,ttl_generations,'A',false);
+    }
+  return TFLmtype(pos,0.,1,ttl_generations,'S',true);
+}
+
+template<>
+inline TFLmtype mut_model_details<ew_tag>(gsl_rng * r, const unsigned int & ttl_generations,
+					  const mut_model_params & mmp,
+					  lookup_table_type * lookup)
+{
+  double pos = get_unique_pos(r,lookup);
+  if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
+    {
+      //4Ns ~ \Gamma with shape mmp.shape and mean mmp.s, so s = 4Ns/4N...
+      double s = gsl_ran_gamma(r,mmp.shape,mmp.s/mmp.shape)/(4.*double(mmp.N_ancestral));
+      return TFLmtype(pos,s,1,ttl_generations,'A',false);
+    }
+  return TFLmtype(pos,0.,1,ttl_generations,'S',true);
+}
+
+template<typename tag_type>
+TFLmtype mut_model2(gsl_rng * r, const unsigned int & ttl_generations,
+		    const mut_model_params & mmp,
+		    lookup_table_type * lookup)
+{
+  static_assert(std::is_base_of<mut_model_tag,tag_type>::value,"tag_type must be derived from mut_model_tag");
+  return mut_model_details<tag_type>(r,ttl_generations,mmp,lookup);
+}
 
 int main(int argc, char ** argv)
 {
   simparams params = parse_command_line(argc,argv);
+  if( params.verbose )
+    {
+      cerr << params << '\n';
+      exit(EXIT_SUCCESS);
+    }
 
   //Determine growth rate under exponential growth model.
   double G = 0.;
@@ -121,6 +168,18 @@ int main(int argc, char ** argv)
 
   std::function<double(void)> recmap = std::bind(gsl_rng_uniform,r);
 
+  std::function<TFLmtype(mlist *)> MMODEL = std::bind(mut_model2<fixed_tag>,r,ttl_gen,params.mmp,&lookup);
+
+  unsigned N_current = params.N;
+  unsigned N_next = N_current;
+
+  //Critical: mmp is getting bound to policies here, so we need to set the pointer to current N PRIOR to binding
+  params.mmp.N_ancestral = params.N;
+  if(params.mmp.dist_effects)
+    MMODEL = std::bind(mut_model2<dist_tag>,r,ttl_gen,params.mmp,&lookup);
+  if(params.model == MODEL::EYREWALKER)
+    MMODEL = std::bind(mut_model2<ew_tag>,r,ttl_gen,params.mmp,&lookup);
+
   for( generation = 0; generation < params.ngens_burnin; ++generation,++ttl_gen )
     {
       //Evolution w/no deleterious mutations and no selection.
@@ -129,8 +188,8 @@ int main(int argc, char ** argv)
 			    &diploids,
 			    &mutations,
 			    params.N,
-			    params.mu_neutral,
-			    std::bind(mutation_model(),r,ttl_gen,params.s,0.,params.mu_neutral,&lookup,params.dist_effects),
+			    params.mmp.mu_neutral,
+			    MMODEL,
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 				      &gametes,
 				      params.littler,
@@ -142,7 +201,7 @@ int main(int argc, char ** argv)
 			    std::bind(KTfwd::mutation_remover(),std::placeholders::_1,0,2*params.N));
       KTfwd::remove_fixed_lost(&mutations,&fixations,&fixation_times,&lookup,ttl_gen,2*params.N);
     }
-  unsigned N_current = params.N;
+
 
   //Fitness model for phase w/selection.  The default is the recessive model of TFL 2013
   std::function<double(const glist::const_iterator &,
@@ -150,7 +209,7 @@ int main(int argc, char ** argv)
 
   if( params.model == MODEL::GENE_ADDITIVE )
     {
-      dipfit = std::bind(TFL2013_additive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,0.,r);
+      dipfit = std::bind(TFL2013_additive(),std::placeholders::_1,std::placeholders::_2,params.sd,params.sd_s,params.optimum,r);
     }
   else if( params.model == MODEL::MULTIPLICATIVE )
     {
@@ -162,6 +221,10 @@ int main(int argc, char ** argv)
       dipfit = std::bind(popgen_disease_effect_to_fitness(),std::placeholders::_1,std::placeholders::_2,params.dominance,
 			 params.sd,params.sd_s,params.optimum,r);
     }
+  else if ( params.model == MODEL::EYREWALKER )
+    {
+      dipfit = std::bind(EWfitness(),std::placeholders::_1,std::placeholders::_2);
+    }
 
   for( generation = 0; generation < params.ngens_evolve; ++generation,++ttl_gen )
     {
@@ -171,8 +234,8 @@ int main(int argc, char ** argv)
 			    &diploids,
 			    &mutations,
 			    params.N,
-			    params.mu_disease+params.mu_neutral,
-			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&lookup,params.dist_effects),
+			    params.mmp.mu_disease+params.mmp.mu_neutral,
+			    MMODEL,
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 				      &gametes,
 				      params.littler,
@@ -187,15 +250,15 @@ int main(int argc, char ** argv)
   //Exp. growth phase w/disease model
   for( generation = 0 ; generation < params.ngens_evolve_growth ; ++generation,++ttl_gen )
     {
-      unsigned N_next = round( params.N*pow(G,generation+1) );
+      N_next = round( params.N*pow(G,generation+1) );
       wbar = sample_diploid(r,
 			    &gametes,
 			    &diploids,
 			    &mutations,
 			    N_current,
 			    N_next,
-			    params.mu_disease+params.mu_neutral,
-			    std::bind(mutation_model(),r,ttl_gen,params.s,params.mu_disease,params.mu_neutral,&lookup,params.dist_effects),
+			    params.mmp.mu_disease+params.mmp.mu_neutral,
+			    MMODEL,
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
 				      &gametes,
 				      params.littler,
@@ -217,46 +280,49 @@ int main(int argc, char ** argv)
   //Write out the phenotypes
   ostringstream phenobuffer;
   unsigned nphenos = diploids.size();
-  phenobuffer.write( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
-  for( unsigned i = 0 ; i < diploids.size() ; ++i )
+  if (params.model != MODEL::EYREWALKER) 
     {
-      if (params.model == MODEL::GENE_RECESSIVE) 
+      phenobuffer.write( reinterpret_cast<char *>(&nphenos), sizeof(unsigned) );
+      for( unsigned i = 0 ; i < diploids.size() ; ++i )
 	{
-	  pair<double,double> pheno = TFL2013_recessive_disease_effect()(diploids[i].first,
-									 diploids[i].second,
-									 params.sd,
-									 r);
-	  double x = pheno.first;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	  x = pheno.second;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	}
-      if (params.model == MODEL::GENE_ADDITIVE) 
-	{
-	  pair<double,double> pheno = TFL2013_additive_disease_effect()(diploids[i].first,
-									diploids[i].second,
-									params.sd,
-									r);
-	  double x = pheno.first;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	  x = pheno.second;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	}
-      else if (params.model == MODEL::MULTIPLICATIVE) 
-	{
-	  double x = multiplicative_phenotype()(diploids[i].first,
-						diploids[i].second);
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	  x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	}
-      else if (params.model == MODEL::POPGEN)
-	{
-	  double x = popgen_phenotype()(diploids[i].first,
-					diploids[i].second,params.dominance);
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
-	  x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
-	  phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	  if (params.model == MODEL::GENE_RECESSIVE) 
+	    {
+	      pair<double,double> pheno = TFL2013_recessive_disease_effect()(diploids[i].first,
+									     diploids[i].second,
+									     params.sd,
+									     r);
+	      double x = pheno.first;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	      x = pheno.second;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	    }
+	  if (params.model == MODEL::GENE_ADDITIVE) 
+	    {
+	      pair<double,double> pheno = TFL2013_additive_disease_effect()(diploids[i].first,
+									    diploids[i].second,
+									    params.sd,
+									    r);
+	      double x = pheno.first;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	      x = pheno.second;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	    }
+	  else if (params.model == MODEL::MULTIPLICATIVE) 
+	    {
+	      double x = multiplicative_phenotype()(diploids[i].first,
+						    diploids[i].second);
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	      x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	    }
+	  else if (params.model == MODEL::POPGEN)
+	    {
+	      double x = popgen_phenotype()(diploids[i].first,
+					    diploids[i].second,params.dominance);
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	      x = (params.sd > 0.) ? gsl_ran_gaussian(r,params.sd) : 0.;
+	      phenobuffer.write( reinterpret_cast< char * >(&x), sizeof(double) );
+	    }
 	}
     }
 
@@ -292,19 +358,24 @@ int main(int argc, char ** argv)
     {
       cerr << "Error writing population to " 
 	   << params.hapfile << '\n';
-      exit(10);
+      exit(EXIT_FAILURE);
     }
   gzclose(gzout);
 
-  gzout = gzopen(params.phenofile.c_str(),"a");
-  int phenowritten = gzwrite(gzout,phenobuffer.str().c_str(),phenobuffer.str().size());
-  if ( ! phenowritten && !phenobuffer.str().empty() )
+  int phenowritten = -1;
+  if( params.model != MODEL::EYREWALKER )
     {
-      cerr << "Error writing population to " 
-	   << params.phenofile << '\n';
-      exit(10);
+      gzout = gzopen(params.phenofile.c_str(),"a");
+      phenowritten = gzwrite(gzout,phenobuffer.str().c_str(),phenobuffer.str().size());
+      if ( ! phenowritten && !phenobuffer.str().empty() )
+	{
+	  cerr << "Error writing population to " 
+	       << params.phenofile << '\n';
+	  exit(EXIT_FAILURE);
+	}
+      gzclose(gzout);
     }
-  gzclose(gzout);
+
 
   gzout = gzopen(params.effectsfile.c_str(),"a");
   int effectwritten = gzwrite(gzout,effectstream.str().c_str(),effectstream.str().size());
@@ -312,9 +383,10 @@ int main(int argc, char ** argv)
     {
       cerr << "Error writing population to " 
 	   << params.effectsfile << '\n';
-      exit(10);
+      exit(EXIT_FAILURE);
     }
   gzclose(gzout);
+    
 
   //Now we can write to the index file
   indexstream << params.replicate_no << ' ' << effectwritten << ' '
@@ -324,96 +396,4 @@ int main(int argc, char ** argv)
   flock.unlock();
   indexstream.close();
   exit(0);
-}
-
-simparams parse_command_line(const int & argc,
-			     char ** argv)
-{
-  simparams rv;
-  options_description desc("Simulate the genetic model from Thornton, Foran, and Long (2013) PLoS Genetics 9(2): e1003258.\nUsage: TFL2013 -h to see help");
-  desc.add_options()
-    ("help,h", "Produce help message")
-    ("popsize1,1", value<unsigned>(&rv.N)->default_value(20000), "Diploid population number")
-    ("popsize2,2", value<unsigned>(&rv.N2)->default_value(20000), "Population size to grow towards")
-    ("burnin",value<unsigned>(&rv.ngens_burnin)->default_value(0), "No. generations to evolve with neutral mutations and no selection")
-    ("generations,g",value<unsigned>(&rv.ngens_evolve)->default_value(160000), "No. generations to evolve with neutral mutations, deleterious mutations, and selection")
-    ("generation-growth,G",value<unsigned>(&rv.ngens_evolve_growth)->default_value(0), "No. generation to grow exponentially from population size popsize1 to popsize2. Default is 0, meaning growth does not happen")
-    ("replicate,R",value<unsigned>(&rv.replicate_no)->default_value(0),"Label of this replicate.  Must be >= 0")
-    ("neutral,n",value<double>(&rv.mu_neutral)->default_value(0.00125),"Neutral mutation rate (per region per generation")
-    ("causative,c",value<double>(&rv.mu_neutral)->default_value(0.000125),"Mutation rate to causative mutations(per region per generation")
-    ("recrate,r",value<double>(&rv.littler)->default_value(0.00125),"Recombination rate (per diploid per region per generation")
-    ("esize,e",value<double>(&rv.s)->default_value(0.1),"Effect size of causative mutation.  Mean of exponential dist by default.  Constant effect size if dist 0 or -d 0 is used")
-    ("noise",value<double>(&rv.sd)->default_value(0.075),"Std. deviation in Gaussian noise to be added to phenotype")
-    ("sigma",value<double>(&rv.sd_s)->default_value(1.0),"Std. deviation in Gaussian fitness function")
-    ("constant,C","Model constant effect size.  Otherwise, exponential distribution is used")
-    ("multiplicative,m","Use multiplicative model of Risch and colleagues.  Default is Thornton, Foran & Long (2013) recessive model")
-    ("popgen,F","Use popgen-like multiplicative model to calculate trait value")
-    ("dominance,d",value<double>(&rv.dominance)->default_value(0.0),"Assign dominance for popgen-like model. Not used for any other model and will be ignored.")
-    ("additive,a","Use additive model to calculate phenotype.  Default is Thornton, Foran & Long (2013) recessive model")
-    ("indexfile,i",value<string>(&rv.indexfile)->default_value(string()),"Name of index file")
-    ("popfile,p",value<string>(&rv.hapfile)->default_value(string()),"Name of output file for population")
-    ("phenotypes,P",value<string>(&rv.phenofile)->default_value(string()),"Name of output file for phenotypes")
-    ("effectsfile,E",value<string>(&rv.effectsfile)->default_value(string()),"Name of output file for effect sizes of causative mutations")
-    ("seed,S",value<unsigned>(&rv.seed)->default_value(0),"Random number seed (unsigned integer)")
-    ("optimum",value<double>(&rv.optimum)->default_value(0.),"At onset of exponential growth, change optimium value of phenotype.  Default is no change.")
-    ;
-
-  variables_map vm;
-  store(parse_command_line(argc, argv, desc), vm);
-  notify(vm);
-
-  if(argc == 1 || vm.count("help"))
-    {
-      cerr << desc << '\n';
-      exit(0);
-    }
-
-  if (vm.count("multiplicative"))
-    {
-      rv.model = MODEL::MULTIPLICATIVE;
-    }
-  if (vm.count("additive"))
-    {
-      if( rv.model != MODEL::GENE_RECESSIVE )
-	{
-	  cerr << "Error, it looks like multiple phenotype models have been chosen.  Please choose one!\n";
-	  exit(10);
-	}
-      rv.model = MODEL::GENE_ADDITIVE;
-    }
-  if( vm.count("popgen") )
-    {
-      if( rv.model != MODEL::GENE_RECESSIVE )
-	{
-	  cerr << "Error, it looks like multiple phenotype models have been chosen.  Please choose one!\\
-n";    
-	  exit(10);
-	}
-      rv.model = MODEL::POPGEN;
-    }
-
-  if( vm.count("constant") )
-    {
-      rv.dist_effects = false;
-    }
-  if( rv.indexfile.empty() || rv.hapfile.empty() || rv.phenofile.empty() )
-    {
-      if (rv.indexfile.empty())
-	{
-	  cerr << "Error: index file name required.  Use -h to see options\n";
-	}
-
-      if( rv.hapfile.empty() )
-	{
-	  cerr << "Error: population output file name required.  Use -h to see options\n";
-	}
-	
-      if( rv.phenofile.empty() )
-	{
-	  cerr << "Error: phenotypes output file name required.  Use -h to see options\n";
-	}
-      exit(10);
-    }
-
-  return rv;
 }

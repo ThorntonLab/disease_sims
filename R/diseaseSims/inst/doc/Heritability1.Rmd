@@ -1,0 +1,35 @@
+---
+title: "Calculating heritability from simulation output"
+author: "Kevin Thornton"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Calculating heritability from simulation output}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Heritability in the entire population
+
+Ingredients:
+
+1. index.txt is the index file corresponding to the simulation output
+2. phenotypes.bin.gz is the file containing the phenotypes of the individuals
+
+To get the distribution of heritabilities in the entire population:
+
+~~~{r}
+idx=read.table("index.txt")
+##open in binary mode...
+f=gzfile("phenotypes.bin.gz","rb")
+
+h2=array()
+for(i in 1:nrow(idx))
+{
+	N = readBin(f,"integer",1)
+	m = matrix(readBin(f,"numeric",2*N),ncol=2,byrow=TRUE)
+	##column 1 = genetic component, column2 = random component
+	h2[i]=var(m[,1])/( var(m[,1]) + var(m[,2]) )
+}
+##Now, you can get the mean, etc...
+~~~

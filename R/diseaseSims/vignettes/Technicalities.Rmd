@@ -1,0 +1,32 @@
+---
+title: "Technical details"
+author: "Kevin Thornton"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Technical details (for developers)}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Introduction
+
+This vignette gives an overview of the implementation of this pacakge.
+
+Anyone who wants to mess around with how the diseaseSims R/Rcpp package is implemented has several places where they need to look.  The diseaseSims package is intimately dependant upon the simulation package.  Thus, the R pacakge requires that the simulation package be installed first because:
+
+* it depends on headers from the simulation package
+* it links to a dynamic library from the simuation pacakge.
+
+While this situation looks complex (and it is), we do this with good reason: __we implement things once and only once, rather than having to maintain on version of a function for the simulation, and another for the R package.__
+
+## Source code layout
+
+Here are the directories:
+
+* disease_sims = The main directory for the entire repo (simulation + R/Rcpp packages)
+* disease_sims/diseaseSims = directory containing C++ (not Rcpp!) header files in common between simulation and R/Rcpp package
+* disease_sims/src = source code for simulation package and libdiseaseSimsHelper, a dynamic library also used by the R/Rcpp package
+* disease_sims/R = where all R-related stuff is
+* diseaes_sims/R/diseaseSims = the R/Rcpp pacakge contents
+

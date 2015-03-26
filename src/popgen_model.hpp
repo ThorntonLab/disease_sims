@@ -1,43 +1,7 @@
 #ifndef __POPGEN_MODEL_HPP__
 #define __POPGEN_MODEL_HPP__
 
-#include <fwdpp/fitness_models.hpp>
-
-//Popgen-like model for trait values
-
-struct popgen_phenotype_updater_hom
-{
-  typedef void result_type;
-  template<typename iterator_type>
-  inline void operator()(double & fitness, const iterator_type & m1) const
-  {
-    fitness *= (1. + m1->s);
-  }
-};
-
-struct popgen_phenotype_updater_het
-{
-  typedef void result_type;
-  template<typename iterator_type>
-  inline void operator()(double & fitness, const iterator_type & m1,const double & dominance) const
-  {
-    fitness *= ( 1. + dominance*m1->s );
-  }
-};
-
-struct popgen_phenotype
-{
-  typedef double result_type;
-  template< typename iterator_type>
-  inline double operator()(const iterator_type & g1, const iterator_type & g2,
-			   const double & dominance) const
-  {
-    return KTfwd::site_dependent_fitness()(g1,g2,
-					   std::bind(popgen_phenotype_updater_hom(),std::placeholders::_1,std::placeholders::_2),
-					   std::bind(popgen_phenotype_updater_het(),std::placeholders::_1,std::placeholders::_2,dominance),
-					   1.);
-  }
-};
+#include <diseaseSims/traitValues.hpp>
 
 struct popgen_disease_effect_to_fitness
 {

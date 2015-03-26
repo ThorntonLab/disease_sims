@@ -15514,6 +15514,22 @@ else
 fi
 
 
+ac_fn_cxx_check_header_mongrel "$LINENO" "boost/accumulators/statistics/stats.hpp" "ac_cv_header_boost_accumulators_statistics_stats_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_accumulators_statistics_stats_hpp" = xyes; then :
+
+else
+  as_fn_error $? "boost/accumulators/statustics/stats.hpp not found" "$LINENO" 5
+fi
+
+
+ac_fn_cxx_check_header_mongrel "$LINENO" "boost/accumulators/statistics/mean.hpp" "ac_cv_header_boost_accumulators_statistics_mean_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_accumulators_statistics_mean_hpp" = xyes; then :
+
+else
+  as_fn_error $? "boost/accumulators/statistics/mean.hpp not found" "$LINENO" 5
+fi
+
+
 ac_fn_cxx_check_header_mongrel "$LINENO" "gsl/gsl_rng.h" "ac_cv_header_gsl_gsl_rng_h" "$ac_includes_default"
 if test "x$ac_cv_header_gsl_gsl_rng_h" = xyes; then :
 

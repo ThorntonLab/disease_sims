@@ -1,11 +1,11 @@
 AC_PREREQ(2.59)
 AC_INIT([diseaseSims], 0.1.0)
-AC_CONFIG_MACRO_DIR([m4])
+dnl AC_CONFIG_MACRO_DIR([m4])
 
 CC=`R CMD config CC`
 CPP=`R CMD config CPP`
 CFLAGS=`R CMD config CFLAGS`
-CPPFLAGS=`R CMD config CPPFLAGS` $CPPFLAGS
+CPPFLAGS="`R CMD config CPPFLAGS` $CPPFLAGS"
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_CXX
@@ -13,6 +13,9 @@ AC_LANG(C++)
 CXXFLAGS="-std=c++11 $CXXFLAGS"
 AC_CHECK_HEADER(diseaseSims/ccintermediate.hpp,,[AC_MSG_ERROR(diseaseSims headers not found -- please install)])
 AC_CHECK_HEADER(diseaseSims/mutation_with_age.hpp,,[AC_MSG_ERROR(diseaseSims headers not found -- please install)])
+AC_CHECK_HEADER(diseaseSims/traitValues.hpp,,[AC_MSG_ERROR(diseaseSims headers not found -- please install)])
+AC_CHECK_HEADER(diseaseSims/util.hpp,,[AC_MSG_ERROR(diseaseSims headers not found -- please install)])
+AC_CHECK_HEADER(fwdpp/diploid.hh,,[AC_MSG_ERROR(fwdpp headers not found -- please install)])
 AC_CHECK_HEADER(boost/interprocess/sync/file_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/file_lock.hpp not found])])
 AC_CHECK_HEADER(boost/interprocess/sync/scoped_lock.hpp,, [AC_MSG_ERROR([boost/interprocess/sync/scoped_lock.hpp not found])])
 AC_CHECK_HEADER(gsl/gsl_rng.h,,[AC_MSG_ERROR([gsl/gsl_rng.h not found.  Please install the GNU Scientific Library])])

@@ -2,49 +2,7 @@
 #define __MULTIPLICATIVE_MODEL_HPP__
 
 #include <fwdpp/fitness_models.hpp>
-
-//Define a model where phenotype is 1, 1+s, (1+s)^2 for a site, then total value is product over sites
-// struct multiplicative_phenotype_updater_hom
-// {
-//   typedef void result_type;
-//   template<typename iterator_type>
-//   inline void operator()(double & fitness, const iterator_type & m1) const
-//   {
-//     fitness *= ( std::pow(1. + m1->s,2.) );
-//   }
-// };
-
-// struct multiplicative_phenotype_updater_het
-// {
-//   typedef void result_type;
-//   template<typename iterator_type>
-//   inline void operator()(double & fitness, const iterator_type & m1) const
-//   {
-//     fitness *= ( 1. + m1->s );
-//   }
-// };
-
-struct multiplicative_phenotype
-{
-  typedef double result_type;
-  template< typename iterator_type>
-  inline double operator()(const iterator_type & g1, const iterator_type & g2) const
-  {
-    using __mtype =  typename iterator_type::value_type::mutation_list_type_iterator;
-    return KTfwd::site_dependent_fitness()(g1,g2,
-					   [](double & fitness,const __mtype & mut)
-					   {
-					     fitness *= ( std::pow(1. + mut->s,2.) ); 
-					   },
-					   [](double & fitness,const __mtype & mut)
-					   {
-					     fitness *= ( 1. + mut->s ); 
-					   },
-					   //std::bind(multiplicative_phenotype_updater_hom(),std::placeholders::_1,std::placeholders::_2),
-					   //std::bind(multiplicative_phenotype_updater_het(),std::placeholders::_1,std::placeholders::_2),
-					   1.);
-  }
-};
+#include <diseaseSims/traitValues.hpp>
 
 struct multiplicative_disease_effect_to_fitness
 {

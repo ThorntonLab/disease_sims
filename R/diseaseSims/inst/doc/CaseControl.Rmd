@@ -1,0 +1,100 @@
+---
+title: "Manipulating case-control panels"
+author: "Kevin Thornton"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Manipulating case-control panels}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Introduction
+
+This document covers:
+
+* How case/control panels are stored in R
+* Reading in pre-generated case/control panels
+* Generation of case/control panels from simulated populations
+* Analysis of case/control panels
+
+## Case/control panel layout
+
+A case/control panel is stored as a list containing the following data members:
+
+* ncontrols, which is the number of controls in the panel
+* ncases, which is the number of cases in the panel
+* neutral, which is the number of markers in the data set not affected phenotype/fitness
+* causative, which is the number of risk mutation in the data set
+* pos, which is a numeric vector of mutation positions
+* genos, which is an integer matrix of genotypes.  There are $ncontrols + ncases$ rows, and $k$ columns (1 column per marker).  The genotypes are encoded as the number of copies of the minor allele (0, 1, or 2).  The controls come before the cases, and the neutral markers before the causative markers.
+* burdens, which is an integer matrix.  There are $nontrols + ncases$ rows, and two columns.  In each column is the number of risk mutations on each haplotype.
+* phenos, which is a numeric matrix containing phenotype values for each individual.  There are $ncontrols + ncases$ rows, and two columns.  The first column is the genetic contribution to phenotype.  The second contribution is the random component.
+
+## Reading in pre-generated case/control panels
+
+Typically, we expect that users will generate panels using the make_case_control program from the disease_sims package.  That program outputs an index file containing the replicate ID number and the size (in bytes) of the case/control block and a gzipped binary file containing the panels themselves.  The R function diseaseSims::getCCblock allows the user to read data from these files:
+
+~~~{r}
+library(diseaseSims)
+
+## read in index file made by make_case_control
+idx = read.table("ccindex")
+
+## read in each panel
+OFFSET = 0
+for( i in 1:nrow(idx) )
+{
+	## Assuming data are stored in ccfile.bin.gz
+	panel = getCCblock("ccfile.bin.gz",OFFSET)
+	## Need to update the offset so that it is
+	## cumulative from the front of ccfile.bin.gz
+	OFFSET = OFFSET + idx$V2[i]
+}
+~~~
+
+## Generating case/control panels in R
+
+It is also possible to generate panels entirely within R using the exact same code that make_case_control relies on.  The relevant function is diseaseSims::sampleCCfromPop
+
+~~~{r}
+library(diseaseSims)
+help(sampleCCfromPop)
+~~~
+
+This function works from the archive of simulated populations.
+
+## Analysis of case/control panels
+
+### Allele frequencies in controls and cases
+
+~~~{r}
+maf.neutral.controls = colSums(panel$genos[1:ncontrols,1:panel$neutral])/(2*panel$ncontrols)
+maf.causative.controls = colSums(panel$genos[1:ncontrols,(panel$neutral+1):ncol(panel$genos)])/(2*panel$ncontrols)
+maf.neutral.cases = colSums(panel$genos[(ncontrols+1):nrow(panel$genos),1:panel$neutral])/(2*panel$ncontrols)
+maf.causative.cases = colSums(panel$genos[ncontrols+1):nrow(panel$genos),(panel$neutral+1):ncol(panel$genos)])/(2*panel$ncontrols)
+~~~
+
+### Association tests
+
+#### Single-marker tests
+
+The package contains a convenience function for performing single-marker logistic regressions of case/control status onto genotype:
+
+~~~{r}
+library(diseaseSims)
+help(makePVblock)
+~~~
+
+The return value of this function is the $-log_{10} p$-values of independent logistic regressions.  The data may be written to a file using another library function:
+
+~~~{r}
+library(diseaseSims)
+help(writePVblock)
+~~~
+
+While you could write these data to a file yourself, writePVblock allows access to the same file from multiple processes via file locking.
+
+#### "Burden" tests
+
+The genotype data matrix of a panel is compatible for use with our other R package, [buRden](http://github.com/molpopgen/buRden)

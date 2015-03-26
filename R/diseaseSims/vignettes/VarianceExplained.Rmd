@@ -1,0 +1,85 @@
+---
+title: "Estimating additive variance explained by risk mutations"
+author: "Kevin Thornton"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Estimating additive variance explained by risk mutations}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Introduction
+
+This vignette gives an overview on how to estimate the fraction of additive genetic variation due to risk mutations
+at frequency $\leq p$.
+
+Let's assume we have the follwing:
+
+1. index.txt is the index file output by a simulation
+2. pop.bin.gz is the file containing the simulated replicates
+
+We want to use R's aov() function to fit an additive model to all markers.  The response variable will be $G$, the
+genetic component of phenotype for each diploid.  Each diploid's genotype will be coded as 0, 1, or 2 copies of a risk mutation 
+into a matrix, $M$, whose dimensions are $N$ rows (the population size) and $k$ columns, which is the number of risk mutations (after removing 
+duplicate columns).
+
+Essentially, what is going on here is:
+
+~~~{r}
+summary(aov(G ~ ., data=as.data.frame(M)))
+~~~
+
+The relevant functions are:
+
+* diseaseSims::getRiskVariantMatrix
+* diseaseSims::vpv1aov
+
+## Example script
+This script shows the essentials of the analysis.  You may also regress actual phenotypes onto $M$.  See the help for how to do that:
+
+~~~{r}
+library(diseaseSims)
+help(getRiskVariantMatrix)
+~~~
+
+Here is the script:
+
+~~~{r}
+library(diseaseSims)
+library(dplyr)
+
+##Read in the index
+idx=read.table("index.txt")
+
+##make output file and add header
+FF=gzfile("output.gz","w")
+write(paste("rep","p","rsq","adj.rsq",sep="\t"),FF) 
+close(FF)
+
+OFFSET=0
+
+for(i in 1:nrow(idx))
+    {
+    ##Get the risk variant matrix for the population
+      XX=getRiskVariantMatrix("pop.bin.gz",OFFSET,model="additive")
+    ##Get the results of the aov analysis, and write them to output.gz
+      XX.aov = vpv1aov(XX,"output.gz",x$V1[i],append=TRUE,useSparseM=TRUE)
+      OFFSET=OFFSET+idx$V4[i]
+    }
+
+##Read in the output,
+##and plot mean var(explained) as function of frequency:
+x = fread("gunzip -c output.gz")
+x.s = x %>%
+    group_by(p) %>%
+        summarise(m.rsq = mean(rsq,na.rm=TRUE),
+                  m.adj.rsq = mean(adj.rsq))
+pdf("test.pdf",pointsize=18,height=10,width=10)
+plot(x.s$p,x.s$m.rsq,type="l",xlim=c(0,0.1),xlab="p",ylab="Vp/V1")
+lines(x.s$p,x.s$m.adj.rsq,col="red")
+dev.off()
+    
+##We can now delete the big data set if we want
+file.remove("output.gz")
+~~~
