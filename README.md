@@ -70,6 +70,36 @@ R CMD Rd2pdf diseaseSims
 
 On many systems, LD_LIBRARY_PATH may be needed to run make_case_control.
 
+# Quick-start guide for the impatient
+
+This section assumes a bash/bash-like shell.  Further, the command lines shown here are explicit, and many of the options specified below are actually just the default values.
+
+Simulate a population of N = 2,000 diploids for 8N generations, and then grow to N = 100,000 in 500 generation.  The genetic model and locus parameters are taken from Thornton et al. (2013), and the mean effect size of a risk mutation is 0.1:
+
+~~~
+TFL2013_ind -1 2000 -g 16000 -2 100000 -G 500 -n 0.00125 -c 0.000125 -r 0.00125 -e 0.1 --noise 0.075 -i simindex.txt -p popfile.bin.gz -P phenotypes.bin.gz -E effects.bin.gz -S $RANDOM
+~~~
+
+Make a case/control panel of 3,000 controls + 3,000 cases.  Cases are from the upper 10% of the distribution of phenotypes in the population, and controls are sampled from the mean +/- 0.5 standard deviations.
+
+~~~
+make_case_control -i simindex.txt -p popfile.bin.gz -P phenotypes.bin.gz -I ccindex.txt -c ccfile.bin.gz -n 3000 -N 3000 -t 0.10 --control-range 0.5 --seed $RANDOM
+~~~
+
+Get the mean site frequency spectrum for the entire population (yes, the mean will be based on a single replicate in this example);
+
+~~~
+#The output is: mutation count, no. neutral mutation, no. risk mutations
+sfs -i simindex.txt -e effects.bin.gz -o popsfs.gz
+~~~
+
+Get the mean site frequency spectrum for a sample of n = 50 chromosomes:
+
+~~~
+#the output is the neutral and risk mean SFS, respectively
+sampleSFS -i popfile.bin.gz -o sampleSFS.gz -n 50 -S $RANDOM
+~~~
+
 #The simulation programs
 
 ##TFL2013_ind
