@@ -1,4 +1,4 @@
-bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control make_case_controlEW chksimoutput phenoburden sfs riskmatrix sampleSFS genburden
+bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control make_case_controlEW chksimoutput phenoburden sfs  sampleSFS genburden
 
 noinst_LTLIBRARIES=libcommon.la
 lib_LTLIBRARIES=libdiseaseSimsHelper.la
@@ -17,14 +17,12 @@ phenoburden_SOURCES=phenoburden.cc
 genburden_SOURCES=genburden.cc
 #CCburden_SOURCES=CCburden.cc readCC.cc
 sfs_SOURCES=sfs.cc readSimOutput.cc
-riskmatrix_SOURCES=riskmatrix.cc
 sampleSFS_SOURCES=sampleSFS.cc
 # atomic_locker/atomic_locker
 
 #esm_chisq_zscore_LDFLAGS=-pthread
 make_case_control_LDADD=libcommon.la
 make_case_controlEW_LDADD=libcommon.la
-riskmatrix_LDADD=libcommon.la
 
 AM_CPPFLAGS=-W -Wall -I.
 
