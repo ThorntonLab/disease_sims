@@ -138,8 +138,8 @@ int main(int argc, char **argv )
     for( unsigned j = 0 ; j < diploids.size() ; ++j )
       {
 	//Get # of risk mutations on "maternal"/"paternal" haplotypes
-	nmom[j] = { diploids[j].first->smutations.size()};
-        ndad[j] = { diploids[j].second->smutations.size()};
+	nmom[j] =  diploids[j].first->smutations.size();
+        ndad[j] =  diploids[j].second->smutations.size();
 	
 	//Get effect sizes of each haplotype (warning--this may barf here. Untested as to whether it compiles...)
 	emom[j]={0.},edad[j]={0.};
