@@ -86,7 +86,7 @@ popparams parse_command_line(const int & argc, char ** argv)
 {
   popparams rv;
 
-  options_description desc("Summarize genetic burden from TFL2013");
+  options_description desc("Summarize genetic burden from TFL2013_ind");
 
   desc.add_options()
     ("help,h", "Produce help message")
