@@ -108,6 +108,17 @@ popparams parse_command_line(const int & argc, char ** argv)
       exit(0);
     }
 
+  if(! vm.count("popfile") )
+    {
+      cerr << "Error, no popfile specified\n";
+      exit(EXIT_FAILURE);
+    }
+
+  if(! vm.count("ofile") )
+    {
+      cerr << "Error, no output file specified\n";
+      exit(EXIT_FAILURE);
+    }
   return rv;
 };
 
