@@ -115,6 +115,19 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// sfs
+Rcpp::DataFrame sfs(const std::string& popfile, const unsigned& n, const unsigned& seed);
+RcppExport SEXP diseaseSims_sfs(SEXP popfileSEXP, SEXP nSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const std::string& >::type popfile(popfileSEXP);
+    Rcpp::traits::input_parameter< const unsigned& >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const unsigned& >::type seed(seedSEXP);
+    __result = Rcpp::wrap(sfs(popfile, n, seed));
+    return __result;
+END_RCPP
+}
 // writePVblock
 void writePVblock(const char * outfilename, const char * indexfilename, const unsigned& recordno, DataFrame pvblock, const bool& append, const bool& gzip);
 RcppExport SEXP diseaseSims_writePVblock(SEXP outfilenameSEXP, SEXP indexfilenameSEXP, SEXP recordnoSEXP, SEXP pvblockSEXP, SEXP appendSEXP, SEXP gzipSEXP) {

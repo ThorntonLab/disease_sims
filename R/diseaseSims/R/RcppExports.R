@@ -58,6 +58,19 @@ getPheno <- function(filename, offset) {
     .Call('diseaseSims_getPheno', PACKAGE = 'diseaseSims', filename, offset)
 }
 
+#' Site frequency spectra
+#' @param popfile The file containing the simulated populations
+#' @param n The desired sample size.  If n == 2N, the entire population is sampled
+#' @param seed A random number seed
+#' @return A data frame with 4 columns:
+#' @return replicate = an arbitrary sample ID.  This is NOT the same ID number as the user may have assigned when running the simulation!!
+#' @return i = the number of occurences of a mutation in the population/sample
+#' @return n = the SFS for neutral variants
+#' @return r = the SFS for risk variants
+sfs <- function(popfile, n, seed = 0L) {
+    .Call('diseaseSims_sfs', PACKAGE = 'diseaseSims', popfile, n, seed)
+}
+
 #' Write the results of an association test to a file
 #' @param outfilename Output file name
 #' @param indexfilename Index file name for the output
