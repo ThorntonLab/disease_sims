@@ -60,7 +60,6 @@ int main( int argc, char ** argv )
 {
   params options = process_argv(argc,argv);
 
-  cerr << options.normalize << '\n';
   gzFile effectsin = gzopen(options.effectfile.c_str(),"r");
 
   //data structures
