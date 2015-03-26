@@ -124,6 +124,12 @@ int main( int argc, char ** argv )
     {
       cout << obuffer.str();
     }
+  else
+    {
+      gzFile gzout = gzopen(options.outfile.c_str(),"w");
+      gzwrite(gzout,obuffer.str().c_str(),obuffer.str().size());
+      gzclose(gzout);
+    }
 
   exit(0);
 }
