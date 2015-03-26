@@ -28,7 +28,6 @@
 #include <zlib.h>
 
 #include <diseaseSims/mutation_with_age.hpp>
-#include <TFL_fitness_models.hpp>
 
 using namespace std;
 using namespace boost::program_options;
