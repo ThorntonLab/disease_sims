@@ -50,6 +50,7 @@ The R package has the following additional dependencies:
 The following packages are suggested:
 
 1. [SparseM](http://cran.r-project.org/web/packages/SparseM/index.html)
+2. [knitr](http://cran.r-project.org/web/packages/knitr/index.html)
 
 ###Vanilla instructions for installing the R package
 
