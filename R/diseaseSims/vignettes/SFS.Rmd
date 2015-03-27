@@ -33,6 +33,9 @@ sfs.norm.mean = sfs.norm %>%
                   r.norm.mean = mean(r.norm))
 
 plot(sfs.norm.mean$i,sfs.norm.mean$n.norm.mean,xlab=("Frequency (out of 100)"),
-								ylab="Proportion of mutations",ylim=c(0,0.5))
+								ylab="Proportion of mutations",
+								ylim=c(0,0.5),
+								pch=17)
 points(sfs.norm.mean$i,sfs.norm.mean$r.norm.mean,pch=18,col="red")
+legend("topright",c("Neutral","Risk"),pch=c(17,18),col=c("black","red"),bty="n")
 ```
