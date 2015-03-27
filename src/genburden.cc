@@ -28,45 +28,12 @@
 #include <zlib.h>
 
 #include <diseaseSims/mutation_with_age.hpp>
-#include <TFL_fitness_models.hpp>
 
 using namespace std;
 using namespace boost::program_options;
 using namespace boost::interprocess;
 using namespace boost::accumulators;
 using namespace KTfwd;
-
-
-//The mutation model
-struct mutation_model
-{
-  typedef TFLmtype result_type;
-  inline result_type operator()( gsl_rng * r, const unsigned int & ttl_generations,
-				 const double & s, const double & ud, const double & un,
-				 lookup_table_type * lookup,
-				 const bool dist_effects = false) const
-  {
-    double pos = gsl_rng_uniform(r);
-    while(lookup->find(pos) != lookup->end())
-      {
-	pos = gsl_rng_uniform(r);
-      }
-    lookup->insert(pos);
-    if( gsl_rng_uniform(r) <= ud/(ud+un) )
-      {
-	if( ! dist_effects )
-	  {
-	    return TFLmtype(pos,s,1,ttl_generations,'A',false);
-	  }
-	else
-	  {
-	    return TFLmtype(pos,gsl_ran_exponential(r,s),1,ttl_generations,'A',false);
-	  }
-      }
-    return TFLmtype(pos,0.,1,ttl_generations,'S',true);
-  }
-};
-
 
 struct popparams 
 {
