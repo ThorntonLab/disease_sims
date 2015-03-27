@@ -86,19 +86,7 @@ Make a case/control panel of 3,000 controls + 3,000 cases.  Cases are from the u
 make_case_control -i simindex.txt -p popfile.bin.gz -P phenotypes.bin.gz -I ccindex.txt -c ccfile.bin.gz -n 3000 -N 3000 -t 0.10 --control-range 0.5 --seed $RANDOM
 ~~~
 
-Get the mean site frequency spectrum for the entire population (yes, the mean will be based on a single replicate in this example);
-
-~~~
-#The output is: mutation count, no. neutral mutation, no. risk mutations
-sfs -i simindex.txt -e effects.bin.gz -o popsfs.gz
-~~~
-
-Get the mean site frequency spectrum for a sample of n = 50 chromosomes:
-
-~~~
-#the output is the neutral and risk mean SFS, respectively
-sampleSFS -i popfile.bin.gz -o sampleSFS.gz -n 50 -S $RANDOM
-~~~
+A lot of the other types of post-simulation processing are handled by the R package.  See the vignettes, manual, etc., for help.
 
 #The simulation programs
 
