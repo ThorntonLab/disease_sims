@@ -97,14 +97,17 @@ int writeDataFrame( const SEXP s,
   	}
       o << names[c] << '\n';
     }
+
+  vector<CharacterVector> vcv;
+  for(int c = 0 ; c < ncol ; ++c) vcv.push_back(CharacterVector(df[c]));
   for(int r = 0; r < nrow ; ++r )
     {
       int c = 0;
       for( ; c < ncol-1 ; ++c )
   	{
-  	  o << CharacterVector(df[c])[r] << sep;
+	  o << vcv[c][r] << sep;
   	}
-      o << CharacterVector(df[c])[r] << '\n';
+      o << vcv[c][r] << '\n';
     }
 
   return gzwrite(lfile->gzf,o.str().c_str(),o.str().size());
