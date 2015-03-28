@@ -10,7 +10,7 @@
 
 <meta name="author" content="Kevin Thornton" />
 
-<meta name="date" content="2015-03-27" />
+<meta name="date" content="2015-03-28" />
 
 <title>Calculating heritability from simulation output</title>
 
@@ -54,7 +54,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <div id="header">
 <h1 class="title">Calculating heritability from simulation output</h1>
 <h4 class="author"><em>Kevin Thornton</em></h4>
-<h4 class="date"><em>2015-03-27</em></h4>
+<h4 class="date"><em>2015-03-28</em></h4>
 </div>
 
 
@@ -77,6 +77,26 @@ for(i in <span class="dv">1</span>:<span class="kw">nrow</span>(idx))
     m =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">readBin</span>(f,<span class="st">&quot;numeric&quot;</span>,<span class="dv">2</span>*N),<span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">byrow=</span><span class="ot">TRUE</span>)
     ##column 1 = genetic component, column2 = random component
     h2[i]=<span class="kw">var</span>(m[,<span class="dv">1</span>])/( <span class="kw">var</span>(m[,<span class="dv">1</span>]) +<span class="st"> </span><span class="kw">var</span>(m[,<span class="dv">2</span>]) )
+}
+##Now, you can get the mean, etc., which will not be very accurate for this example,
+##as it is based on just 3 replicates
+<span class="kw">print</span>(<span class="kw">mean</span>(h2))</code></pre>
+<pre><code>## [1] 0.06026601</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(h2)</code></pre>
+<pre><code>## [1] 0.05864086 0.05362043 0.06853675</code></pre>
+<p>Another method involves calling the getPheno function to read the file. This method is slower, as it requires constant opening of the file and seeking to the desired position, but it is handy for accessing specific records directly:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(diseaseSims)
+idx=<span class="kw">read.table</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;index.txt&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;diseaseSims&quot;</span>))
+pfile=<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;phenotypes.bin.gz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;diseaseSims&quot;</span>)
+
+h2=<span class="kw">array</span>()
+OFFSET=<span class="dv">0</span>
+for( i in <span class="dv">1</span>:<span class="kw">nrow</span>(idx) )
+{
+    m =<span class="st"> </span><span class="kw">getPheno</span>(pfile,OFFSET)
+    h2[i]=<span class="kw">var</span>(m[,<span class="dv">1</span>])/( <span class="kw">var</span>(m[,<span class="dv">1</span>]) +<span class="st"> </span><span class="kw">var</span>(m[,<span class="dv">2</span>]) )
+    ##Update the OFFSET
+    OFFSET =<span class="st"> </span>OFFSET +<span class="st"> </span>idx$V3[i]
 }
 ##Now, you can get the mean, etc., which will not be very accurate for this example,
 ##as it is based on just 3 replicates
