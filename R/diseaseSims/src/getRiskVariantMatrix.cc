@@ -210,6 +210,7 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
 			    Rcpp::Named("nremoved") = nremoved);
  }
 
+/*
 //[[Rcpp::export(".writeVpV1Data")]]
 void writeVpV1Data( const Rcpp::NumericMatrix & d,
 		    const std::string & outfilename,
@@ -227,3 +228,4 @@ void writeVpV1Data( const Rcpp::NumericMatrix & d,
     }
   gzclose(gzout);
 }
+*/

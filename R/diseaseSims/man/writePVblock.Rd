@@ -35,4 +35,7 @@ If append == FALSE, then no file locking is done, which means
 different R processes should write to different output files,
 otherwise you'll be overwriting your data!!!!
 }
+\note{
+This function should be viewed as deprecated, and replaced by writeDataFrame
+}
 

@@ -21,14 +21,9 @@
 
 #' Fit linear models to genotypes
 #' @param data A list returned by getRiskVariantMatrix
-#' @param ofilename The output file to write to (optional).  File will be gzip-compressed using zlib.
-#' @param replicateID An unsigned integer identifying "data".  (optional, only required if ofilename is used)
-#' @param append Whether or not to open ofilename in append mode, or to overwrite ofilename
 #' @param useSparseM Use SparseM::slm instead of base::lm for the regression.  Requires the SparseM pacakge.
 #' @return A matrix with 3 columns: allele frequency, and then estimates of the total variance in the trait explained by markers are <= that frequency.  The estimates make up the last two columns, and are based on the R^2 and adjusted R^2 of the linear model, respectively.
-#' @details
-#' By default, just the matrix is returned.  If ofilename is specified, the matrix plus a column containing replicateID are also written.  If ofilenname is opened with append = TRUE, then multiple processes are able to write to ofilename, as access is handled using POSIX file locking methods.
-vpv1aov = function(data, ofilename , replicateID, append = FALSE, useSparseM = FALSE)
+vpv1aov = function(data, useSparseM = FALSE)
     {
         ##Fit the model and summarize
         ##We coerce the matrix to a data frame so that we can get sum of squares, etc.,
@@ -75,10 +70,5 @@ vpv1aov = function(data, ofilename , replicateID, append = FALSE, useSparseM = F
             }
         mm[,2] = cumsum(mm[,2])
         mm[,3] = cumsum(mm[,3])
-        if (! missing(ofilename) )
-            {
-                #.writeVpV1Data(mm,ofilename,replicateID,append);
-                .writeVpV1Data(.fillvpv1matrix(mm,twoN),ofilename,replicateID,append)
-            }
         return(mm)
     }

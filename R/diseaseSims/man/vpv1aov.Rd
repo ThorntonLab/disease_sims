@@ -4,16 +4,10 @@
 \alias{vpv1aov}
 \title{Fit linear models to genotypes}
 \usage{
-vpv1aov(data, ofilename, replicateID, append = FALSE, useSparseM = FALSE)
+vpv1aov(data, useSparseM = FALSE)
 }
 \arguments{
 \item{data}{A list returned by getRiskVariantMatrix}
-
-\item{ofilename}{The output file to write to (optional).  File will be gzip-compressed using zlib.}
-
-\item{replicateID}{An unsigned integer identifying "data".  (optional, only required if ofilename is used)}
-
-\item{append}{Whether or not to open ofilename in append mode, or to overwrite ofilename}
 
 \item{useSparseM}{Use SparseM::slm instead of base::lm for the regression.  Requires the SparseM pacakge.}
 }
@@ -22,8 +16,5 @@ A matrix with 3 columns: allele frequency, and then estimates of the total varia
 }
 \description{
 Fit linear models to genotypes
-}
-\details{
-By default, just the matrix is returned.  If ofilename is specified, the matrix plus a column containing replicateID are also written.  If ofilenname is opened with append = TRUE, then multiple processes are able to write to ofilename, as access is handled using POSIX file locking methods.
 }
 
