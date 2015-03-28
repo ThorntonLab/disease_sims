@@ -16,13 +16,15 @@
                         mutate(filled2 = nth(V3,1)) %>%
                         ungroup() %>%
                             select(-V2,-V3,-dummy) -> m2
-        return(as.matrix(m2))
+        colnames(m2) <- c("p","rsq","adj.rsq")
+        return(m2)
+        ##return(as.matrix(m2))
     }
 
 #' Fit linear models to genotypes
 #' @param data A list returned by getRiskVariantMatrix
 #' @param useSparseM Use SparseM::slm instead of base::lm for the regression.  Requires the SparseM pacakge.
-#' @return A matrix with 3 columns: allele frequency, and then estimates of the total variance in the trait explained by markers are <= that frequency.  The estimates make up the last two columns, and are based on the R^2 and adjusted R^2 of the linear model, respectively.
+#' @return A data frame with 3 columns: allele frequency, and then estimates of the total variance in the trait explained by markers are <= that frequency.  The estimates make up the last two columns, and are based on the R^2 and adjusted R^2 of the linear model, respectively.
 vpv1aov = function(data, useSparseM = FALSE)
     {
         ##Fit the model and summarize
@@ -45,8 +47,10 @@ vpv1aov = function(data, useSparseM = FALSE)
 
         ##Initalize the matrix to return.
         ##The columns will be: mutant allele frequency, r^2, adj. r^2
-        mm = matrix(data = NA, ncol = 3, nrow = length(unique(alleleCounts)))
-
+        p = array( dim = length(unique(alleleCounts)) )
+        rsq = array( dim = length(unique(alleleCounts)) )
+        adj.rsq = array( dim = length(unique(alleleCounts)) )
+        
         sum.sq = data.aov.s[[1]]$'Sum Sq'
         ttl.sum.sq = sum(sum.sq)
         DF = data.aov.s[[1]]$'Df'
@@ -57,18 +61,18 @@ vpv1aov = function(data, useSparseM = FALSE)
         for( ac in unique(sort(alleleCounts)) )
             {
                 ac.sum.sq = sum.sq[which(alleleCounts == ac)]
-                mm[IDX,1] = ac/twoN
+                p[IDX] = ac/twoN
                 ## r^2 due just to mutation at this freq. bin
-                mm[IDX,2] = sum(ac.sum.sq)/ttl.sum.sq
-                if(is.na(mm[IDX,2]))
+                rsq[IDX] = sum(ac.sum.sq)/ttl.sum.sq
+                if(is.na(rsq[IDX]))
                     {
                         stop("NA found...")
                     }
                 ## adj. r^2 due just to mutations at this freq. bin
-                mm[IDX,3] = 1 - ( (sum.sq[n] + sum(sum.sq[which(alleleCounts != ac)]))/ttl.sum.sq )*(sum(DF)/(DF[n] + length(which(alleleCounts != ac))))
+                adj.rsq[IDX] =  1 - ( (sum.sq[n] + sum(sum.sq[which(alleleCounts != ac)]))/ttl.sum.sq )*(sum(DF)/(DF[n] + length(which(alleleCounts != ac))))
                 IDX=IDX+1
             }
-        mm[,2] = cumsum(mm[,2])
-        mm[,3] = cumsum(mm[,3])
-        return(.fillvpv1matrix(mm,twoN))
+        rsq = cumsum(rsq)
+        adj.rsq = cumsum(adj.rsq)
+        return(.fillvpv1matrix(data.frame(p,rsq,adj.rsq),twoN))
     }

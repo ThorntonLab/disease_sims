@@ -12,7 +12,7 @@ vpv1aov(data, useSparseM = FALSE)
 \item{useSparseM}{Use SparseM::slm instead of base::lm for the regression.  Requires the SparseM pacakge.}
 }
 \value{
-A matrix with 3 columns: allele frequency, and then estimates of the total variance in the trait explained by markers are <= that frequency.  The estimates make up the last two columns, and are based on the R^2 and adjusted R^2 of the linear model, respectively.
+A data frame with 3 columns: allele frequency, and then estimates of the total variance in the trait explained by markers are <= that frequency.  The estimates make up the last two columns, and are based on the R^2 and adjusted R^2 of the linear model, respectively.
 }
 \description{
 Fit linear models to genotypes

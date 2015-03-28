@@ -10,7 +10,7 @@ for(i in 1:nrow(idx))
       XX.aov = vpv1aov(XX)
       if( i == 1 )
       {
-	plot(XX.aov[,1],XX.aov[,2],
+	plot(XX.aov$p,XX.aov$rsq,
 		xlab="Mutation frequency",
 		ylab="Variance explained",
 		xlim=c(0,0.1),type="l",
@@ -18,7 +18,7 @@ for(i in 1:nrow(idx))
       }
       else
       {
-	lines(XX.aov[,1],XX.aov[,2],col=i)
+	lines(XX.aov$p,XX.aov$adj.rsq,col=i)
       }
       OFFSET=OFFSET+idx$V4[i]
     }
