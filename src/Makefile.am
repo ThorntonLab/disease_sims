@@ -1,4 +1,4 @@
-bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control make_case_controlEW chksimoutput phenoburden genburden
+bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control make_case_controlEW chksimoutput genburden
 
 noinst_LTLIBRARIES=libcommon.la
 lib_LTLIBRARIES=libdiseaseSimsHelper.la
@@ -13,7 +13,6 @@ make_case_control_SOURCES=make_case_control.cc simindex.cc readSimOutput.cc
 make_case_controlEW_SOURCES=make_case_controlEW.cc simindex.cc readSimOutput.cc
 #esm_chisq_zscore_SOURCES=esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc
 chksimoutput_SOURCES=chksimoutput.cc simindex.cc
-phenoburden_SOURCES=phenoburden.cc
 genburden_SOURCES=genburden.cc
 
 #esm_chisq_zscore_LDFLAGS=-pthread

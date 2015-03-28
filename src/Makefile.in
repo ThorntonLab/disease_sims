@@ -81,7 +81,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = TFL2013$(EXEEXT) TFL2013_ind$(EXEEXT) \
 	make_case_control$(EXEEXT) make_case_controlEW$(EXEEXT) \
-	chksimoutput$(EXEEXT) phenoburden$(EXEEXT) genburden$(EXEEXT)
+	chksimoutput$(EXEEXT) genburden$(EXEEXT)
 @DEBUG_FALSE@am__append_1 = -DNDEBUG
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -159,9 +159,6 @@ am_make_case_controlEW_OBJECTS = make_case_controlEW.$(OBJEXT) \
 	simindex.$(OBJEXT) readSimOutput.$(OBJEXT)
 make_case_controlEW_OBJECTS = $(am_make_case_controlEW_OBJECTS)
 make_case_controlEW_DEPENDENCIES = libcommon.la
-am_phenoburden_OBJECTS = phenoburden.$(OBJEXT)
-phenoburden_OBJECTS = $(am_phenoburden_OBJECTS)
-phenoburden_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -199,13 +196,12 @@ am__v_CXXLD_1 =
 SOURCES = $(libcommon_la_SOURCES) $(libdiseaseSimsHelper_la_SOURCES) \
 	$(TFL2013_SOURCES) $(TFL2013_ind_SOURCES) \
 	$(chksimoutput_SOURCES) $(genburden_SOURCES) \
-	$(make_case_control_SOURCES) $(make_case_controlEW_SOURCES) \
-	$(phenoburden_SOURCES)
+	$(make_case_control_SOURCES) $(make_case_controlEW_SOURCES)
 DIST_SOURCES = $(libcommon_la_SOURCES) \
 	$(libdiseaseSimsHelper_la_SOURCES) $(TFL2013_SOURCES) \
 	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
 	$(genburden_SOURCES) $(make_case_control_SOURCES) \
-	$(make_case_controlEW_SOURCES) $(phenoburden_SOURCES)
+	$(make_case_controlEW_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -365,7 +361,6 @@ make_case_control_SOURCES = make_case_control.cc simindex.cc readSimOutput.cc
 make_case_controlEW_SOURCES = make_case_controlEW.cc simindex.cc readSimOutput.cc
 #esm_chisq_zscore_SOURCES=esm_chisq_zscore.cc esm.cc chisq_per_marker.cc esm_filter_sites.cc readCC.cc
 chksimoutput_SOURCES = chksimoutput.cc simindex.cc
-phenoburden_SOURCES = phenoburden.cc
 genburden_SOURCES = genburden.cc
 
 #esm_chisq_zscore_LDFLAGS=-pthread
@@ -533,10 +528,6 @@ make_case_controlEW$(EXEEXT): $(make_case_controlEW_OBJECTS) $(make_case_control
 	@rm -f make_case_controlEW$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(make_case_controlEW_OBJECTS) $(make_case_controlEW_LDADD) $(LIBS)
 
-phenoburden$(EXEEXT): $(phenoburden_OBJECTS) $(phenoburden_DEPENDENCIES) $(EXTRA_phenoburden_DEPENDENCIES) 
-	@rm -f phenoburden$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(phenoburden_OBJECTS) $(phenoburden_LDADD) $(LIBS)
-
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -551,7 +542,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/genburden.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make_case_control.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/make_case_controlEW.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/phenoburden.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readSimOutput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simindex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
