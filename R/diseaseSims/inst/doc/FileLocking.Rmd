@@ -1,0 +1,35 @@
+---
+title: "POSIX file locking"
+author: "Kevin Thornton"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{POSIX file locking}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+#Introduction
+
+A typical workflow involves "naive" parallelizing the processing of replicates across many compute cores on a large cluster.  An R function that returns a data frame or a matrix could be written to a separate file by each process.  However, that is quite tedious.
+
+We solve this problem by using [Rcpp](http://rcpp.org) to provide access to [boost](http://www.boost.org)'s interprocess library.  This library allows us to manage access to an output file via advisory file locks.
+
+## Caveats
+
+1. One caveat is that these locks are only supported on POSIX systems.  Further, some advanced distributed file systems need special configuration to support POSIX file locking.  Talk to your IT support staff if you are unsure!
+2. Currently, we only support managing acccess to gzip-compressed files.
+
+## Example
+
+~~~{r}
+library(diseaseSims)
+#make a data frame
+z = data.frame(cbind(x=1:10,y=11:20))
+#open a gz file in append model with locking
+locker = gzLock("foo.txt.gz",mode="a”);
+#write to it
+writeDataFrame(z,locker,colnames=TRUE)
+#close and remove locks
+gzUnlock(locker);
+~~~
