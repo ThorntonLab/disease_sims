@@ -70,5 +70,5 @@ vpv1aov = function(data, useSparseM = FALSE)
             }
         mm[,2] = cumsum(mm[,2])
         mm[,3] = cumsum(mm[,3])
-        return(mm)
+        return(.fillvpv1matrix(mm,twoN))
     }
