@@ -18,7 +18,6 @@
                             select(-V2,-V3,-dummy) -> m2
         colnames(m2) <- c("p","rsq","adj.rsq")
         return(m2)
-        ##return(as.matrix(m2))
     }
 
 #' Fit linear models to genotypes
