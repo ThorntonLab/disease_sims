@@ -200,7 +200,7 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
 	{
 	  if( *i )
 	    {
-	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) );
+	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) - 1 );
 	    }
 	}
     }
