@@ -138,11 +138,11 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
 	{
 	  if( *i )
 	    {
-	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) );
+	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) - 1 );
 	    }
 	}
     }
-  
+
   return Rcpp::List::create(Rcpp::Named("trait") = Gvals,
 			    Rcpp::Named("esizes") = esizes,
 			    Rcpp::Named("genos") = genos,
