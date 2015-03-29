@@ -42,7 +42,9 @@ vpv1aov = function(data, useSparseM = FALSE)
             summary(aov(SparseM::slm(data$trait ~ ., data=as.data.frame(data$genos)),data=as.data.frame(data$genos))))
         twoN = 2*nrow(data$genos)
         ##Get the counts of risk allele frequencies at each marker
-        alleleCounts = as.integer(colSums(data$genos))
+        ##GIVEN THAT THE MARKER WERE USED IN THE REGRESSION
+        ROWS=rownames(data.aov.s[[1]])
+        alleleCounts = as.integer(colSums(as.data.frame(data$genos)[,sapply(as.array(ROWS[1:(length(ROWS)-1)]),function(x) gsub(" ","",x),USE.NAMES=FALSE)]))
 
         ##Initalize the matrix to return.
         ##The columns will be: mutant allele frequency, r^2, adj. r^2
@@ -54,7 +56,6 @@ vpv1aov = function(data, useSparseM = FALSE)
         ttl.sum.sq = sum(sum.sq)
         DF = data.aov.s[[1]]$'Df'
         n = length(sum.sq)
-
         ##Populate the matrix, starting with the rares
         IDX=1
         for( ac in unique(sort(alleleCounts)) )
