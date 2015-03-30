@@ -22,7 +22,7 @@ Gfxn_t setModel( const std::string & model, const double & dominance )
     {
       dipG = std::bind(additiveg(),std::placeholders::_1,std::placeholders::_2);
     }
-  else if (model == "multipicative")
+  else if (model == "multiplicative")
     {
       dipG = std::bind(multiplicative_phenotype(),std::placeholders::_1,std::placeholders::_2);
     }

@@ -56,11 +56,16 @@ vpv1aov = function(data, useSparseM = FALSE)
         ttl.sum.sq = sum(sum.sq)
         DF = data.aov.s[[1]]$'Df'
         n = length(sum.sq)
+        print(unique(data$trait))
+        print(paste(var(data$trait),ttl.sum.sq,sum.sq[n]))
+        print(n)
+        print(length(alleleCounts))
         ##Populate the matrix, starting with the rares
         IDX=1
         for( ac in unique(sort(alleleCounts)) )
             {
                 ac.sum.sq = sum.sq[which(alleleCounts == ac)]
+                print(paste(ac,ac.sum.sq))
                 p[IDX] = ac/twoN
                 ## r^2 due just to mutation at this freq. bin
                 rsq[IDX] = sum(ac.sum.sq)/ttl.sum.sq
