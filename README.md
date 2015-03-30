@@ -180,6 +180,8 @@ h2 = var( m[,1] )/( var(m[,1]) + var(m[,2]) )
 
 You may read all the replicates in from a file using a for loop, etc.  Please note that seeking within a gzipped file doesn't work all that well in R.
 
+__Important note:__ for the multiplicative models, the first columns are centered around a value of 1, not 0!!  This means that, to calculate fitness, etc., from these files, you should subtract 1 from the final trait value!
+
 #### The effect sizes file
 
 For each simulated replicate, the following data are recorded:
