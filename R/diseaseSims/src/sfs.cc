@@ -71,7 +71,7 @@ Rcpp::DataFrame sfs( const std::string & popfile,
 	}
 
       std::vector<unsigned> ID(N,REP),C(N),nSFS(N,0.),rSFS(N,0.);
-      dummy=0;
+      dummy=1;
       for_each(C.begin(),C.end(),[&dummy](unsigned & __u){__u=dummy++;});
       for( unsigned i = 0 ; i < sampleNeutralCounts.size() ; ++i )
 	{
