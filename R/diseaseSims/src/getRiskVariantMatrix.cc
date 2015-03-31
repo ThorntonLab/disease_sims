@@ -83,10 +83,17 @@ vector<double> getEsizes( const vector<pair<mlist::iterator,unsigned> > & risk_i
   return rv;
 }
 
-Rcpp::IntegerMatrix MakeRiskMatrix( const dipvector & diploids,
-				    const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
+Rcpp::DataFrame MakeRiskMatrix( const dipvector & diploids,
+				const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
+/*
+  Problem: R/Rcpp matrices may not be able to hold enough data: http://stackoverflow.com/questions/9984283/maximum-size-of-a-matrix-in-r
+  Solution: Romain's advice from:
+  http://stackoverflow.com/questions/23865210/how-to-convert-stdvectorstdvectordouble-to-rcppdataframe-or-rcppnume
+*/
 {
-  Rcpp::IntegerMatrix genos(diploids.size(),risk_indexes.size());
+  //Rcpp::IntegerMatrix genos(diploids.size(),risk_indexes.size());
+  std::vector<std::vector<unsigned> > temp(diploids.size(),
+					   std::vector<unsigned>(risk_indexes.size(),0u));
   for( unsigned ind = 0 ; ind < diploids.size() ; ++ind )
     {
       vmcount_t vmc = get_mut_counts(diploids[ind].first,diploids[ind].second);
@@ -95,10 +102,14 @@ Rcpp::IntegerMatrix MakeRiskMatrix( const dipvector & diploids,
 	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
 	      return __p.first == vmc[i].first;
 	    });
-	  genos(ind,__itr->second) += vmc[i].second;
+	  //genos(ind,__itr->second) += vmc[i].second;
+	  temp[ind][__itr->second] = vmc[i].second;
 	}
     }
-  return genos;
+  Rcpp::List temp2(temp.size());
+  for(unsigned i = 0 ; i < temp.size() ; ++i) temp2[i] = Rcpp::wrap(temp[i].begin(),temp[i].end());
+  Rcpp::DataFrame rv = temp2;
+  return rv;
 }
 
 // Details of how to get a genotype matrix for risk variants
@@ -126,27 +137,27 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
   vector<pair<mlist::iterator,unsigned> > risk_indexes = getRiskIndexes(pop.mutations);
   auto Gvals = getG(pop.diploids,dipG);
 
-  Rcpp::IntegerMatrix genos = MakeRiskMatrix(pop.diploids,risk_indexes);
+  auto genos = MakeRiskMatrix(pop.diploids,risk_indexes);
   vector<double> esizes = getEsizes(risk_indexes);
   //Remove duplicated columns, and esizes, if needed
-  vector<int> dupc = columnsDuplicated(genos);
-  unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
-  if(nremoved)
-    {
-      removeColumns(genos,dupc);
-      for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
-	{
-	  if( *i )
-	    {
-	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) - 1 );
-	    }
-	}
-    }
+  // vector<int> dupc = columnsDuplicated(genos);
+  // unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
+  // if(nremoved)
+  //   {
+  //     removeColumns(genos,dupc);
+  //     for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
+  // 	{
+  // 	  if( *i )
+  // 	    {
+  // 	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) - 1 );
+  // 	    }
+  // 	}
+  //   }
 
   return Rcpp::List::create(Rcpp::Named("trait") = Gvals,
 			    Rcpp::Named("esizes") = esizes,
-			    Rcpp::Named("genos") = genos,
-			    Rcpp::Named("nremoved") = nremoved);
+			    Rcpp::Named("genos") = genos);
+  //Rcpp::Named("nremoved") = nremoved);
  }
 				    
 // Details of how to get a genotype matrix for risk variants
@@ -188,26 +199,26 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
   gzclose(gzin);
   vector<pair<mlist::iterator,unsigned> > risk_indexes = getRiskIndexes(pop.mutations);
 
-  Rcpp::IntegerMatrix genos = MakeRiskMatrix(pop.diploids,risk_indexes);
+  auto genos = MakeRiskMatrix(pop.diploids,risk_indexes);
   vector<double> esizes = getEsizes(risk_indexes);
   //Remove duplicated columns, and esizes, if needed
-  vector<int> dupc = columnsDuplicated(genos);
-  unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
-  if(nremoved)
-    {
-      removeColumns(genos,dupc);
-      for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
-	{
-	  if( *i )
-	    {
-	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) - 1 );
-	    }
-	}
-    }
+  // vector<int> dupc = columnsDuplicated(genos);
+  // unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
+  // if(nremoved)
+  //   {
+  //     removeColumns(genos,dupc);
+  //     for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
+  // 	{
+  // 	  if( *i )
+  // 	    {
+  // 	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) - 1 );
+  // 	    }
+  // 	}
+  //   }
   return Rcpp::List::create(Rcpp::Named("trait") = phenotypes,
 			    Rcpp::Named("esizes") = esizes,
-			    Rcpp::Named("genos") = genos,
-			    Rcpp::Named("nremoved") = nremoved);
+			    Rcpp::Named("genos") = genos);
+  //Rcpp::Named("nremoved") = nremoved);
  }
 
 /*
