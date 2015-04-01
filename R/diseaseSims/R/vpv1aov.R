@@ -68,10 +68,14 @@ vpv1aov = function(data, useSparseM = FALSE)
                 rsq[IDX] = sum(ac.sum.sq)/ttl.sum.sq
                 if(is.na(rsq[IDX]))
                     {
-                        stop("NA found...")
+                        stop("rsq == NA found")
                     }
                 ## adj. r^2 due just to mutations at this freq. bin
                 adj.rsq[IDX] =  1 - ( (sum.sq[n] + sum(sum.sq[which(alleleCounts != ac)]))/ttl.sum.sq )*(sum(DF)/(DF[n] + length(which(alleleCounts != ac))))
+                if(is.na(adj.rsq[IDX]))
+                    {
+                        stop("adj.rsq == NA found")
+                    }
                 IDX=IDX+1
             }
         rsq = cumsum(rsq)
