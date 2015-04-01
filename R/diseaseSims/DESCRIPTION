@@ -12,7 +12,8 @@ Imports:
     buRden (>= 0.1.0),
 Suggests:
     SparseM,
-    knitr
+    knitr,
+    biglm
 LinkingTo: Rcpp
 RcppModules: SimPopData
 VignetteBuilder: knitr
