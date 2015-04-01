@@ -147,25 +147,10 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
 
   auto genos = MakeRiskMatrix(pop.diploids,risk_indexes);
   vector<double> esizes = getEsizes(risk_indexes);
-  //Remove duplicated columns, and esizes, if needed
-  // vector<int> dupc = columnsDuplicated(genos);
-  // unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
-  // if(nremoved)
-  //   {
-  //     removeColumns(genos,dupc);
-  //     for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
-  // 	{
-  // 	  if( *i )
-  // 	    {
-  // 	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) - 1 );
-  // 	    }
-  // 	}
-  //   }
 
   return Rcpp::List::create(Rcpp::Named("trait") = Gvals,
 			    Rcpp::Named("esizes") = esizes,
 			    Rcpp::Named("genos") = genos);
-  //Rcpp::Named("nremoved") = nremoved);
  }
 				    
 // Details of how to get a genotype matrix for risk variants
@@ -209,42 +194,7 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
 
   auto genos = MakeRiskMatrix(pop.diploids,risk_indexes);
   vector<double> esizes = getEsizes(risk_indexes);
-  //Remove duplicated columns, and esizes, if needed
-  // vector<int> dupc = columnsDuplicated(genos);
-  // unsigned nremoved = std::count(dupc.begin(),dupc.end(),1);
-  // if(nremoved)
-  //   {
-  //     removeColumns(genos,dupc);
-  //     for( vector<int>::reverse_iterator i = dupc.rbegin() ; i != dupc.rend() ; ++i )
-  // 	{
-  // 	  if( *i )
-  // 	    {
-  // 	      esizes.erase( esizes.begin() + distance( dupc.begin(), i.base() ) - 1 );
-  // 	    }
-  // 	}
-  //   }
   return Rcpp::List::create(Rcpp::Named("trait") = phenotypes,
 			    Rcpp::Named("esizes") = esizes,
 			    Rcpp::Named("genos") = genos);
-  //Rcpp::Named("nremoved") = nremoved);
  }
-
-/*
-//[[Rcpp::export(".writeVpV1Data")]]
-void writeVpV1Data( const Rcpp::NumericMatrix & d,
-		    const std::string & outfilename,
-		    const unsigned & replicate_id,
-		    const bool & append ) 
-{
-  using namespace boost::interprocess;
-  std::string __append = (append) ? "a" : "w";
-  gzFile gzout = gzopen(outfilename.c_str(),__append.c_str());
-  file_lock ofile_flock(outfilename.c_str());
-  scoped_lock<file_lock> s_lock(ofile_flock);
-  for(int row = 0 ; row < d.nrow() ; ++row )
-    {
-      gzprintf(gzout,"%u\t%lf\t%lf\t%lf\n",replicate_id,d(row,0),d(row,1),d(row,2));
-    }
-  gzclose(gzout);
-}
-*/
