@@ -4,12 +4,14 @@
 \alias{vpv1aov}
 \title{Fit linear models to genotypes}
 \usage{
-vpv1aov(data, useSparseM = FALSE)
+vpv1aov(data, useSparseM = FALSE, chunksize = 5000)
 }
 \arguments{
 \item{data}{A list returned by getRiskVariantMatrix}
 
 \item{useSparseM}{Use SparseM::slm instead of base::lm for the regression.  Requires the SparseM pacakge.}
+
+\item{chunksize}{If the data set is massive, we'll use biglm::biglm for the regression, breaking data up into sets of chunksize rows}
 }
 \value{
 A data frame with 3 columns: allele frequency, and then estimates of the total variance in the trait explained by markers are <= that frequency.  The estimates make up the last two columns, and are based on the R^2 and adjusted R^2 of the linear model, respectively.
