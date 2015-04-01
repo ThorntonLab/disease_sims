@@ -27,17 +27,17 @@
             {
                 stop("cannot proceed: biglm namespace not found")
             }
-        data2 = data.frame(cbind(data$trait,data$genos))
         IIa=1
-        FINAL = as.numeric(nrow(data2))
+        FINAL = as.numeric(nrow(data))
         IIb=min(chunksize,FINAL)
 
-        BIGGIE = biglm::biglm( lm(trait ~ .,data=data2),data = data2[IIa:IIb,] )
+        BIGGIE = biglm::biglm( lm(trait ~ .,data=data),data = data[IIa:IIb,] )
+                print(twoN)
         while( as.numeric(IIb) <= FINAL )
             {
-                IIa = IIa + chunksize
-                IIb = min(IIb + chunksize,FINAL)
-                update( BIGGIE, moredata=data2[IIa:IIb,] )
+                update( BIGGIE, moredata=data[IIa:IIb,] )
+                IIa = IIb + 1 + chunksize
+                IIb = min(IIa + chunksize - 1, FINAL)
             }
         return(summary(aov(BIGGIE)))
     }
@@ -63,9 +63,9 @@ vpv1aov = function(data, useSparseM = FALSE, chunksize=5000)
                         USPARSE=FALSE
                     }
             }
-        data.aov.s = ifelse( BIG == TRUE, .dobigaov(data),
-            ifelse(USPARSE==FALSE,summary(aov(lm(data$trait ~ ., data = data$genos))),
-                   summary(aov(SparseM::slm(data$trait ~ ., data=data$genos),data=data$genos))))
+        data.aov.s = ifelse( BIG == TRUE, .dobigaov(data,chunksize),
+            ifelse(USPARSE==FALSE,summary(aov(lm(trait ~ ., data = data$genos))),
+                   summary(aov(SparseM::slm(trait ~ ., data=data$genos),data=data$genos))))
         twoN = 2*nrow(data$genos)
         ##Get the counts of risk allele frequencies at each marker
         ##GIVEN THAT THE MARKER WERE USED IN THE REGRESSION
