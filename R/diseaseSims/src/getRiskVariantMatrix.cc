@@ -12,7 +12,6 @@
 #include <fwdpp/IO.hpp>
 #include <diseaseSims/util.hpp>
 #include <diseaseSims/traitValues.hpp>
-#include <matManip.hpp>
 
 using namespace std;
 
