@@ -156,9 +156,6 @@ std::pair<Rcpp::DataFrame,std::vector<double> > MakeRiskMatrix( const dipvector 
     }
   temp2.attr("names")=colNames;
   return std::make_pair( Rcpp::DataFrame(temp2), esizes );
-  // Rcpp::DataFrame temp3(temp2);
-  // return Rcpp::List::create( Rcpp::Named("genos") = temp3,
-  // 			     Rcpp::Named("esizes") = esizes );
 }
 
 // Details of how to get a genotype matrix for risk variants
@@ -187,7 +184,6 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
   auto Gvals = getG(pop.diploids,dipG);
 
   auto genos = MakeRiskMatrix(pop.diploids,risk_indexes);
-  //vector<double> esizes = getEsizes(risk_indexes);
 
   return Rcpp::List::create(Rcpp::Named("trait") = Gvals,
 			    Rcpp::Named("esizes") = genos.second,
@@ -234,7 +230,6 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
   vector<pair<mlist::iterator,unsigned> > risk_indexes = getRiskIndexes(pop.mutations);
 
   auto genos = MakeRiskMatrix(pop.diploids,risk_indexes);
-  //vector<double> esizes = getEsizes(risk_indexes);
   return Rcpp::List::create(Rcpp::Named("trait") = phenotypes,
 			    Rcpp::Named("esizes") = genos.second,
 			    Rcpp::Named("genos") = genos.first);
