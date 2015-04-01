@@ -6,7 +6,7 @@
 #' @param modelName The model of gene action.  Must be one of: recessive, additive, multiplicative, or popgen
 #' @param dominance The dominance of a risk mutation.  Only applies to the "popgen" model of gene action
 #' @return traits, which is a list of trait (or genetic) values for each individual
-#' @return genos, which is an integer matrix of genotypes. Rows = individuals. Columns = 0,1,2 copies of risk mutation
+#' @return genos, which is an data frame of genotypes. Rows = individuals. Columns = 0,1,2 copies of risk mutation
 #' @return nremoved, which is the number of markers removed because they resulted in duplicate columns in genos
 #' @details
 #' The order of the columns in "genos" is in descending order of both frequency and absolute value of effect size
@@ -39,14 +39,7 @@ getRiskVariantMatrix = function(popfilename,
             }
         if( missing(phenofilename) )
             {
-                ##return (.getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance))
-
-                ##Remove duplicate markers (co-linear predictors...)
                 XX = .getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance)
-                #XX.dups = duplicated(XX$genos,MARGIN=2)
-                #XX$esizes = XX$esizes[XX.dups == FALSE]
-                #XX$genos = XX$genos[,XX.dups == FALSE]
-                #XX$nremoved = length(which(XX.dups==TRUE))
                 return (XX);
             }
             
@@ -54,11 +47,6 @@ getRiskVariantMatrix = function(popfilename,
             {
                 stop("Error: offest missing for phenotype file");
             }
-        #return (.getRiskVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance))
         XX=.getRiskVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance)
-        #XX.dups = duplicated(XX$genos,MARGIN=2)
-        #XX$esizes = XX$esizes[XX.dups == FALSE]
-        #XX$genos = XX$genos[,XX.dups == FALSE]
-        #XX$nremoved = length(which(XX.dups==TRUE))
         return (XX);
     }
