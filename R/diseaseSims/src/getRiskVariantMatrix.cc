@@ -83,8 +83,27 @@ vector<double> getEsizes( const vector<pair<mlist::iterator,unsigned> > & risk_i
   return rv;
 }
 
-Rcpp::DataFrame MakeRiskMatrix( const dipvector & diploids,
-				const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
+std::vector<std::int8_t> columnsDuplicated( const std::vector<std::vector<unsigned> > & v )
+{
+  std::vector<std::int8_t> rv(v.size(),0);
+  unsigned I = 0;
+  for( ; I < rv.size()-1 ; ++I )
+    {
+      for( unsigned J = I + 1 ; J < rv.size() ; ++J )
+	{
+	  auto XX = std::mismatch( v[I].begin(),v[I].end(), v[J].begin() );
+	  if( XX.first == v[I].end() && XX.second == v[J].end() )
+	    {
+	      rv[J]=1;
+	    }
+	}
+    }
+  return rv;
+}
+
+//Rcpp::DataFrame MakeRiskMatrix( const dipvector & diploids,
+std::pair<Rcpp::DataFrame,std::vector<double> > MakeRiskMatrix( const dipvector & diploids,
+								const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
 /*
   Problem: R/Rcpp matrices may not be able to hold enough data: http://stackoverflow.com/questions/9984283/maximum-size-of-a-matrix-in-r
   Solution: Romain's advice from:
@@ -106,6 +125,26 @@ Rcpp::DataFrame MakeRiskMatrix( const dipvector & diploids,
 	  temp[__itr->second][ind] = vmc[i].second;
 	}
     }
+  /* 
+     Let's remove identical columns.
+     lm() and the like will do that anyways.
+     Also, pruning here lowers total data size, etc.
+  */
+  auto dup = columnsDuplicated(temp);
+  vector<double> esizes = getEsizes(risk_indexes);
+  auto nremoved = count(dup.begin(),dup.end(),1);
+  if( nremoved ) //any dups??
+    {
+      for( auto itr = dup.rbegin() ; itr != dup.rend() ; ++itr )
+	{
+	  if(*itr)
+	    {
+	      auto d = std::distance(dup.begin(),itr.base());
+	      temp.erase(temp.begin() + d-1);
+	      esizes.erase(esizes.begin() + d-1);
+	    }
+	}
+    }
   Rcpp::List temp2(temp.size());
   Rcpp::CharacterVector colNames;
   for(unsigned i = 0 ; i < temp.size() ; ++i) 
@@ -116,7 +155,10 @@ Rcpp::DataFrame MakeRiskMatrix( const dipvector & diploids,
       temp2[i] = Rcpp::wrap(temp[i].begin(),temp[i].end());
     }
   temp2.attr("names")=colNames;
-  return Rcpp::DataFrame(temp2);
+  return std::make_pair( Rcpp::DataFrame(temp2), esizes );
+  // Rcpp::DataFrame temp3(temp2);
+  // return Rcpp::List::create( Rcpp::Named("genos") = temp3,
+  // 			     Rcpp::Named("esizes") = esizes );
 }
 
 // Details of how to get a genotype matrix for risk variants
@@ -145,11 +187,11 @@ Rcpp::List getRiskVariantMatrixDetails( const std::string & model,
   auto Gvals = getG(pop.diploids,dipG);
 
   auto genos = MakeRiskMatrix(pop.diploids,risk_indexes);
-  vector<double> esizes = getEsizes(risk_indexes);
+  //vector<double> esizes = getEsizes(risk_indexes);
 
   return Rcpp::List::create(Rcpp::Named("trait") = Gvals,
-			    Rcpp::Named("esizes") = esizes,
-			    Rcpp::Named("genos") = genos);
+			    Rcpp::Named("esizes") = genos.second,
+			    Rcpp::Named("genos") = genos.first);
  }
 				    
 // Details of how to get a genotype matrix for risk variants
@@ -192,8 +234,8 @@ Rcpp::List getRiskVariantMatrixDetails_Pheno( const std::string & model,
   vector<pair<mlist::iterator,unsigned> > risk_indexes = getRiskIndexes(pop.mutations);
 
   auto genos = MakeRiskMatrix(pop.diploids,risk_indexes);
-  vector<double> esizes = getEsizes(risk_indexes);
+  //vector<double> esizes = getEsizes(risk_indexes);
   return Rcpp::List::create(Rcpp::Named("trait") = phenotypes,
-			    Rcpp::Named("esizes") = esizes,
-			    Rcpp::Named("genos") = genos);
+			    Rcpp::Named("esizes") = genos.second,
+			    Rcpp::Named("genos") = genos.first);
  }
