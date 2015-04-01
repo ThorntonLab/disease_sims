@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdint>
 #include <algorithm>
+#include <sstream>
 #include <set>
 #include <zlib.h>
 #include <boost/interprocess/sync/file_lock.hpp>
@@ -89,11 +90,12 @@ Rcpp::DataFrame MakeRiskMatrix( const dipvector & diploids,
   Problem: R/Rcpp matrices may not be able to hold enough data: http://stackoverflow.com/questions/9984283/maximum-size-of-a-matrix-in-r
   Solution: Romain's advice from:
   http://stackoverflow.com/questions/23865210/how-to-convert-stdvectorstdvectordouble-to-rcppdataframe-or-rcppnume
+
+  Romain implies that it may be important to set the dimnames.  It is, otherwise things go south with the return value.
 */
 {
-  //Rcpp::IntegerMatrix genos(diploids.size(),risk_indexes.size());
-  std::vector<std::vector<unsigned> > temp(diploids.size(),
-					   std::vector<unsigned>(risk_indexes.size(),0u));
+  std::vector<std::vector<unsigned> > temp(risk_indexes.size(),
+					   std::vector<unsigned>(diploids.size(),0u));
   for( unsigned ind = 0 ; ind < diploids.size() ; ++ind )
     {
       vmcount_t vmc = get_mut_counts(diploids[ind].first,diploids[ind].second);
@@ -102,14 +104,20 @@ Rcpp::DataFrame MakeRiskMatrix( const dipvector & diploids,
 	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
 	      return __p.first == vmc[i].first;
 	    });
-	  //genos(ind,__itr->second) += vmc[i].second;
-	  temp[ind][__itr->second] = vmc[i].second;
+	  temp[__itr->second][ind] = vmc[i].second;
 	}
     }
   Rcpp::List temp2(temp.size());
-  for(unsigned i = 0 ; i < temp.size() ; ++i) temp2[i] = Rcpp::wrap(temp[i].begin(),temp[i].end());
-  Rcpp::DataFrame rv = temp2;
-  return rv;
+  Rcpp::CharacterVector colNames;
+  for(unsigned i = 0 ; i < temp.size() ; ++i) 
+    {
+      ostringstream NAME;
+      NAME << 'V' << (i+1);
+      colNames.push_back( NAME.str() );
+      temp2[i] = Rcpp::wrap(temp[i].begin(),temp[i].end());
+    }
+  temp2.attr("names")=colNames;
+  return Rcpp::DataFrame(temp2);
 }
 
 // Details of how to get a genotype matrix for risk variants
