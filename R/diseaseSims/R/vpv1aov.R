@@ -22,7 +22,6 @@
 
 .dobigaov = function(data,chunksize = 5000)
     {
-        warning("data are very big, will use biglm")
         if( requireNamespace("biglm",quietly=TRUE) == FALSE )
             {
                 stop("cannot proceed: biglm namespace not found")
@@ -41,25 +40,32 @@
                 IIa = IIb + 1
                 IIb = min(IIa + chunksize - 1, FINAL)
             }
-        attach(data)
-        RV =summary(aov(BIGGIE))
-        detach(data)
+        RV =summary(aov(BIGGIE,data=data))
         return(RV)
     }
 
 #' Fit linear models to genotypes
 #' @param data A list returned by getRiskVariantMatrix
-#' @param useSparseM Use SparseM::slm instead of base::lm for the regression.  Requires the SparseM pacakge.
+#' @param method Method to use for model fitting.  Must be one of "biglm","slm", or "lm", corresponding to the biglm, SparseM, and base packages, respectively.
 #' @param chunksize If the data set is massive, we'll use biglm::biglm for the regression, breaking data up into sets of chunksize rows
 #' @return A data frame with 3 columns: allele frequency, and then estimates of the total variance in the trait explained by markers are <= that frequency.  The estimates make up the last two columns, and are based on the R^2 and adjusted R^2 of the linear model, respectively.
-vpv1aov = function(data, useSparseM = FALSE, chunksize=5000)
+vpv1aov = function(data, method, chunksize=5000)
     {
         ##Check if data$geno's dimensions are potentially "too big":
-        BIG = ifelse( as.numeric(ncol(data$genos))*as.numeric(nrow(data$genos)) >= as.numeric(.Machine$integer.max), TRUE, FALSE )
+        BIG = ifelse( as.numeric(ncol(data$genos))*as.numeric(nrow(data$genos)) >= as.numeric(.Machine$integer.max),
+            TRUE,
+            ifelse( method == "biglm", TRUE, FALSE) )
+
+        if( BIG == TRUE & method != "biglm" )
+            {
+                warning("data are very big, will use biglm")
+            }
         ##Fit the model and summarize
         ##We coerce the matrix to a data frame so that we can get sum of squares, etc.,
         ##per marker
-        USPARSE=useSparseM
+        USPARSE = ifelse( method == "slm",
+            ifelse( BIG == FALSE, TRUE, FALSE ),
+            FALSE )
         if( USPARSE == TRUE )
             {
                 if ( requireNamespace("SparseM",quietly=TRUE) == FALSE )
@@ -71,7 +77,6 @@ vpv1aov = function(data, useSparseM = FALSE, chunksize=5000)
         data.aov.s = ifelse( BIG == TRUE, .dobigaov(data$genos,chunksize),
             ifelse(USPARSE==FALSE,summary(aov(lm(trait ~ ., data = data$genos))),
                    summary(aov(SparseM::slm(trait ~ ., data=data$genos),data=data$genos))))
-        print("aov step done")
         twoN = 2*nrow(data$genos)
         ##Get the counts of risk allele frequencies at each marker
         ##GIVEN THAT THE MARKER WERE USED IN THE REGRESSION
