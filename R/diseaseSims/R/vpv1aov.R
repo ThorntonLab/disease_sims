@@ -49,7 +49,7 @@
 #' @param method Method to use for model fitting.  Must be one of "biglm","slm", or "lm", corresponding to the biglm, SparseM, and base packages, respectively.
 #' @param chunksize If the data set is massive, we'll use biglm::biglm for the regression, breaking data up into sets of chunksize rows
 #' @return A data frame with 3 columns: allele frequency, and then estimates of the total variance in the trait explained by markers are <= that frequency.  The estimates make up the last two columns, and are based on the R^2 and adjusted R^2 of the linear model, respectively.
-vpv1aov = function(data, method, chunksize=5000)
+vpv1aov = function(data, method = "lm", chunksize=5000)
     {
         ##Check if data$geno's dimensions are potentially "too big":
         BIG = ifelse( as.numeric(ncol(data$genos))*as.numeric(nrow(data$genos)) >= as.numeric(.Machine$integer.max),
