@@ -27,19 +27,24 @@
             {
                 stop("cannot proceed: biglm namespace not found")
             }
-        IIa=1
         FINAL = as.numeric(nrow(data))
+        IIa=1
         IIb=min(chunksize,FINAL)
-
-        BIGGIE = biglm::biglm( lm(trait ~ .,data=data),data = data[IIa:IIb,] )
-                print(twoN)
-        while( as.numeric(IIb) <= FINAL )
+        ##Make the model expression
+        FORMULA <- paste(colnames(data)[1], "~", paste(colnames(data)[-1], collapse=" + "))
+        BIGGIE = biglm::biglm( as.formula(FORMULA) ,data = data[IIa:IIb,] )
+        IIa = IIb + 1
+        IIb = min(IIa + chunksize - 1, FINAL)
+        while( as.numeric(IIa) < FINAL )
             {
                 update( BIGGIE, moredata=data[IIa:IIb,] )
-                IIa = IIb + 1 + chunksize
+                IIa = IIb + 1
                 IIb = min(IIa + chunksize - 1, FINAL)
             }
-        return(summary(aov(BIGGIE)))
+        attach(data)
+        RV =summary(aov(BIGGIE))
+        detach(data)
+        return(RV)
     }
 
 #' Fit linear models to genotypes
@@ -63,9 +68,10 @@ vpv1aov = function(data, useSparseM = FALSE, chunksize=5000)
                         USPARSE=FALSE
                     }
             }
-        data.aov.s = ifelse( BIG == TRUE, .dobigaov(data,chunksize),
+        data.aov.s = ifelse( BIG == TRUE, .dobigaov(data$genos,chunksize),
             ifelse(USPARSE==FALSE,summary(aov(lm(trait ~ ., data = data$genos))),
                    summary(aov(SparseM::slm(trait ~ ., data=data$genos),data=data$genos))))
+        print("aov step done")
         twoN = 2*nrow(data$genos)
         ##Get the counts of risk allele frequencies at each marker
         ##GIVEN THAT THE MARKER WERE USED IN THE REGRESSION
