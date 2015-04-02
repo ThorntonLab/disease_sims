@@ -4,12 +4,12 @@
 \alias{vpv1aov}
 \title{Fit linear models to genotypes}
 \usage{
-vpv1aov(data, useSparseM = FALSE, chunksize = 5000)
+vpv1aov(data, method = "lm", chunksize = 5000)
 }
 \arguments{
 \item{data}{A list returned by getRiskVariantMatrix}
 
-\item{useSparseM}{Use SparseM::slm instead of base::lm for the regression.  Requires the SparseM pacakge.}
+\item{method}{Method to use for model fitting.  Must be one of "biglm","slm", or "lm", corresponding to the biglm, SparseM, and base packages, respectively.}
 
 \item{chunksize}{If the data set is massive, we'll use biglm::biglm for the regression, breaking data up into sets of chunksize rows}
 }
