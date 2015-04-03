@@ -33,6 +33,6 @@ The order of the columns in "genos" is in descending order of both frequency and
 If phenofilename and phenofileOffset are both provided, then "traits" corresponds to individual phenotypes.
 If these two arguments are NOT provided, then "traits" corresponds to the genetic component of trait value,
 which is calculated by the parameter based to modelName.
-Risk variant frequencies are calculated by colSums(genos)/(2*nrow(genos)), in case you want to filter
+Risk variant frequencies are calculated by colSums(genos)[-1]/(2*nrow(genos)), in case you want to filter
 }
 
