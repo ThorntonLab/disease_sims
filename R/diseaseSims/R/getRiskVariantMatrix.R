@@ -7,12 +7,11 @@
 #' @param dominance The dominance of a risk mutation.  Only applies to the "popgen" model of gene action
 #' @return traits, which is a list of trait (or genetic) values for each individual
 #' @return genos, which is an data frame of genotypes. Rows = individuals. Columns = 0,1,2 copies of risk mutation
-#' @return nremoved, which is the number of markers removed because they resulted in duplicate columns in genos
 #' @details
 #' The order of the columns in "genos" is in descending order of both frequency and absolute value of effect size
 #' If phenofilename and phenofileOffset are both provided, then "traits" corresponds to individual phenotypes.
 #' If these two arguments are NOT provided, then "traits" corresponds to the genetic component of trait value,
-#' which is calculated by the parameter bassed to modelName.
+#' which is calculated by the parameter based to modelName.
 #' Risk variant frequencies are calculated by colSums(genos)/(2*nrow(genos)), in case you want to filter
 getRiskVariantMatrix = function(popfilename,
     popfileOffset,
@@ -42,7 +41,6 @@ getRiskVariantMatrix = function(popfilename,
                 XX = .getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance)
                 return (XX);
             }
-            
         if( missing(phenofileOffset) )
             {
                 stop("Error: offest missing for phenotype file");
