@@ -303,7 +303,7 @@ int main(int argc, char ** argv)
       gzclose(gzout);
     }
   ostringstream buffer;
-  buffer << options.record_no << ' ' << written;
+  buffer << options.record_no;
   if( !options.idfile.empty() )
     {
       buffer << ' ' << idwritten << '\n';
