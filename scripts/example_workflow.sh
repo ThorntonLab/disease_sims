@@ -11,7 +11,7 @@ done
 
 ##Run a simulation
 SEED=101
-TFL2013_ind -i simindex.txt -p pop.bin.gz -P phenotypes.bin.gz -E effects.bin.gz  -S $SEED -g 1000
+TFL2013_ind -i simindex.txt -p pop.bin.gz -P phenotypes.bin.gz -E effects.bin.gz  -S $SEED
 
 ##Make a case/control panel
 make_case_control  -i simindex.txt -p pop.bin.gz -P phenotypes.bin.gz -c ccfile.bin.gz -I ccindex.txt -n 3000 -N 3000 -S $SEED -t 0.15
@@ -26,3 +26,4 @@ R --no-save --slave < vexpl.R
 R --no-save --slave < skat.R
 
 ##burden tests (not SKAT)
+R --no-save --slave < burdens.R
