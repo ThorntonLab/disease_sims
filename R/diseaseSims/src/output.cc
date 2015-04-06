@@ -69,7 +69,7 @@ struct boostScopedLockManager
   }
 };
 
-//' Manage access to a gz-compressed file
+//' Manage access to a file
 //' @param filename The file name to write to
 //' @return An external pointer to a boostScopedLockManager
 //[[Rcpp::export("Lock")]]
@@ -78,8 +78,9 @@ SEXP initScopedLock( const char * filename )
   return XPtr<boostScopedLockManager> ( new boostScopedLockManager(filename) );
 }
 
-//' Unlock and close a gz-compressed file
+//' Unlock and close a file
 //' @param s A boostScopedLockManager
+//' @note Failing to call this function may cause file locks to persist until the R session ends
 //[[Rcpp::export("Unlock")]]
 void endScopedLock( SEXP s )
 {

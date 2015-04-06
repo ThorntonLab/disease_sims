@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{Unlock}
 \alias{Unlock}
-\title{Unlock and close a gz-compressed file}
+\title{Unlock and close a file}
 \usage{
 Unlock(s)
 }
@@ -10,6 +10,9 @@ Unlock(s)
 \item{s}{A boostScopedLockManager}
 }
 \description{
-Unlock and close a gz-compressed file
+Unlock and close a file
+}
+\note{
+Failing to call this function may cause file locks to persist until the R session ends
 }
 

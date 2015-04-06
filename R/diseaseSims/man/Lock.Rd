@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{Lock}
 \alias{Lock}
-\title{Manage access to a gz-compressed file}
+\title{Manage access to a file}
 \usage{
 Lock(filename)
 }
@@ -13,6 +13,6 @@ Lock(filename)
 An external pointer to a boostScopedLockManager
 }
 \description{
-Manage access to a gz-compressed file
+Manage access to a file
 }
 

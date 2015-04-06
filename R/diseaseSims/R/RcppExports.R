@@ -9,15 +9,16 @@
     .Call('diseaseSims_getRiskVariantMatrixDetails_Pheno', PACKAGE = 'diseaseSims', model, popfile, popfile_offset, phenofile, phenofile_offset, dominance)
 }
 
-#' Manage access to a gz-compressed file
+#' Manage access to a file
 #' @param filename The file name to write to
 #' @return An external pointer to a boostScopedLockManager
 Lock <- function(filename) {
     .Call('diseaseSims_initScopedLock', PACKAGE = 'diseaseSims', filename)
 }
 
-#' Unlock and close a gz-compressed file
+#' Unlock and close a file
 #' @param s A boostScopedLockManager
+#' @note Failing to call this function may cause file locks to persist until the R session ends
 Unlock <- function(s) {
     invisible(.Call('diseaseSims_endScopedLock', PACKAGE = 'diseaseSims', s))
 }
