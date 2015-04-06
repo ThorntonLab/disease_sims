@@ -11,34 +11,15 @@
 
 #' Manage access to a gz-compressed file
 #' @param filename The file name to write to
-#' @param mode The mode for opening the file.
 #' @return An external pointer to a boostScopedLockManager
-gzLock <- function(filename, mode) {
-    .Call('diseaseSims_initZlibBoostScopedLock', PACKAGE = 'diseaseSims', filename, mode)
+Lock <- function(filename) {
+    .Call('diseaseSims_initScopedLock', PACKAGE = 'diseaseSims', filename)
 }
 
 #' Unlock and close a gz-compressed file
 #' @param s A boostScopedLockManager
-gzUnlock <- function(s) {
-    invisible(.Call('diseaseSims_endZlibBoostScopedLock', PACKAGE = 'diseaseSims', s))
-}
-
-#' Write a data frame to file
-#' @param s A data frame
-#' @param locker A boostScopedLockManager
-#' @param colnames If TRUE, write column names to file
-#' @param sep column separater
-writeDataFrame <- function(s, locker, colnames = TRUE, sep = "\t") {
-    .Call('diseaseSims_writeDataFrame', PACKAGE = 'diseaseSims', s, locker, colnames, sep)
-}
-
-#' Write a matrix to file
-#' @param s A matrix
-#' @param locker A boostScopedLockManager
-#' @param colnames If TRUE, write column names to file
-#' @param sep column separater
-writeMatrix <- function(s, locker, colnames = TRUE, sep = "\t") {
-    .Call('diseaseSims_writeMatrix', PACKAGE = 'diseaseSims', s, locker, colnames, sep)
+Unlock <- function(s) {
+    invisible(.Call('diseaseSims_endScopedLock', PACKAGE = 'diseaseSims', s))
 }
 
 #' Read effect sizes from a file at a specific position

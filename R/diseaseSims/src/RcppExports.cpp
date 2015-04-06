@@ -35,54 +35,25 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// initZlibBoostScopedLock
-SEXP initZlibBoostScopedLock(const char * filename, const char * mode);
-RcppExport SEXP diseaseSims_initZlibBoostScopedLock(SEXP filenameSEXP, SEXP modeSEXP) {
+// initScopedLock
+SEXP initScopedLock(const char * filename);
+RcppExport SEXP diseaseSims_initScopedLock(SEXP filenameSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< const char * >::type filename(filenameSEXP);
-    Rcpp::traits::input_parameter< const char * >::type mode(modeSEXP);
-    __result = Rcpp::wrap(initZlibBoostScopedLock(filename, mode));
+    __result = Rcpp::wrap(initScopedLock(filename));
     return __result;
 END_RCPP
 }
-// endZlibBoostScopedLock
-void endZlibBoostScopedLock(SEXP s);
-RcppExport SEXP diseaseSims_endZlibBoostScopedLock(SEXP sSEXP) {
+// endScopedLock
+void endScopedLock(SEXP s);
+RcppExport SEXP diseaseSims_endScopedLock(SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< SEXP >::type s(sSEXP);
-    endZlibBoostScopedLock(s);
+    endScopedLock(s);
     return R_NilValue;
-END_RCPP
-}
-// writeDataFrame
-int writeDataFrame(const SEXP s, SEXP locker, const bool& colnames, const char * sep);
-RcppExport SEXP diseaseSims_writeDataFrame(SEXP sSEXP, SEXP lockerSEXP, SEXP colnamesSEXP, SEXP sepSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< const SEXP >::type s(sSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type locker(lockerSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type colnames(colnamesSEXP);
-    Rcpp::traits::input_parameter< const char * >::type sep(sepSEXP);
-    __result = Rcpp::wrap(writeDataFrame(s, locker, colnames, sep));
-    return __result;
-END_RCPP
-}
-// writeMatrix
-int writeMatrix(const SEXP s, SEXP locker, const bool& colnames, const char * sep);
-RcppExport SEXP diseaseSims_writeMatrix(SEXP sSEXP, SEXP lockerSEXP, SEXP colnamesSEXP, SEXP sepSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< const SEXP >::type s(sSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type locker(lockerSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type colnames(colnamesSEXP);
-    Rcpp::traits::input_parameter< const char * >::type sep(sepSEXP);
-    __result = Rcpp::wrap(writeMatrix(s, locker, colnames, sep));
-    return __result;
 END_RCPP
 }
 // getEsizes
