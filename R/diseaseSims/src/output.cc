@@ -49,7 +49,8 @@ struct boostScopedLockManager
 	  {
 	    ostringstream o;
 	    o << "could not create file descriptor for " << filename
-	      << " with flags O_WRONLY|O_CREAT|O_APPEND." 
+	      << " with flags O_WRONLY|O_CREAT|O_APPEND" 
+	      << " and permissions S_IRUSR|S_IWUSR (user read/write)."
 	      << " Line " << __LINE__ << " of " << __FILE__ << '\n';
 	    Rcpp::stop(o.str());
 	  }
