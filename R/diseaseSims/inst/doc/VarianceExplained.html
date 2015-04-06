@@ -286,7 +286,7 @@ with an error.</p>
 <ul>
 <li>use lm for small data sets ( \(N \approx O(10^4)\) and 100s of risk mutations )</li>
 <li>use slm for large data sets, where the data frames contain \(O(10^9)\) elements</li>
-<li>Let the code decide if and when biglm should be used.</li>
+<li>Let the code decide if and when biglm should be used.  In this case, a warning will be emitted informing you that the code will use biglm instead.</li>
 </ul>
 
 <p>In all honesty, we have not checked which of slm or biglm is the faster method.  </p>
