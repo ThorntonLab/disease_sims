@@ -16,32 +16,28 @@ struct boostScopedLockManager
   typedef boost::interprocess::file_lock flock_t;
   typedef boost::interprocess::scoped_lock<flock_t> slock_t;
   int existed,fd;
-  flock_t * flock;
-  slock_t * slock;
-  bool closed;
+  flock_t flock;
+  slock_t slock;
+  bool closed,unlocked;
   
   void finish()
   {
     if( closed ) return;
-    flock->unlock();
-    slock->unlock();
+    flock.unlock();
+    slock.unlock();
+    unlocked = true;
     if( existed ) close(fd);
     closed = true;
   }
   
   boostScopedLockManager( const char * filename ) :
-    existed(1),fd(0),flock(nullptr),slock(nullptr),closed(false)
+    existed(1),fd(0),flock(flock_t()),slock(slock_t()),closed(false),unlocked(false)
   {
     //1. Check if the file exists
     struct stat buffer;
     existed = stat(filename,&buffer);
 
-    if( existed == 0 ) //then the file already exists
-      {
-	flock = new flock_t(filename);
-	slock = new slock_t(*flock);
-      }
-    else
+    if( existed != 0 ) //then the file does not exists
       {
 	//Create the file
 	fd = open(filename, O_WRONLY|O_CREAT|O_APPEND,S_IRUSR|S_IWUSR);
@@ -54,21 +50,22 @@ struct boostScopedLockManager
 	      << " Line " << __LINE__ << " of " << __FILE__ << '\n';
 	    Rcpp::stop(o.str());
 	  }
-	flock = new flock_t(filename);
-	slock = new slock_t(*flock);
       }
+    flock = flock_t(filename);
+    slock = slock_t(flock);
   }
 
   ~boostScopedLockManager()
   {
-    flock->unlock();
-    slock->unlock();
+    if(!unlocked)
+      {
+	flock.unlock();
+	slock.unlock();
+      }
     if(!closed&&existed)
       {
 	close(fd);
       }
-    delete flock;
-    delete slock;
   }
 };
 
