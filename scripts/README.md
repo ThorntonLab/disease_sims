@@ -10,7 +10,7 @@ To execute the script:
 
 In order for this to work, you need ALL of the dependencies installed first!!! (Yes, there are a lot of them.)
 
-This script probably takes several hours to complete on a typical workstation.
+This script probably takes 30-45 minutes to complete on a typical workstation.
 
 ## Notes
 
