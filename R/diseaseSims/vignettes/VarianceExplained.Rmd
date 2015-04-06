@@ -64,51 +64,46 @@ for(i in 1:nrow(idx))
     }
 ```
 
-## Example script
-This script shows the essentials of the analysis.  You may also regress actual phenotypes onto $M$.  See the help for how to do that:
+## Some details
+
+Currently, we support the following three methods for fitting the linear models:
+
+* lm, from R's base package
+* slm, from [SparseM](http://cran.r-project.org/web/packages/SparseM/index.html)
+* biglm, from [biglm](http://cran.r-project.org/web/packages/biglm/index.html)
+
+These method names may be supplied as arguments to vpv1aov.  The function will override your supplied method name if the following condition holds:
 
 ~~~{r}
-library(diseaseSims)
-help(getRiskVariantMatrix)
+prod( as.numeric(dim(m)) ) >= .Machine$integer.max
 ~~~
 
-Here is the script:
+If that condition holds, the method will be changed to "biglm".  If the "biglm" package namespace cannot be found, execution will stop at this point 
+with an error.
 
-~~~{r}
-library(diseaseSims)
-library(dplyr)
+Our recommendations for choosing a method are:
 
-##Read in the index
-idx=read.table("index.txt")
+* use lm for small data sets ( $N \approx O(10^4)$ and 100s of risk mutations )
+* use slm for large data sets, where the data frames contain $O(10^9)$ elements
+* Let the code decide if and when biglm should be used.
 
-##make output file and add header
-FF=gzfile("output.gz","w")
-write(paste("rep","p","rsq","adj.rsq",sep="\t"),FF) 
-close(FF)
+In all honesty, we have not checked which of slm or biglm is the faster method.  
 
-OFFSET=0
+The reason why you cannot use slm with data frames larger than the maximum integer size is the following:
 
-for(i in 1:nrow(idx))
-    {
-    ##Get the risk variant matrix for the population
-      XX=getRiskVariantMatrix("pop.bin.gz",OFFSET,model="additive")
-    ##Get the results of the aov analysis, and write them to output.gz
-      XX.aov = vpv1aov(XX,"output.gz",x$V1[i],append=TRUE,useSparseM=TRUE)
-      OFFSET=OFFSET+idx$V4[i]
-    }
+1. In R, the maximum length of a matrix (e.g, prod(dim(m))) is .Machine$integer.max (because matrices in R are stored as linear arrays with dimenion attribues)
+2. In R, the maximum size of a data.frame is .Machine$integer.max elements ("columns"), each of which may be .Machine$integer.max ("rows") long.
+3. Internally, slm makes a call to as.matrix.  If your data.frame is "too big", execution will stop.
 
-##Read in the output,
-##and plot mean var(explained) as function of frequency:
-x = fread("gunzip -c output.gz")
-x.s = x %>%
-    group_by(p) %>%
-        summarise(m.rsq = mean(rsq,na.rm=TRUE),
-                  m.adj.rsq = mean(adj.rsq))
-pdf("test.pdf",pointsize=18,height=10,width=10)
-plot(x.s$p,x.s$m.rsq,type="l",xlim=c(0,0.1),xlab="p",ylab="Vp/V1")
-lines(x.s$p,x.s$m.adj.rsq,col="red")
-dev.off()
-    
-##We can now delete the big data set if we want
-file.remove("output.gz")
-~~~
+## Warning: big RAM alert!
+
+These analyses can be very RAM-intensive.  We have worked with the following diploid population sizes:
+
+* $N = 20^4$
+* $N = 10^6$
+
+For our work, the larger $N$ corresponds to the end of an exponential growth model.  Processing the output of the smaller 
+population size required a trivial amount of RAM ( $\leq 400$ Gb).  However, the peak RAM use for the growth simulations was typically
+$\approx 70$ Gb, and the initial reading in of the data alon required about 8Gb.  It is therefore possible that processing such large populations
+will not be possible for all users.  In principle, this issue can be solved via a combination of the [bigmemory](http://cran.r-project.org/web/packages/bigmemory/index.html)
+and [biglm](http://cran.r-project.org/web/packages/biglm/index.html) packages, but we have not looked into that.

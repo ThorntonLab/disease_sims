@@ -1,5 +1,6 @@
 ## ----,fig.width=5,fig.height=5-------------------------------------------
 library(diseaseSims)
+library(dplyr)
 idx=read.table(system.file("extdata", "index.txt", package = "diseaseSims"))
 popfile=system.file("extdata", "pop.bin.gz", package = "diseaseSims")
 OFFSET=0
