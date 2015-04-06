@@ -307,18 +307,6 @@ What does the scaled selection parameter 4Ns mean in a growing population?  If w
 
 See the scripts in the workflow directory.
 
-#Utilities
-
-Used in writing the R01 for June 5, 2014
-
-##phenoburden
-
-Calculates statistics relatated to the deleterious mutation load in the entire population.
-
-##CCburden
-
-Calculates statistics related to the deleterous mutation load in a case/control panel.
-
 
 #Important links:
 
