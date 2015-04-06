@@ -37,7 +37,7 @@ To install the simulation in your user's $HOME:
 
 The above may be mixed and matched as needed.
 
-##Installing the R package
+## Installing the R package
 
 Once the main simulation is installed, you may install the diseaseSims R package.  The R package requires headers and a shared library installed when the simulation is installed.
 
@@ -51,8 +51,9 @@ The following packages are suggested:
 
 1. [SparseM](http://cran.r-project.org/web/packages/SparseM/index.html)
 2. [knitr](http://cran.r-project.org/web/packages/knitr/index.html)
+3. [biglm](http://cran.r-project.org/web/packages/biglm/index.html)
 
-###Vanilla instructions for installing the R package
+### Vanilla instructions for installing the R package
 
 Once the above dependencies are accounted for,
 
@@ -61,11 +62,20 @@ cd R
 R CMD INSTALL diseaseSims
 ```
 
+### Viewing the package's vignettes
+
+In R:
+
+~~~{r}
+library(diseaseSims)
+browseVignettes("diseaseSims")
+~~~
+
 ### Build the documentation for the R package
 
-```
+~~~
 R CMD Rd2pdf diseaseSims
-```
+~~~
 
 ##Notes
 
