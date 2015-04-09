@@ -83,6 +83,15 @@ vector<double> getEsizes( const vector<pair<mlist::iterator,unsigned> > & risk_i
   return rv;
 }
 
+vector<double> getPos( const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
+{
+  vector<double> rv;
+  for_each(risk_indexes.begin(),risk_indexes.end(),[&rv](const pair<mlist::iterator,unsigned> & __p) {
+      rv.push_back(__p.first->pos);
+    });
+  return rv;
+}
+
 std::vector<std::int8_t> columnsDuplicated( const std::vector<std::vector<unsigned> > & v )
 {
   std::vector<std::int8_t> rv(v.size(),0);
@@ -182,6 +191,7 @@ Rcpp::List getVariantMatrixDetails( const std::string & model,
   auto Gvals = getG(pop.diploids,dipG);
   auto genos = MakeVariantMatrix(pop.diploids,Gvals,risk_indexes,selectedOnly);
   return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(risk_indexes),
+			    Rcpp::Named("position") = getPos(risk_indexes),
 			    Rcpp::Named("genos") = genos);
  }
 				    
@@ -226,6 +236,7 @@ Rcpp::List getVariantMatrixDetails_Pheno( const std::string & model,
   vector<pair<mlist::iterator,unsigned> > risk_indexes = getVariantIndexes(pop.mutations,selectedOnly);
   auto genos = MakeVariantMatrix(pop.diploids,phenotypes,risk_indexes,selectedOnly);
   return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(risk_indexes),
+			    Rcpp::Named("position") = getPos(risk_indexes),
 			    Rcpp::Named("genos") = genos);
  }
 
