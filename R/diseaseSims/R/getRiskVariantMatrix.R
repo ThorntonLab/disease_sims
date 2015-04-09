@@ -38,13 +38,13 @@ getRiskVariantMatrix = function(popfilename,
             }
         if( missing(phenofilename) )
             {
-                XX = .getRiskVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance)
+                XX = .getVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance,TRUE)
                 return (XX);
             }
         if( missing(phenofileOffset) )
             {
                 stop("Error: offest missing for phenotype file");
             }
-        XX=.getRiskVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance)
+        XX=.getVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance,TRUE)
         return (XX);
     }

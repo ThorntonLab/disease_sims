@@ -5,9 +5,9 @@
 
 using namespace Rcpp;
 
-// getRiskVariantMatrixDetails
-Rcpp::List getRiskVariantMatrixDetails(const std::string& model, const std::string& popfile, const int64_t& popfile_offset, const double& dominance);
-RcppExport SEXP diseaseSims_getRiskVariantMatrixDetails(SEXP modelSEXP, SEXP popfileSEXP, SEXP popfile_offsetSEXP, SEXP dominanceSEXP) {
+// getVariantMatrixDetails
+Rcpp::List getVariantMatrixDetails(const std::string& model, const std::string& popfile, const int64_t& popfile_offset, const double& dominance, const double& selectedOnly);
+RcppExport SEXP diseaseSims_getVariantMatrixDetails(SEXP modelSEXP, SEXP popfileSEXP, SEXP popfile_offsetSEXP, SEXP dominanceSEXP, SEXP selectedOnlySEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -15,13 +15,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string& >::type popfile(popfileSEXP);
     Rcpp::traits::input_parameter< const int64_t& >::type popfile_offset(popfile_offsetSEXP);
     Rcpp::traits::input_parameter< const double& >::type dominance(dominanceSEXP);
-    __result = Rcpp::wrap(getRiskVariantMatrixDetails(model, popfile, popfile_offset, dominance));
+    Rcpp::traits::input_parameter< const double& >::type selectedOnly(selectedOnlySEXP);
+    __result = Rcpp::wrap(getVariantMatrixDetails(model, popfile, popfile_offset, dominance, selectedOnly));
     return __result;
 END_RCPP
 }
-// getRiskVariantMatrixDetails_Pheno
-Rcpp::List getRiskVariantMatrixDetails_Pheno(const std::string& model, const std::string& popfile, const int64_t& popfile_offset, const std::string& phenofile, const int64_t& phenofile_offset, const double& dominance);
-RcppExport SEXP diseaseSims_getRiskVariantMatrixDetails_Pheno(SEXP modelSEXP, SEXP popfileSEXP, SEXP popfile_offsetSEXP, SEXP phenofileSEXP, SEXP phenofile_offsetSEXP, SEXP dominanceSEXP) {
+// getVariantMatrixDetails_Pheno
+Rcpp::List getVariantMatrixDetails_Pheno(const std::string& model, const std::string& popfile, const int64_t& popfile_offset, const std::string& phenofile, const int64_t& phenofile_offset, const double& dominance, const double selectedOnly);
+RcppExport SEXP diseaseSims_getVariantMatrixDetails_Pheno(SEXP modelSEXP, SEXP popfileSEXP, SEXP popfile_offsetSEXP, SEXP phenofileSEXP, SEXP phenofile_offsetSEXP, SEXP dominanceSEXP, SEXP selectedOnlySEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -31,7 +32,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string& >::type phenofile(phenofileSEXP);
     Rcpp::traits::input_parameter< const int64_t& >::type phenofile_offset(phenofile_offsetSEXP);
     Rcpp::traits::input_parameter< const double& >::type dominance(dominanceSEXP);
-    __result = Rcpp::wrap(getRiskVariantMatrixDetails_Pheno(model, popfile, popfile_offset, phenofile, phenofile_offset, dominance));
+    Rcpp::traits::input_parameter< const double >::type selectedOnly(selectedOnlySEXP);
+    __result = Rcpp::wrap(getVariantMatrixDetails_Pheno(model, popfile, popfile_offset, phenofile, phenofile_offset, dominance, selectedOnly));
     return __result;
 END_RCPP
 }

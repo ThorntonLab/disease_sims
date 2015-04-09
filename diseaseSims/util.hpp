@@ -21,7 +21,9 @@ struct popstruct
 popstruct readPop( gzFile gzin );
 std::vector<double> getG( const dipvector & diploids,
 		     const Gfxn_t & dipG );
+//Counts of mutations per diploid
 vmcount_t get_mut_counts( const glist::const_iterator & g1,
-			  const glist::const_iterator & g2 );
+			  const glist::const_iterator & g2,
+			  const bool & selected = true);
 
 #endif

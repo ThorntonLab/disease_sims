@@ -19,7 +19,8 @@ vector<double> getG( const dipvector & diploids,
 }
 
 vmcount_t get_mut_counts( const glist::const_iterator & g1,
-			  const glist::const_iterator & g2 )
+			  const glist::const_iterator & g2,
+const bool & selected )
 {
   vmcount_t rv;
 
@@ -32,7 +33,15 @@ vmcount_t get_mut_counts( const glist::const_iterator & g1,
     else
       __itr->second++;
   };
-  for_each( g1->smutations.begin(), g1->smutations.end(),updater );
-  for_each( g2->smutations.begin(), g2->smutations.end(),updater );
+  if(selected)
+    {
+      for_each( g1->smutations.begin(), g1->smutations.end(),updater );
+      for_each( g2->smutations.begin(), g2->smutations.end(),updater );
+    }
+  else
+    {
+      for_each( g1->mutations.begin(), g1->mutations.end(),updater );
+      for_each( g2->mutations.begin(), g2->mutations.end(),updater );
+    }
   return rv;
 }
