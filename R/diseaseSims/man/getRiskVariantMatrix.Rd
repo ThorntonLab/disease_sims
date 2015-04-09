@@ -21,9 +21,12 @@ getRiskVariantMatrix(popfilename, popfileOffset, phenofilename, phenofileOffset,
 \item{dominance}{The dominance of a risk mutation.  Only applies to the "popgen" model of gene action}
 }
 \value{
-traits, which is a list of trait (or genetic) values for each individual
+genos, which is an data frame of genotypes. Rows = individuals. The first column contains trait
+values for each individual, and the remaining columns = 0,1,2 copies of risk mutation
 
-genos, which is an data frame of genotypes. Rows = individuals. Columns = 0,1,2 copies of risk mutation
+esizes, which is a numeric vector of effect sizes for each mutation in genos
+
+positions, which are the positions of every matrix in genos
 }
 \description{
 Return a genotype matrix based on risk variants from a population
