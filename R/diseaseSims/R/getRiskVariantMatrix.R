@@ -79,31 +79,4 @@ getRiskVariantMatrix = function(popfilename,
     dominance = 0)
     {
     return( getVariantMatrix(popfilename,popfileOffset,phenofilename,phenofileOffset,modelName,dominance,TRUE) )
-        ## if( missing(popfilename) ) {
-        ##     stop("Error: popfilename required")
-        ## }
-        ## if( missing(popfileOffset) ) {
-        ##     stop("Error: popfileOffset required")
-        ## }
-        ## if( popfileOffset < 0 ) {
-        ##     stop("Error: popfileOffset must be >= 0")
-        ## }
-        ## if(modelName != "recessive" &
-        ##    modelName != "additive" &
-        ##    modelName != "multiplicative" &
-        ##    modelName != "popgen")
-        ##     {
-        ##         stop("Error: invalid model name.  Must be one of: recessive, additive, multiplicative, or popgen")
-        ##     }
-        ## if( missing(phenofilename) )
-        ##     {
-        ##         XX = .getVariantMatrixDetails(modelName,popfilename,popfileOffset,dominance,TRUE)
-        ##         return (XX);
-        ##     }
-        ## if( missing(phenofileOffset) )
-        ##     {
-        ##         stop("Error: offest missing for phenotype file");
-        ##     }
-        ## XX=.getVariantMatrixDetailsPheno(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,dominance,TRUE)
-        ## return (XX);
-    }
+}
