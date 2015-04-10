@@ -5,6 +5,17 @@
 
 using namespace Rcpp;
 
+// reformactCCgenos
+DataFrame reformactCCgenos(const IntegerMatrix& m);
+RcppExport SEXP diseaseSims_reformactCCgenos(SEXP mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const IntegerMatrix& >::type m(mSEXP);
+    __result = Rcpp::wrap(reformactCCgenos(m));
+    return __result;
+END_RCPP
+}
 // getVariantMatrixDetails
 Rcpp::List getVariantMatrixDetails(const std::string& model, const std::string& popfile, const int64_t& popfile_offset, const double& dominance, const double& selectedOnly);
 RcppExport SEXP diseaseSims_getVariantMatrixDetails(SEXP modelSEXP, SEXP popfileSEXP, SEXP popfile_offsetSEXP, SEXP dominanceSEXP, SEXP selectedOnlySEXP) {
