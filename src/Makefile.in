@@ -79,9 +79,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = TFL2013$(EXEEXT) TFL2013_ind$(EXEEXT) \
-	make_case_control$(EXEEXT) make_case_controlEW$(EXEEXT) \
-	chksimoutput$(EXEEXT) genburden$(EXEEXT)
+bin_PROGRAMS = TFL2013_ind$(EXEEXT) make_case_control$(EXEEXT) \
+	make_case_controlEW$(EXEEXT) chksimoutput$(EXEEXT) \
+	genburden$(EXEEXT)
 @DEBUG_FALSE@am__append_1 = -DNDEBUG
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -138,9 +138,6 @@ am_libdiseaseSimsHelper_la_OBJECTS = ccintermediate.lo util.lo
 libdiseaseSimsHelper_la_OBJECTS =  \
 	$(am_libdiseaseSimsHelper_la_OBJECTS)
 PROGRAMS = $(bin_PROGRAMS)
-am_TFL2013_OBJECTS = TFL2013.$(OBJEXT)
-TFL2013_OBJECTS = $(am_TFL2013_OBJECTS)
-TFL2013_DEPENDENCIES =
 am_TFL2013_ind_OBJECTS = TFL2013_ind.$(OBJEXT) \
 	TFL2013_ind_params.$(OBJEXT)
 TFL2013_ind_OBJECTS = $(am_TFL2013_ind_OBJECTS)
@@ -194,14 +191,13 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libcommon_la_SOURCES) $(libdiseaseSimsHelper_la_SOURCES) \
-	$(TFL2013_SOURCES) $(TFL2013_ind_SOURCES) \
-	$(chksimoutput_SOURCES) $(genburden_SOURCES) \
-	$(make_case_control_SOURCES) $(make_case_controlEW_SOURCES)
-DIST_SOURCES = $(libcommon_la_SOURCES) \
-	$(libdiseaseSimsHelper_la_SOURCES) $(TFL2013_SOURCES) \
 	$(TFL2013_ind_SOURCES) $(chksimoutput_SOURCES) \
 	$(genburden_SOURCES) $(make_case_control_SOURCES) \
 	$(make_case_controlEW_SOURCES)
+DIST_SOURCES = $(libcommon_la_SOURCES) \
+	$(libdiseaseSimsHelper_la_SOURCES) $(TFL2013_ind_SOURCES) \
+	$(chksimoutput_SOURCES) $(genburden_SOURCES) \
+	$(make_case_control_SOURCES) $(make_case_controlEW_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -355,7 +351,7 @@ libdiseaseSimsHelper_la_SOURCES = ccintermediate.cc util.cc
 #atomic_locker/atomic_locker
 
 #TFL2013_ind_SOURCES=
-TFL2013_SOURCES = TFL2013.cc
+#TFL2013_SOURCES=TFL2013.cc
 TFL2013_ind_SOURCES = TFL2013_ind.cc TFL2013_ind_params.cc
 make_case_control_SOURCES = make_case_control.cc simindex.cc readSimOutput.cc
 make_case_controlEW_SOURCES = make_case_controlEW.cc simindex.cc readSimOutput.cc
@@ -367,7 +363,6 @@ genburden_SOURCES = genburden.cc
 make_case_control_LDADD = libcommon.la
 make_case_controlEW_LDADD = libcommon.la
 AM_CPPFLAGS = -W -Wall -I. $(am__append_1)
-TFL2013_LDADD = -lboost_iostreams
 all: all-am
 
 .SUFFIXES:
@@ -504,10 +499,6 @@ clean-binPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-TFL2013$(EXEEXT): $(TFL2013_OBJECTS) $(TFL2013_DEPENDENCIES) $(EXTRA_TFL2013_DEPENDENCIES) 
-	@rm -f TFL2013$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(TFL2013_OBJECTS) $(TFL2013_LDADD) $(LIBS)
-
 TFL2013_ind$(EXEEXT): $(TFL2013_ind_OBJECTS) $(TFL2013_ind_DEPENDENCIES) $(EXTRA_TFL2013_ind_DEPENDENCIES) 
 	@rm -f TFL2013_ind$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(TFL2013_ind_OBJECTS) $(TFL2013_ind_LDADD) $(LIBS)
@@ -534,7 +525,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFL2013.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFL2013_ind.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFL2013_ind_params.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ccintermediate.Plo@am__quote@
@@ -783,6 +773,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
 	uninstall-am uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
+
+#TFL2013_LDADD=-lboost_iostreams
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

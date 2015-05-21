@@ -1,4 +1,4 @@
-bin_PROGRAMS=TFL2013 TFL2013_ind make_case_control make_case_controlEW chksimoutput genburden
+bin_PROGRAMS=TFL2013_ind make_case_control make_case_controlEW chksimoutput genburden
 
 noinst_LTLIBRARIES=libcommon.la
 lib_LTLIBRARIES=libdiseaseSimsHelper.la
@@ -7,7 +7,7 @@ libdiseaseSimsHelper_la_SOURCES=ccintermediate.cc util.cc
 #atomic_locker/atomic_locker
 
 #TFL2013_ind_SOURCES=
-TFL2013_SOURCES=TFL2013.cc
+#TFL2013_SOURCES=TFL2013.cc
 TFL2013_ind_SOURCES=TFL2013_ind.cc TFL2013_ind_params.cc
 make_case_control_SOURCES=make_case_control.cc simindex.cc readSimOutput.cc
 make_case_controlEW_SOURCES=make_case_controlEW.cc simindex.cc readSimOutput.cc
@@ -26,5 +26,5 @@ else !DEBUG
 AM_CPPFLAGS+=-DNDEBUG
 endif
 
-TFL2013_LDADD=-lboost_iostreams
+#TFL2013_LDADD=-lboost_iostreams
 
