@@ -189,6 +189,7 @@ List sampleCCfromPop( const char * popfilename,
     {
       phenos2.push_back( make_pair( phenos(i,0),phenos(i,1) ) );
     }
+
   double cutoff;
   pair<double,double> mean_sd = phenosums(phenos2,case_proportion,&cutoff);
   vector<unsigned> put_controls,put_cases;
@@ -211,12 +212,11 @@ List sampleCCfromPop( const char * popfilename,
 	back_inserter(pos) );
   IntegerMatrix genos(ncontrols+ncases,ccblocks.neutral.numsites()+ccblocks.causative.size()),
     burdens(ncontrols+ncases,2);
-
   //Add the neutral sites into genos
   unsigned I = 0;
   for( unsigned i = 0 ; i < ccblocks.neutral.size() ; i+= 2,++I )
     {
-      for( unsigned j = 0 ; j < ccblocks.neutral.numsites() ; i += 2 )
+      for( unsigned j = 0 ; j < ccblocks.neutral.numsites() ; ++j )
 	{
 	  genos(I,j) += (ccblocks.neutral[i][j]=='1') ? 1 : 0;
 	  genos(I,j) += (ccblocks.neutral[i+1][j]=='1') ? 1 : 0;
@@ -226,7 +226,7 @@ List sampleCCfromPop( const char * popfilename,
   //And the causative
   for( unsigned i = 0 ; i < ccblocks.causative.size() ; i+= 2,++I )
     {
-      for( unsigned j = 0 ; j < ccblocks.causative.numsites() ; i += 2 )
+      for( unsigned j = 0 ; j < ccblocks.causative.numsites() ; ++j )
 	{
 	  genos(I,j + ccblocks.neutral.numsites()) += (ccblocks.causative[i][j]=='1') ? 1 : 0;
 	  genos(I,j + ccblocks.neutral.numsites()) += (ccblocks.causative[i+1][j]=='1') ? 1 : 0;
