@@ -13,6 +13,10 @@
     .Call('diseaseSims_getVariantMatrixDetails_Pheno', PACKAGE = 'diseaseSims', model, popfile, popfile_offset, phenofile, phenofile_offset, dominance, selectedOnly)
 }
 
+.getVariantMatrixDetailsSubset <- function(model, popfile, popfile_offset, phenofile, phenofile_offset, subset, nsample, dominance = 0., selectedOnly = FALSE) {
+    .Call('diseaseSims_getVariantMatrixDetails_Subset', PACKAGE = 'diseaseSims', model, popfile, popfile_offset, phenofile, phenofile_offset, subset, nsample, dominance, selectedOnly)
+}
+
 #' Manage access to a file
 #' @param filename The file name to write to
 #' @return An external pointer to a boostScopedLockManager

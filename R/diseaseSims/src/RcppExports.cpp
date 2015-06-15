@@ -48,6 +48,25 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// getVariantMatrixDetails_Subset
+Rcpp::List getVariantMatrixDetails_Subset(const std::string& model, const std::string& popfile, const int64_t& popfile_offset, const std::string& phenofile, const int64_t& phenofile_offset, const std::vector<int>& subset, const int& nsample, const double& dominance, const double selectedOnly);
+RcppExport SEXP diseaseSims_getVariantMatrixDetails_Subset(SEXP modelSEXP, SEXP popfileSEXP, SEXP popfile_offsetSEXP, SEXP phenofileSEXP, SEXP phenofile_offsetSEXP, SEXP subsetSEXP, SEXP nsampleSEXP, SEXP dominanceSEXP, SEXP selectedOnlySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const std::string& >::type model(modelSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type popfile(popfileSEXP);
+    Rcpp::traits::input_parameter< const int64_t& >::type popfile_offset(popfile_offsetSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type phenofile(phenofileSEXP);
+    Rcpp::traits::input_parameter< const int64_t& >::type phenofile_offset(phenofile_offsetSEXP);
+    Rcpp::traits::input_parameter< const std::vector<int>& >::type subset(subsetSEXP);
+    Rcpp::traits::input_parameter< const int& >::type nsample(nsampleSEXP);
+    Rcpp::traits::input_parameter< const double& >::type dominance(dominanceSEXP);
+    Rcpp::traits::input_parameter< const double >::type selectedOnly(selectedOnlySEXP);
+    __result = Rcpp::wrap(getVariantMatrixDetails_Subset(model, popfile, popfile_offset, phenofile, phenofile_offset, subset, nsample, dominance, selectedOnly));
+    return __result;
+END_RCPP
+}
 // initScopedLock
 SEXP initScopedLock(const char * filename);
 RcppExport SEXP diseaseSims_initScopedLock(SEXP filenameSEXP) {

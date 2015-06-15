@@ -1,4 +1,4 @@
-## ----, fig.height=5, fig.width=5-----------------------------------------
+## ---- fig.height=5, fig.width=5------------------------------------------
 library(diseaseSims)
 library(dplyr)
 ##n = 100, and if you use n >= 2N, 2N will be used
