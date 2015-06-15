@@ -1,4 +1,4 @@
-## ----,fig.width=5,fig.height=5-------------------------------------------
+## ----fig.width=5,fig.height=5--------------------------------------------
 library(diseaseSims)
 library(dplyr)
 idx=read.table(system.file("extdata", "index.txt", package = "diseaseSims"))

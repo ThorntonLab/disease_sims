@@ -164,6 +164,69 @@ Rcpp::DataFrame MakeVariantMatrix( const dipvector & diploids,
   return Rcpp::DataFrame(temp2);
 }
 
+
+Rcpp::DataFrame MakeVariantMatrixSubset( const dipvector & diploids,
+					 const std::vector<double> & trait_vals,
+					 const vector<pair<mlist::iterator,unsigned> > & risk_indexes,
+					 const std::vector<int> & subset,
+					 const int & nsample,
+					 const bool & selectedOnly )
+/*
+  Problem: R/Rcpp matrices may not be able to hold enough data: http://stackoverflow.com/questions/9984283/maximum-size-of-a-matrix-in-r
+  Solution: Romain's advice from:
+  http://stackoverflow.com/questions/23865210/how-to-convert-stdvectorstdvectordouble-to-rcppdataframe-or-rcppnume
+  Romain implies that it may be important to set the dimnames.  It is, otherwise things go south with the return value.
+*/
+{
+
+  std::vector<std::vector<unsigned> > temp(risk_indexes.size(),
+					   std::vector<unsigned>(nsample,0u));
+  unsigned n = 0;
+  for( unsigned ind = 0 ; ind < diploids.size() ; ++ind )
+    {
+      if ( subset[ind]==1 ){
+      vmcount_t vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,true);
+      for( unsigned i = 0 ; i < vmc.size() ; ++i )
+	{
+	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+	      return __p.first == vmc[i].first;
+	    });
+	  temp[__itr->second][n] = vmc[i].second;
+	}
+      //Do non-risk muts for this individual, if desired.
+      //Note: risk_indexes needs to be created correctly for this to not segfault/barf badly...
+      if(! selectedOnly )
+	{
+	  vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,false);
+	  for( unsigned i = 0 ; i < vmc.size() ; ++i )
+	    {
+	      auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+		  return __p.first == vmc[i].first;
+		});
+	      temp[__itr->second][n] = vmc[i].second;
+	    }
+	}
+      n++;
+      }
+    }
+  Rcpp::List temp2(temp.size()+1);
+  temp2[0] = Rcpp::wrap( trait_vals.begin(),trait_vals.end() );
+  Rcpp::CharacterVector colNames;
+  colNames.push_back("trait");
+  unsigned i = 0;
+  for( ; i < temp.size() ; ++i) 
+    {
+      ostringstream NAME;
+      NAME << 'V' << (i+1);
+      colNames.push_back( NAME.str() );
+      temp2[i+1] = Rcpp::wrap(temp[i].begin(),temp[i].end());
+    }
+  temp2.attr("names")=colNames;
+  return Rcpp::DataFrame(temp2);
+
+
+}
+
 // Details of how to get a genotype matrix for risk variants
 //[[Rcpp::export(".getVariantMatrixDetails")]]
 Rcpp::List getVariantMatrixDetails( const std::string & model,
@@ -241,6 +304,61 @@ Rcpp::List getVariantMatrixDetails_Pheno( const std::string & model,
  }
 
 
+// Get variant matrix of subset of population.
+//[[Rcpp::export(".getVariantMatrixDetailsSubset")]]
+Rcpp::List getVariantMatrixDetails_Subset( const std::string & model,
+					   const std::string & popfile,
+					   const int64_t & popfile_offset,
+					   const std::string & phenofile,
+					   const int64_t & phenofile_offset,
+					   const std::vector<int> & subset,
+					   const int & nsample,
+					   const double & dominance = 0., 
+					   const double selectedOnly= false)
+{
+
+  gzFile gzin = gzopen(popfile.c_str(),"rb");
+  if( gzin == NULL ) 
+    {
+      Rcpp::Rcerr << "Error, " << popfile
+		  << " could not be opened for reading.\n";
+      return Rcpp::List();
+    }
+  
+  gzseek(gzin,popfile_offset, SEEK_SET);
+
+  Gfxn_t dipG = setModel(model,dominance);
+
+  popstruct pop = readPop(gzin);
+  gzclose(gzin);
+
+  gzin = gzopen(phenofile.c_str(),"rb");
+  gzseek(gzin,phenofile_offset,SEEK_SET);
+  unsigned ndips = 0;
+  gzread(gzin,&ndips,sizeof(unsigned));
+  vector<double> phenotypes(nsample);
+  
+  unsigned a = 0 ;
+  for( unsigned i = 0 ; i < ndips ; ++i )
+    {
+      
+      double G,E;
+      gzread(gzin,&G,sizeof(double));
+      gzread(gzin,&E,sizeof(double));
+      if ( subset[i]==1 ){
+	phenotypes[a] = G + E;
+	a++;
+      }
+    }
+  gzclose(gzin);
+  vector<pair<mlist::iterator,unsigned> > risk_indexes = getVariantIndexes(pop.mutations,selectedOnly);
+  auto genos = MakeVariantMatrixSubset(pop.diploids,phenotypes,risk_indexes,subset,nsample,selectedOnly);
+  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(risk_indexes),
+			    Rcpp::Named("position") = getPos(risk_indexes),
+			    Rcpp::Named("genos") = genos);
+
+
+}
 /*
   Below are fxns for returning the entire variant matrix for an entire pop,
   e.g. all risk + non-risk variants.
