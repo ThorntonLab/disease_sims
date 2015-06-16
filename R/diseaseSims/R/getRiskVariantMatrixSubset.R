@@ -8,10 +8,12 @@
 #' @param selectedOnly True or False, get causative sites only
 #' @param subset A vector of 0/1, specifying which individuals to take from the population
 #' @param nsample An integer value specifying the size of the subset being taken
+#' @param phenoSum, a bool which specifies how to return phenotypes; if true then sum P=G+E and tack to variant matrix, if false keep separate.
 #' @return genos, which is an data frame of genotypes. Rows = individuals. The first column contains trait
-#' values for each individual, and the remaining columns = 0,1,2 copies of risk mutation
+#' values for each individual if phenoSum =TRUE, and the remaining columns = 0,1,2 copies of risk mutation
 #' @return esizes, which is a numeric vector of effect sizes for each mutation in genos
 #' @return positions, which are the positions of every matrix in genos
+#' @return phenos, as separate G and E values for each indidivudal if phenoSum=FALSE
 #' @details
 #' The order of the columns in "genos" is in descending order of both frequency and absolute value of effect size
 #' If phenofilename and phenofileOffset are both provided, then "traits" corresponds to individual phenotypes.
@@ -26,7 +28,8 @@ getVariantMatrixSubset = function(popfilename,
     dominance = 0,
     selectedOnly = TRUE,
     subset,
-    nsample)
+    nsample,
+    sumPheno = FALSE)
     {
         if( missing(popfilename) ) {
             stop("Error: popfilename required")
@@ -52,7 +55,11 @@ getVariantMatrixSubset = function(popfilename,
             {
                 stop("Error: offest missing for phenotype file");
             }
-        XX=.getVariantMatrixDetailsSubset(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,subset,nsample,dominance,selectedOnly)
+        if (sumPheno==TRUE){
+            XX=.getVariantMatrixDetailsSubset(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,subset,nsample,dominance,selectedOnly)
+        } else {
+            XX=.getVariantMatrixDetailsSubsetGE(modelName,popfilename,popfileOffset,phenofilename,phenofileOffset,subset,nsample,dominance,selectedOnly)  
+        }
         return (XX);
     }
 
