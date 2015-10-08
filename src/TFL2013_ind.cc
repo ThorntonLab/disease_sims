@@ -179,7 +179,7 @@ int main(int argc, char ** argv)
     MMODEL = std::bind(mut_model2<dist_tag>,r,ttl_gen,params.mmp,&lookup);
   if(params.model == MODEL::EYREWALKER)
     MMODEL = std::bind(mut_model2<ew_tag>,r,ttl_gen,params.mmp,&lookup);
-
+  gtype::mutation_container neutral,selected;
   for( generation = 0; generation < params.ngens_burnin; ++generation,++ttl_gen )
     {
       //Evolution w/no deleterious mutations and no selection.
@@ -190,7 +190,8 @@ int main(int argc, char ** argv)
 			    params.N,
 			    params.mmp.mu_neutral,
 			    MMODEL,
-			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
+			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,
+				      std::ref(neutral),std::ref(selected),
 				      &gametes,
 				      params.littler,
 				      r,
@@ -237,6 +238,8 @@ int main(int argc, char ** argv)
 			    params.mmp.mu_disease+params.mmp.mu_neutral,
 			    MMODEL,
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
+				      std::placeholders::_3,
+				      std::ref(neutral),std::ref(selected),
 				      &gametes,
 				      params.littler,
 				      r,
@@ -260,6 +263,8 @@ int main(int argc, char ** argv)
 			    params.mmp.mu_disease+params.mmp.mu_neutral,
 			    MMODEL,
 			    std::bind(KTfwd::genetics101(),std::placeholders::_1,std::placeholders::_2,
+				      std::placeholders::_3,
+				      std::ref(neutral),std::ref(selected),
 				      &gametes,
 				      params.littler,
 				      r,
