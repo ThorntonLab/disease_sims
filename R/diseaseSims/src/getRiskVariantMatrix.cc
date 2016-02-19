@@ -285,7 +285,183 @@ Rcpp::DataFrame MakeVariantMatrixSubset_GE( const dipvector & diploids,
   return Rcpp::DataFrame(temp2);
 }
 
+Rcpp::DataFrame MakeVariantMatrixDominance( const dipvector & diploids,
+					    const std::vector<double> & trait_vals,
+					    const vector<pair<mlist::iterator,unsigned> > & risk_indexes,
+					    const bool & selectedOnly )
+/*
+  Problem: R/Rcpp matrices may not be able to hold enough data: http://stackoverflow.com/questions/9984283/maximum-size-of-a-matrix-in-r
+  Solution: Romain's advice from:
+  http://stackoverflow.com/questions/23865210/how-to-convert-stdvectorstdvectordouble-to-rcppdataframe-or-rcppnume
 
+  Romain implies that it may be important to set the dimnames.  It is, otherwise things go south with the return value.
+*/
+{
+  //note: temp is 2*risk_indexes.size() because each variant will now have a dominance component
+  std::vector<std::vector<float> > temp(2*risk_indexes.size(),std::vector<float>(diploids.size(),0u));
+  for( unsigned ind = 0 ; ind < diploids.size() ; ++ind )
+    {
+      vmcount_t vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,true);
+      for( unsigned i = 0 ; i < vmc.size() ; ++i )
+	{
+	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+	      return __p.first == vmc[i].first;
+	    });
+	  //Fill the additive components in first
+	  temp[2*(__itr->second)][ind] = vmc[i].second;
+	}
+      //Do non-risk muts for this individual, if desired.
+      //Note: risk_indexes needs to be created correctly for this to not segfault/barf badly...
+      if(! selectedOnly )
+	{
+	  vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,false);
+	  for( unsigned i = 0 ; i < vmc.size() ; ++i )
+	    {
+	      auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+		  return __p.first == vmc[i].first;
+		});
+	      temp[2*(__itr->second)][ind] = vmc[i].second;
+	    }
+	}
+    }
+  //for each mutatation
+  for (unsigned mut = 0; mut<risk_indexes.size();++mut)
+    {
+      //get its frequency
+      int mutcount = 0;
+      for (std::vector<float>::iterator it = temp[2*mut].begin() ; it!=  temp[2*mut].end() ; ++it)
+	{
+	  mutcount += *it;
+	}
+      float mutfreq = mutcount/((float)2*diploids.size());
+      /*now go back through the individuals for that mutation and assign the dominance variable from this paper:
+       1. Zhu, et al. The American Journal of Human Genetics (2015): 377–385. doi:10.1016/j.ajhg.2015.01.001
+       */
+      for( unsigned ind = 0 ; ind< diploids.size(); ++ind)
+	{
+	  //if count is 0 then leave as zero
+	  if (temp[2*mut][ind]==1)
+	    {
+	      temp[2*mut + 1][ind]= 2.*mutfreq;
+	    }
+	  else if ( temp[2*mut][ind]==2)
+	    {
+	      temp[2*mut + 1][ind]= 4.*mutfreq - 2.;
+	    }
+	}
+       
+    }
+
+
+  Rcpp::List temp2(temp.size()+1);
+  temp2[0] = Rcpp::wrap( trait_vals.begin(),trait_vals.end() );
+  Rcpp::CharacterVector colNames;
+  colNames.push_back("trait");
+  unsigned i = 0;
+  for( ; i < temp.size() ; ++i) 
+    {
+      ostringstream NAME;
+      NAME << 'V' << (i+1);
+      colNames.push_back( NAME.str() );
+      temp2[i+1] = Rcpp::wrap(temp[i].begin(),temp[i].end());
+    }
+  temp2.attr("names")=colNames;
+  return Rcpp::DataFrame(temp2);
+}
+
+Rcpp::DataFrame MakeVariantMatrixDominanceSubset( const dipvector & diploids,
+					    const std::vector<double> & trait_vals,
+					    const vector<pair<mlist::iterator,unsigned> > & risk_indexes,
+					    const std::vector<int> & subset,
+					    const int & nsample,
+					    const bool & selectedOnly )
+/*
+  Problem: R/Rcpp matrices may not be able to hold enough data: http://stackoverflow.com/questions/9984283/maximum-size-of-a-matrix-in-r
+  Solution: Romain's advice from:
+  http://stackoverflow.com/questions/23865210/how-to-convert-stdvectorstdvectordouble-to-rcppdataframe-or-rcppnume
+
+  Romain implies that it may be important to set the dimnames.  It is, otherwise things go south with the return value.
+*/
+{
+  //note: temp is 2*risk_indexes.size() because each variant will now have a dominance component
+  std::vector<std::vector<float> > temp(2*risk_indexes.size(),std::vector<float>(nsample,0u));
+  unsigned n =  0; 
+  for( unsigned ind = 0 ; ind < diploids.size() ; ++ind )
+    {
+      if ( subset[ind]==1){
+	vmcount_t vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,true);
+	for( unsigned i = 0 ; i < vmc.size() ; ++i )
+	  {
+	    auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+		return __p.first == vmc[i].first;
+	      });
+	    //Fill the additive components in first
+	    temp[2*(__itr->second)][n] = vmc[i].second;
+	  }
+	//Do non-risk muts for this individual, if desired.
+	//Note: risk_indexes needs to be created correctly for this to not segfault/barf badly...
+	if(! selectedOnly )
+	  {
+	    vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,false);
+	    for( unsigned i = 0 ; i < vmc.size() ; ++i )
+	      {
+		auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+		    return __p.first == vmc[i].first;
+		  });
+		temp[2*(__itr->second)][n] = vmc[i].second;
+	      }
+	  }
+	n++;
+      }
+    }
+  //for each mutatation
+  for (unsigned mut = 0; mut<risk_indexes.size();++mut)
+    {
+      //get its frequency
+      int mutcount = 0;
+      for (std::vector<float>::iterator it = temp[2*mut].begin() ; it!=  temp[2*mut].end() ; ++it)
+	{
+	  mutcount += *it;
+	}
+      float mutfreq = mutcount/((float)2*diploids.size());
+      /*now go back through the individuals for that mutation and assign the dominance variable from this paper:
+       1. Zhu, et al. The American Journal of Human Genetics (2015): 377–385. doi:10.1016/j.ajhg.2015.01.001
+       */
+      for( unsigned ind = 0 ; ind< n; ++ind)
+	{
+	  //if count is 0 then leave as zero
+	  if (temp[2*mut][ind]==1)
+	    {
+	      temp[2*mut + 1][ind]= 2.*mutfreq;
+	    }
+	  else if ( temp[2*mut][ind]==2)
+	    {
+	      temp[2*mut + 1][ind]= 4.*mutfreq - 2.;
+	    }
+	}
+       
+    }
+
+
+  Rcpp::List temp2(temp.size()+1);
+  temp2[0] = Rcpp::wrap( trait_vals.begin(),trait_vals.end() );
+  Rcpp::CharacterVector colNames;
+  colNames.push_back("trait");
+  unsigned i = 0;
+  for( ; i < temp.size() ; ++i) 
+    {
+      ostringstream NAME;
+      NAME << 'V' << (i+1);
+      colNames.push_back( NAME.str() );
+      temp2[i+1] = Rcpp::wrap(temp[i].begin(),temp[i].end());
+    }
+  temp2.attr("names")=colNames;
+  return Rcpp::DataFrame(temp2);
+}
+
+
+//////////////////////////////////////////////
+//Details
 
 // Details of how to get a genotype matrix for risk variants
 //[[Rcpp::export(".getVariantMatrixDetails")]]
@@ -477,6 +653,83 @@ Rcpp::List getVariantMatrixDetails_SubsetGE( const std::string & model,
 
 
 }
+
+
+
+// Details of how to get a genotype matrix for risk variants
+//[[Rcpp::export(".getVariantMatrixDominanceDetails")]]
+Rcpp::List getVariantMatrixDominanceDetails( const std::string & model,
+					     const std::string & popfile,
+					     const int64_t & popfile_offset,
+					     const double & dominance = 0.,
+					     const double & selectedOnly = true)
+{
+  gzFile gzin = gzopen(popfile.c_str(),"rb");
+  if( gzin == NULL ) 
+    {
+      Rcpp::Rcerr << "Error, " << popfile
+		  << " could not be opened for reading.\n";
+      return Rcpp::List();
+    }
+
+  gzseek(gzin,popfile_offset, SEEK_SET);
+
+  Gfxn_t dipG = setModel(model,dominance);
+
+  popstruct pop = readPop(gzin);
+  gzclose(gzin);
+
+  vector<pair<mlist::iterator,unsigned> > risk_indexes = getVariantIndexes(pop.mutations,selectedOnly);
+  auto Gvals = getG(pop.diploids,dipG);
+  auto genos = MakeVariantMatrixDominance(pop.diploids,Gvals,risk_indexes,selectedOnly);
+  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(risk_indexes),
+			    Rcpp::Named("position") = getPos(risk_indexes),
+			    Rcpp::Named("genos") = genos);
+ }
+
+
+// Details of how to get a genotype matrix for risk variants with dominance from a population subset
+//[[Rcpp::export(".getVariantMatrixDominanceDetailsSubset")]]
+Rcpp::List getVariantMatrixDominanceDetails_Subset( const std::string & model,
+					     const std::string & popfile,
+					     const int64_t & popfile_offset,
+					     const std::vector<int> & subset,
+					     const int & nsample,
+					     const double & dominance = 0.,
+					     const double & selectedOnly = true)
+{
+  gzFile gzin = gzopen(popfile.c_str(),"rb");
+  if( gzin == NULL ) 
+    {
+      Rcpp::Rcerr << "Error, " << popfile
+		  << " could not be opened for reading.\n";
+      return Rcpp::List();
+    }
+
+  gzseek(gzin,popfile_offset, SEEK_SET);
+
+  Gfxn_t dipG = setModel(model,dominance);
+
+  popstruct pop = readPop(gzin);
+  gzclose(gzin);
+
+  vector<pair<mlist::iterator,unsigned> > risk_indexes = getVariantIndexes(pop.mutations,selectedOnly);
+  auto Gtemp = getG(pop.diploids,dipG);
+  std::vector<double> Gvals(nsample);
+  size_t a = 0; 
+  for (size_t i = 0 ; i < Gtemp.size(); ++i)
+    {
+      if (subset[i]==1){
+	Gvals[a] = Gtemp[i];
+	a++;
+      }
+    }
+  auto genos = MakeVariantMatrixDominanceSubset(pop.diploids,Gvals,risk_indexes,subset,nsample,selectedOnly);
+  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(risk_indexes),
+			    Rcpp::Named("position") = getPos(risk_indexes),
+			    Rcpp::Named("genos") = genos);
+ }
+
 /*
   Below are fxns for returning the entire variant matrix for an entire pop,
   e.g. all risk + non-risk variants.
