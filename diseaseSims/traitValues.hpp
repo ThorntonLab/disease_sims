@@ -10,19 +10,20 @@
 struct TFL2013g
 {
   using return_type = double;
-  inline double operator()( const glist::const_iterator & g1,
-			    const glist::const_iterator & g2) const
+  inline double operator()( const poptype::gamete_t & g1,
+			    const poptype::gamete_t & g2,
+			    const poptype::mcont_t & mutations) const
   {
-    double e1 = std::accumulate( g1->smutations.begin(),
-				 g1->smutations.end(),
+    double e1 = std::accumulate( g1.smutations.begin(),
+				 g1.smutations.end(),
 				 0.,
-				 [](const double & a,
-				    const gtype::mutation_list_type_iterator & b) { return a + b->s; } );
-    double e2 = std::accumulate( g2->smutations.begin(),
-				 g2->smutations.end(),
+				 [&mutations](const double & a,
+					      const std::size_t b) { return a + mutations[b].s; } );
+    double e2 = std::accumulate( g2.smutations.begin(),
+				 g2.smutations.end(),
 				 0.,
-				 [](const double & a,
-				    const gtype::mutation_list_type_iterator & b) { return a + b->s; } );
+				 [&mutations](const double & a,
+					      const std::size_t b) { return a + mutations[b].s; } );
     return (sqrt(e1*e2));
   }
 };
@@ -31,19 +32,20 @@ struct TFL2013g
 struct additiveg
 {
   using return_type = double;
-  inline double operator()( const glist::const_iterator & g1,
-			    const glist::const_iterator & g2) const
+  inline double operator()( const poptype::gamete_t & g1,
+			    const poptype::gamete_t & g2,
+			    const poptype::mcont_t & mutations) const
   {
-    return std::accumulate( g1->smutations.begin(),
-			    g1->smutations.end(),
+    return std::accumulate( g1.smutations.begin(),
+			    g1.smutations.end(),
 			    0.,
-			    [](const double & a,
-			       const gtype::mutation_list_type_iterator & b) { return a + b->s; } )
-      + std::accumulate( g2->smutations.begin(),
-			 g2->smutations.end(),
+			    [&mutations](const double & a,
+					 const std::size_t b) { return a + mutations[b].s; } )
+      + std::accumulate( g2.smutations.begin(),
+			 g2.smutations.end(),
 			 0.,
-			 [](const double & a,
-			    const gtype::mutation_list_type_iterator & b) { return a + b->s; } );
+			 [&mutations](const double & a,
+				      const std::size_t b) { return a + mutations[b].s; } );
   }
 };
 
@@ -51,18 +53,19 @@ struct additiveg
 struct multiplicative_phenotype
 {
   typedef double result_type;
-  template< typename iterator_type>
-  inline double operator()(const iterator_type & g1, const iterator_type & g2) const
+  template< typename gamete_type,
+	    typename mcont_t>
+  inline double operator()(const gamete_type & g1, const gamete_type & g2,const mcont_t & mutations) const
   {
-    using __mtype =  typename iterator_type::value_type::mutation_list_type_iterator;
+    using __mtype =  std::size_t;
     return KTfwd::site_dependent_fitness()(g1,g2,
-					   [](double & fitness,const __mtype & mut)
+					   [&mutations](double & fitness,const __mtype & mut)
 					   {
-					     fitness *= ( std::pow(1. + mut->s,2.) ); 
+					     fitness *= ( std::pow(1. + mutations[mut].s,2.) ); 
 					   },
-					   [](double & fitness,const __mtype & mut)
+					   [&mutations](double & fitness,const __mtype & mut)
 					   {
-					     fitness *= ( 1. + mut->s ); 
+					     fitness *= ( 1. + mutations[mut].s ); 
 					   },
 					   1.);
   }
@@ -72,8 +75,8 @@ struct multiplicative_phenotype
 struct popgen_phenotype_updater_hom
 {
   typedef void result_type;
-  template<typename iterator_type>
-  inline void operator()(double & fitness, const iterator_type & m1) const
+  template<typename mutation_type>
+  inline void operator()(double & fitness, const mutation_type & m1) const
   {
     /*
       Bug fix March 4, 2016
@@ -82,28 +85,28 @@ struct popgen_phenotype_updater_hom
       didn't scale as they would for homozygote
       in Risch model.
     */
-    fitness *= (1. + 2.*m1->s);
+    fitness *= (1. + 2.*m1.s);
   }
 };
 
 struct popgen_phenotype_updater_het
 {
   typedef void result_type;
-  template<typename iterator_type>
-  inline void operator()(double & fitness, const iterator_type & m1,const double & dominance) const
+  template<typename mutation_type>
+  inline void operator()(double & fitness, const mutation_type & m1,const double & dominance) const
   {
-    fitness *= ( 1. + dominance*m1->s );
+    fitness *= ( 1. + dominance*m1.s );
   }
 };
 
 struct popgen_phenotype
 {
   typedef double result_type;
-  template< typename iterator_type>
-  inline double operator()(const iterator_type & g1, const iterator_type & g2,
+  template< typename gamete_type,typename mcont_t>
+  inline double operator()(const gamete_type & g1, const gamete_type & g2,const mcont_t & mutations,
 			   const double & dominance) const
   {
-    return KTfwd::site_dependent_fitness()(g1,g2,
+    return KTfwd::site_dependent_fitness()(g1,g2,mutations,
 					   std::bind(popgen_phenotype_updater_hom(),std::placeholders::_1,std::placeholders::_2),
 					   std::bind(popgen_phenotype_updater_het(),std::placeholders::_1,std::placeholders::_2,dominance),
 					   1.);

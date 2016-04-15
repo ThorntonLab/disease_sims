@@ -3,17 +3,19 @@
 
 #include <fwdpp/forward_types.hpp>
 #include <fwdpp/fwd_functional.hpp>
+#include <fwdpp/sugar/singlepop.hpp>
 #include <cmath>
 #include <iosfwd>
 #include <sstream>
 
 #include <zlib.h>
 
-#include <boost/container/list.hpp>
-#include <boost/container/vector.hpp>
-#include <boost/pool/pool_alloc.hpp>
-#include <boost/unordered_set.hpp>
-#include <boost/functional/hash.hpp>
+// #include <boost/container/list.hpp>
+// #include <boost/container/vector.hpp>
+// #include <boost/pool/pool_alloc.hpp>
+// #include <boost/unordered_set.hpp>
+// #include <boost/functional/hash.hpp>
+#include <unordered_set>
 #include <vector>
 
 struct mutation_with_age : public KTfwd::mutation_base
@@ -22,9 +24,9 @@ struct mutation_with_age : public KTfwd::mutation_base
   double s;
   char label; //'A' = "amino acid", 'S' = "synonymous"  Only used here in that A = causative, S = neutral.
   mutation_with_age( const double & position, const double & sel_coeff,
-		     const unsigned & count,const unsigned & origin, const char & ch,
+		     const unsigned & origin, const char & ch,
 		     const bool & n=true) 
-    : mutation_base(position,count,n),o(origin),s(sel_coeff),label(ch)
+    : mutation_base(position,n),o(origin),s(sel_coeff),label(ch)
   {
   }
   bool operator==(const mutation_with_age & rhs) const
@@ -42,7 +44,7 @@ struct mwriter
   typedef void result_type;
   result_type operator()( const TFLmtype & m, std::ostringstream & buffer ) const
   {
-    buffer.write( reinterpret_cast< const char * >(&m.n),sizeof(unsigned) );
+    //buffer.write( reinterpret_cast< const char * >(&m.n),sizeof(unsigned) );
     buffer.write( reinterpret_cast< const char * >(&m.o),sizeof(unsigned) );
     buffer.write( reinterpret_cast< const char * >(&m.neutral),sizeof(bool) );
     buffer.write( reinterpret_cast< const char * >(&m.pos),sizeof(double) );
@@ -57,8 +59,8 @@ struct mreader
   typedef TFLmtype result_type;
   result_type operator()( std::istream & in ) const
   {
-    unsigned n;
-    in.read( reinterpret_cast< char * >(&n),sizeof(unsigned) );
+    //unsigned n;
+    //in.read( reinterpret_cast< char * >(&n),sizeof(unsigned) );
     unsigned o;
     in.read( reinterpret_cast< char * >(&o),sizeof(unsigned) );
     bool neut;
@@ -69,7 +71,7 @@ struct mreader
     in.read( reinterpret_cast< char * >(&s),sizeof(double) );
     char label;
     in.read( reinterpret_cast< char * >(&label),sizeof(char) );
-    return result_type(pos,s,n,o,label,neut);
+    return result_type(pos,s,o,label,neut);
   }
 };
 
@@ -79,8 +81,8 @@ struct gzmreader
   typedef TFLmtype result_type;
   result_type operator()( gzFile gzin ) const
   {
-    unsigned n;
-    gzread(gzin,&n,sizeof(unsigned));
+    //unsigned n;
+    //gzread(gzin,&n,sizeof(unsigned));
     unsigned o;
     gzread(gzin,&o,sizeof(unsigned));
     bool neut;
@@ -91,18 +93,20 @@ struct gzmreader
     gzread(gzin,&s,sizeof(double));
     char label;
     gzread(gzin,&label,sizeof(char));
-    return result_type(pos,s,n,o,label,neut);
+    return result_type(pos,s,o,label,neut);
   }
 };
 
-using mut_allocator = boost::pool_allocator<TFLmtype>;
-using mlist = boost::container::list<TFLmtype,mut_allocator >;
-using gtype = KTfwd::gamete_base<TFLmtype,mlist>;
-using gam_allocator = boost::pool_allocator<gtype>;
-using glist =  boost::container::list<gtype,gam_allocator >;
-using mvector = boost::container::vector<TFLmtype>;
-using ftvector = boost::container::vector<unsigned>;
-using lookup_table_type = boost::unordered_set<double,boost::hash<double>,KTfwd::equal_eps >;
-using diploid_t = std::pair<glist::iterator,glist::iterator>;
-using dipvector = std::vector< diploid_t >;
+// //using mut_allocator = boost::pool_allocator<TFLmtype>;
+// using mlist = std::vector<TFLmtype>;
+// using gtype = KTfwd::gamete;
+// //using gam_allocator = boost::pool_allocator<gtype>;
+// using glist =  std::vector<gtype>;//boost::container::list<gtype,gam_allocator >;
+// using mvector = mlist;
+// using ftvector = std::vector<unsigned>;
+// using lookup_table_type = std::unordered_set<double,std::hash<double>,KTfwd::equal_eps >;
+// using diploid_t = std::pair<std::size_t,std::size_t>;
+// using dipvector = std::vector< diploid_t >;
+
+using poptype = KTfwd::singlepop<TFLmtype>;
 #endif

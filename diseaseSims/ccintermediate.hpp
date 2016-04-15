@@ -28,7 +28,7 @@ struct cc_intermediate
 
 std::ostream & operator<<(std::ostream &, const cc_intermediate & );
 
-cc_intermediate process_population( const std::vector< std::pair<glist::iterator,glist::iterator> > & diploids,
+cc_intermediate process_population( const poptype & pop,
 				    const std::vector<std::pair<double,double> > & phenotypes,
 				    const std::vector<unsigned> & put_controls,
 				    const std::vector<unsigned> & put_cases,
@@ -38,9 +38,9 @@ cc_intermediate process_population( const std::vector< std::pair<glist::iterator
 std::pair<double,double> phenosums(const std::vector<std::pair<double,double> > & phenos, const double & case_proportion, double * cutoff);
 
 void grab_putative_CC( const std::pair<double,double> & mean_sd,
-		      const std::vector<std::pair<double,double> > & phenotypes,
-		      const double & crange,
-		      const double & cutoff,
-		      std::vector<unsigned> & put_controls,
- 		      std::vector<unsigned> & put_cases );
+		       const std::vector<std::pair<double,double> > & phenotypes,
+		       const double & crange,
+		       const double & cutoff,
+		       std::vector<unsigned> & put_controls,
+		       std::vector<unsigned> & put_cases );
 #endif

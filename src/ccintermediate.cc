@@ -121,10 +121,11 @@ std::ostream & operator<<(std::ostream & o, const cc_intermediate & b )
 }
 
 //called by process_subset to update data blocks
-void update_block( glist::const_iterator::value_type::mutation_container::const_iterator beg,  //gamete1
-		   glist::const_iterator::value_type::mutation_container::const_iterator end,
-		   glist::const_iterator::value_type::mutation_container::const_iterator beg2, //gamete2
-		   glist::const_iterator::value_type::mutation_container::const_iterator end2,
+void update_block( poptype::gamete_t::mutation_container::const_iterator beg,  //gamete1
+		   poptype::gamete_t::mutation_container::const_iterator end,
+		   poptype::gamete_t::mutation_container::const_iterator beg2, //gamete2
+		   poptype::gamete_t::mutation_container::const_iterator end2,
+		   const poptype & pop,
 		   const unsigned & i,
 		   vector< pair<double,string> > & datablock,
 		   const unsigned & ttl,
@@ -137,7 +138,7 @@ void update_block( glist::const_iterator::value_type::mutation_container::const_
     };
   for( ; beg < end ; ++beg )
     {
-      double mutpos = (*beg)->pos;
+      double mutpos = pop.mutations[*beg].pos;
       vector< pair<double,string> >::iterator itr =  find_if(datablock.begin(),
 							     datablock.end(),
 							     std::bind(sitefinder,std::placeholders::_1,mutpos));
@@ -154,7 +155,7 @@ void update_block( glist::const_iterator::value_type::mutation_container::const_
     }
   for( ; beg2 < end2 ; ++beg2 )
     {
-      double mutpos = (*beg2)->pos;
+      double mutpos = pop.mutations[*beg2].pos;
       vector< pair<double,string> >::iterator itr =  find_if(datablock.begin(),
 							     datablock.end(),
 							     std::bind(sitefinder,std::placeholders::_1,mutpos));
@@ -176,7 +177,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
 		     //vector< pair<double,double> > &cphenos,
 		     vector<double> & ccG,
 		     vector<double> & ccE,
-		     const vector< pair<glist::iterator,glist::iterator> > & diploids,
+		     const poptype & pop,
 		     const vector<pair<double,double> > & popphenos,
 		     const vector<unsigned> & indlist,
 		     const unsigned & maxnum,
@@ -193,18 +194,20 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
       //ccphenos.push_back( popphenos[ indlist[i] ] );
       ccG.push_back( popphenos[ indlist[i] ].first );
       ccE.push_back( popphenos[ indlist[i] ].second );
-      update_block(  diploids[ indlist[i] ].first->mutations.begin(),
-		     diploids[ indlist[i] ].first->mutations.end(),
-		     diploids[ indlist[i] ].second->mutations.begin(),
-		     diploids[ indlist[i] ].second->mutations.end(),
+      update_block(  pop.gametes[pop.diploids[ indlist[i] ].first].mutations.begin(),
+		     pop.gametes[pop.diploids[ indlist[i] ].first].mutations.end(),
+		     pop.gametes[pop.diploids[ indlist[i] ].second].mutations.begin(),
+		     pop.gametes[pop.diploids[ indlist[i] ].second].mutations.end(),
+		     pop,
 		     i,
 		     datablock_neut,
 		     ttl,offset
 		     );
-      update_block(  diploids[ indlist[i] ].first->smutations.begin(),
-		     diploids[ indlist[i] ].first->smutations.end(),
-		     diploids[ indlist[i] ].second->smutations.begin(),
-		     diploids[ indlist[i] ].second->smutations.end(),
+      update_block(  pop.gametes[pop.diploids[ indlist[i] ].first].smutations.begin(),
+		     pop.gametes[pop.diploids[ indlist[i] ].first].smutations.end(),
+		     pop.gametes[pop.diploids[ indlist[i] ].second].smutations.begin(),
+		     pop.gametes[pop.diploids[ indlist[i] ].second].smutations.end(),
+		     pop,
 		     i,
 		     datablock_sel,
 		     ttl,offset
@@ -285,7 +288,7 @@ void process_subset( vector< pair<double,string> > & datablock_neut,
     }
 }
 
-cc_intermediate process_population( const vector< pair<glist::iterator,glist::iterator> > & diploids,
+cc_intermediate process_population( const poptype & pop,
 				    const vector<pair<double,double> > & phenotypes,
 				    const vector<unsigned> & put_controls,
 				    const vector<unsigned> & put_cases,
@@ -311,7 +314,7 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
   //Go thru controls first
   process_subset( neutral, selected,
 		  rv.G,rv.E,
-		  diploids,
+		  pop,
 		  phenotypes,
 		  put_controls,
 		  ncontrols,
@@ -320,7 +323,7 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
   //cases
   process_subset( neutral, selected,
 		  rv.G,rv.E,
-		  diploids,
+		  pop,
 		  phenotypes,
 		  put_cases,
 		  ncases,
@@ -339,8 +342,8 @@ cc_intermediate process_population( const vector< pair<glist::iterator,glist::it
   rv.neutral.assign( neutral.begin(), neutral.end() );  
   rv.causative.assign( selected.begin(), selected.end() );  
 
-  Sequence::RemoveInvariantColumns(&rv.neutral);
-  Sequence::RemoveInvariantColumns(&rv.causative);
+  Sequence::removeInvariantPos(rv.neutral);
+  Sequence::removeInvariantPos(rv.causative);
 
   //Define the minor allele state
 

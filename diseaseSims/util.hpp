@@ -7,23 +7,19 @@
 #include <cstdlib>
 #include <diseaseSims/mutation_with_age.hpp>
 
-using Gfxn_t = std::function<double(const glist::const_iterator &,
-				    const glist::const_iterator &)>;
-using vmcount_t = std::vector<std::pair<mlist::iterator,std::int8_t> >;
+using Gfxn_t = std::function<double(const std::size_t first,
+				    const std::size_t second,
+				    const poptype::gcont_t & gametes,
+				    const poptype::mcont_t & mutations)>;
+//pair = index of mutation in pop.mutations, count of that mutation in a diploid
+using vmcount_t = std::vector<std::pair<std::size_t,std::int8_t> >;
 
-struct popstruct
-{
-  mlist mutations;
-  glist gametes;
-  dipvector diploids;
-};
-
-popstruct readPop( gzFile gzin );
-std::vector<double> getG( const dipvector & diploids,
-		     const Gfxn_t & dipG );
+poptype readPop( gzFile gzin );
+std::vector<double> getG( const poptype & pop,
+			  const Gfxn_t & dipG );
 //Counts of mutations per diploid
-vmcount_t get_mut_counts( const glist::const_iterator & g1,
-			  const glist::const_iterator & g2,
+vmcount_t get_mut_counts( const poptype & pop,
+			  const std::size_t dipindex,
 			  const bool & selected = true);
 
 #endif
