@@ -8,9 +8,9 @@
 #include <zlib.h>
 #include <diseaseSims/mutation_with_age.hpp>
 
-using Gfxn_t = std::function<double(const std::size_t first,
-				    const std::size_t second,
-				    const poptype::gcont_t & gametes,
+using Gfxn_t = std::function<double(const poptype::gamete_t & first,
+				    const poptype::gamete_t & second,
+				    //const poptype::gcont_t & gametes,
 				    const poptype::mcont_t & mutations)>;
 //pair = index of mutation in pop.mutations, count of that mutation in a diploid
 using vmcount_t = std::vector<std::pair<std::size_t,std::int8_t> >;

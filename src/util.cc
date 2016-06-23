@@ -15,7 +15,10 @@ vector<double> getG( const poptype & pop,
 		     const Gfxn_t & dipG )
 {
   vector<double> rv;
-  for_each( pop.diploids.begin(),pop.diploids.end(),[&rv,&dipG,&pop](const poptype::diploid_t & __d ) { rv.push_back( dipG(__d.first,__d.second,pop.gametes,pop.mutations) ); } );
+  for(const auto & dip : pop.diploids)
+    {
+      rv.push_back(dipG(pop.gametes[dip.first],pop.gametes[dip.second],pop.mutations));
+    }
   return rv;
 }
 
