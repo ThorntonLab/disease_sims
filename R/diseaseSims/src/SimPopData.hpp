@@ -6,19 +6,17 @@
 class SimPopData
 {
 private:
-  void readPop(const char * filename,
-	       const unsigned long & offset);
+  void readPopWrapper(const char * filename,
+		      const unsigned long & offset);
 public:
-  mlist mutations;
-  glist gametes;
-  dipvector diploids;
+  poptype pop;
 
   SimPopData(const std::string & filename,
 	     const unsigned long & offset);
 
   Rcpp::List neutralGenotype(const size_t & i) const;
   Rcpp::List selectedGenotype(const size_t & i) const;
-  dipvector::size_type popsize() const;
+  poptype::dipvector_t::size_type popsize() const;
 };
 
 Rcpp::NumericMatrix getPheno(const char * filename,

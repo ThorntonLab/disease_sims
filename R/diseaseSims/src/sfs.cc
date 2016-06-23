@@ -6,10 +6,9 @@
 #include <vector>
 #include <cassert>
 #include <cstdlib>
-
-#include <fwdpp/IO.hpp>
+#include <map>
 #include <diseaseSims/mutation_with_age.hpp>
-
+#include <diseaseSims/util.hpp>
 using namespace std;
 
 //' Site frequency spectra
@@ -23,8 +22,8 @@ using namespace std;
 //' @return r = the SFS for risk variants
 //[[Rcpp::export]]
 Rcpp::DataFrame sfs( const std::string & popfile,
-			 const unsigned & n,
-			 const unsigned & seed = 0 )
+		     const unsigned & n,
+		     const unsigned & seed = 0 )
 {
   Rcpp::NumericMatrix rv;
   gzFile gzin = gzopen(popfile.c_str(),"rb");
@@ -32,58 +31,45 @@ Rcpp::DataFrame sfs( const std::string & popfile,
   generator.seed(seed);
   unsigned REP = 0;
 
-  auto updater = []( const mlist::iterator & __m, vector< pair<const mlist::iterator,unsigned> > & __counts  ) {
-    auto __i = find_if(__counts.begin(),__counts.end(),[&__m](const pair<mlist::iterator,unsigned> & __p ) {
-	return __m == __p.first;
-      });
-    if(__i == __counts.end())
-      {
-	__counts.push_back(make_pair(__m,1u));
-      }
-    else
-      {
-	__i->second++;
-      }
-  };
   unsigned long NROW = 0;
 
   vector<unsigned> allID,allC,allnSFS,allrSFS;
   do 
     {
-      mlist mutations;
-      glist gametes;
-      dipvector diploids;
-      KTfwd::read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
-      unsigned N = (n < 2*diploids.size()) ? n : 2*diploids.size();
+      //mlist mutations;
+      //glist gametes;
+      //dipvector diploids;
+      //KTfwd::read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+      auto pop = readPop(gzin);
+      unsigned N = (n < 2*pop.diploids.size()) ? n : 2*pop.diploids.size();
       NROW += N;
-      vector<unsigned> rd(diploids.size());
+      vector<unsigned> rd(pop.diploids.size());
       unsigned dummy = 0;
       for_each(rd.begin(),rd.end(),[&dummy](unsigned & __u){__u=dummy++;});
       shuffle(rd.begin(),rd.end(),generator);
-      vector< pair<const mlist::iterator,unsigned> >  sampleRiskCounts,sampleNeutralCounts;
+      //vector< pair<const mlist::iterator,unsigned> >  sampleRiskCounts,sampleNeutralCounts;
+      map<unsigned,unsigned> sampleRiskCounts,sampleNeutralCounts;
       for( unsigned i = 0 ; i < N/2 ; ++i )
 	{
 	  assert( rd[i] < diploids.size() );
-	  for_each( diploids[ rd[i] ].first->mutations.begin(),diploids[ rd[i] ].first->mutations.end(),std::bind(updater,std::placeholders::_1,ref(sampleNeutralCounts)) );
-	  for_each( diploids[ rd[i] ].second->mutations.begin(),diploids[ rd[i] ].second->mutations.end(),std::bind(updater,std::placeholders::_1,ref(sampleNeutralCounts)) );
-	  for_each( diploids[ rd[i] ].first->smutations.begin(),diploids[ rd[i] ].first->smutations.end(),std::bind(updater,std::placeholders::_1,ref(sampleRiskCounts)) );
-	  for_each( diploids[ rd[i] ].second->smutations.begin(),diploids[ rd[i] ].second->smutations.end(),std::bind(updater,std::placeholders::_1,ref(sampleRiskCounts)) );
+	  for(auto && m : pop.gametes[pop.diploids[rd[i]].first].mutations) sampleNeutralCounts[m]++;
+	  for(auto && m : pop.gametes[pop.diploids[rd[i]].second].mutations) sampleNeutralCounts[m]++;
+	  for(auto && m : pop.gametes[pop.diploids[rd[i]].first].smutations) sampleRiskCounts[m]++;
+	  for(auto && m : pop.gametes[pop.diploids[rd[i]].second].smutations) sampleRiskCounts[m]++;
 	}
 
       std::vector<unsigned> ID(N,REP),C(N),nSFS(N,0.),rSFS(N,0.);
       dummy=1;
       for_each(C.begin(),C.end(),[&dummy](unsigned & __u){__u=dummy++;});
-      for( unsigned i = 0 ; i < sampleNeutralCounts.size() ; ++i )
+      //for( unsigned i = 0 ; i < sampleNeutralCounts.size() ; ++i )
+      for( auto && i : sampleNeutralCounts )
 	{
-	  assert( sampleNeutralCounts[i].second > 0 );
-	  assert( sampleNeutralCounts[i].second <= N );
-	  nSFS[ sampleNeutralCounts[i].second - 1 ]++;
+	  nSFS[ i.second -1 ] += i.first;
 	}
-      for( unsigned i = 0 ; i < sampleRiskCounts.size() ; ++i )
+      //for( unsigned i = 0 ; i < sampleRiskCounts.size() ; ++i )
+      for(auto && i : sampleRiskCounts )
 	{
-	  assert( sampleRiskCounts[i].second > 0 );
-	  assert( sampleRiskCounts[i].second <= N );
-	  rSFS[ sampleRiskCounts[i].second - 1 ]++;
+	  rSFS[ i.second - 1 ] += i.first;
 	}
 
       ++REP;

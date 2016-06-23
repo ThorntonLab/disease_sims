@@ -17,18 +17,18 @@ using namespace std;
 
 Gfxn_t setModel( const std::string & model, const double & dominance )
 {
-  Gfxn_t dipG = std::bind(TFL2013g(),std::placeholders::_1,std::placeholders::_2);
+  Gfxn_t dipG = std::bind(TFL2013g(),std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
   if( model == "additive" )
     {
-      dipG = std::bind(additiveg(),std::placeholders::_1,std::placeholders::_2);
+      dipG = std::bind(additiveg(),std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
     }
   else if (model == "multiplicative")
     {
-      dipG = std::bind(multiplicative_phenotype(),std::placeholders::_1,std::placeholders::_2);
+      dipG = std::bind(multiplicative_phenotype(),std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
     }
   else if (model == "popgen")
     {
-      dipG = std::bind(popgen_phenotype(),std::placeholders::_1,std::placeholders::_2,dominance);
+      dipG = std::bind(popgen_phenotype(),std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,dominance);
     }
   return dipG;
 }
@@ -38,34 +38,41 @@ Gfxn_t setModel( const std::string & model, const double & dominance )
   1. Decreasing mutation frequency
   2. Within frequency class, by decreasing abs(effect size)
  */
-vector<pair<mlist::iterator,unsigned> > getVariantIndexes( mlist & mutations, const bool & selectedOnly )
+vector<pair<std::size_t,unsigned> > getVariantIndexes( const poptype & pop, const bool & selectedOnly )
 {
-  vector<mlist::iterator> v;
+  vector<std::size_t> v;
   set<unsigned,greater<unsigned> > counts;
-  for( auto i = mutations.begin();i!=mutations.end();++i ) 
+  for( std::size_t i=0;i<pop.mutations.size();++i)
     {
-      if(!selectedOnly || !i->neutral)
+      if(pop.mcounts[i] && (!selectedOnly||pop.mutations[i].neutral))
 	{
 	  v.push_back(i);
 	}
     }
-  std::sort(v.begin(),v.end(),[&counts]( mlist::iterator const & i, mlist::iterator const & j ) { 
-      counts.insert(i->n);
-      counts.insert(j->n);
-      return i->n > j->n; 
+	   // for( auto i = mutations.begin();i!=mutations.end();++i ) 
+  //   {
+  //     if(!selectedOnly || !i->neutral)
+  // 	{
+  // 	  v.push_back(i);
+  // 	}
+  //   }
+  std::sort(v.begin(),v.end(),[&counts,&pop]( size_t i, size_t j) {
+      counts.insert(pop.mcounts[i]);
+      counts.insert(pop.mcounts[j]);
+      return pop.mcounts[i] > pop.mcounts[j];
     } );
   //Sort by decreasing |effect size| w/in each freq class
   for_each( counts.begin(), counts.end(),
-	    [&v]( const unsigned & __u ) {
+	    [&v,&pop]( const unsigned & __u ) {
 	      //First element at this freq.
-	      auto __beg = find_if(v.begin(),v.end(),[&__u](const mlist::iterator & __i) { return __i->n == __u; });
+	      auto __beg = find_if(v.begin(),v.end(),[&__u,&pop](const std::size_t & __i) { return pop.mcounts[__i] == __u; });
 	      //Last element at this freq.
-	      auto __end = find_if(v.rbegin(),v.rend(),[&__u](const mlist::iterator & __i) { return __i->n == __u; });
-	      sort(__beg,__end.base(),[](mlist::iterator const & __i, mlist::iterator const & __j) {
-		  return abs(__i->s) > abs(__j->s);
+	      auto __end = find_if(v.rbegin(),v.rend(),[&__u,&pop](const std::size_t & __i) { return pop.mcounts[__i] == __u; });
+	      sort(__beg,__end.base(),[&pop](std::size_t const & __i, std::size_t const & __j) {
+		  return abs(pop.mutations[__i].s) > abs(pop.mutations[__j].s);
 		});
 	    } );
-  vector<pair<mlist::iterator,unsigned> > risk_indexes;
+  vector<pair<std::size_t,unsigned> > risk_indexes;
   unsigned RISKMUTIDX=0;
   for( auto i = v.begin() ; i != v.end() ; ++i )
     {
@@ -74,20 +81,20 @@ vector<pair<mlist::iterator,unsigned> > getVariantIndexes( mlist & mutations, co
   return risk_indexes;
 }
 
-vector<double> getEsizes( const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
+vector<double> getEsizes( const poptype & pop,const vector<pair<size_t,unsigned> > & risk_indexes )
 {
   vector<double> rv;
-  for_each(risk_indexes.begin(),risk_indexes.end(),[&rv](const pair<mlist::iterator,unsigned> & __p) {
-      rv.push_back(__p.first->s);
+  for_each(risk_indexes.begin(),risk_indexes.end(),[&rv,&pop](const pair<std::size_t,unsigned> & __p) {
+      rv.push_back(pop.mutations[__p.first].s);
     });
   return rv;
 }
 
-vector<double> getPos( const vector<pair<mlist::iterator,unsigned> > & risk_indexes )
+vector<double> getPos( const poptype & pop,const vector<pair<size_t,unsigned> > & risk_indexes )
 {
   vector<double> rv;
-  for_each(risk_indexes.begin(),risk_indexes.end(),[&rv](const pair<mlist::iterator,unsigned> & __p) {
-      rv.push_back(__p.first->pos);
+  for_each(risk_indexes.begin(),risk_indexes.end(),[&rv,&pop](const pair<size_t,unsigned> & __p) {
+      rv.push_back(pop.mutations[__p.first].pos);
     });
   return rv;
 }
@@ -110,9 +117,9 @@ std::vector<std::int8_t> columnsDuplicated( const std::vector<std::vector<unsign
   return rv;
 }
 
-Rcpp::DataFrame MakeVariantMatrix( const dipvector & diploids,
+Rcpp::DataFrame MakeVariantMatrix( const poptype::dipvector_t & diploids,
 				   const std::vector<double> & trait_vals,
-				   const vector<pair<mlist::iterator,unsigned> > & risk_indexes,
+				   const vector<pair<size_t,unsigned> > & risk_indexes,
 				   const bool & selectedOnly )
 /*
   Problem: R/Rcpp matrices may not be able to hold enough data: http://stackoverflow.com/questions/9984283/maximum-size-of-a-matrix-in-r
@@ -129,7 +136,7 @@ Rcpp::DataFrame MakeVariantMatrix( const dipvector & diploids,
       vmcount_t vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,true);
       for( unsigned i = 0 ; i < vmc.size() ; ++i )
 	{
-	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<size_t,unsigned> & __p) {
 	      return __p.first == vmc[i].first;
 	    });
 	  temp[__itr->second][ind] = vmc[i].second;
@@ -141,7 +148,7 @@ Rcpp::DataFrame MakeVariantMatrix( const dipvector & diploids,
 	  vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,false);
 	  for( unsigned i = 0 ; i < vmc.size() ; ++i )
 	    {
-	      auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+	      auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<size_t,unsigned> & __p) {
 		  return __p.first == vmc[i].first;
 		});
 	      temp[__itr->second][ind] = vmc[i].second;
@@ -165,9 +172,9 @@ Rcpp::DataFrame MakeVariantMatrix( const dipvector & diploids,
 }
 
 
-Rcpp::DataFrame MakeVariantMatrixSubset( const dipvector & diploids,
+Rcpp::DataFrame MakeVariantMatrixSubset( const poptype::dipvector_t & diploids,
 					 const std::vector<double> & trait_vals,
-					 const vector<pair<mlist::iterator,unsigned> > & risk_indexes,
+					 const vector<pair<size_t,unsigned> > & risk_indexes,
 					 const std::vector<int> & subset,
 					 const int & nsample,
 					 const bool & selectedOnly )
@@ -188,7 +195,7 @@ Rcpp::DataFrame MakeVariantMatrixSubset( const dipvector & diploids,
       vmcount_t vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,true);
       for( unsigned i = 0 ; i < vmc.size() ; ++i )
 	{
-	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<size_t,unsigned> & __p) {
 	      return __p.first == vmc[i].first;
 	    });
 	  temp[__itr->second][n] = vmc[i].second;
@@ -200,7 +207,7 @@ Rcpp::DataFrame MakeVariantMatrixSubset( const dipvector & diploids,
 	  vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,false);
 	  for( unsigned i = 0 ; i < vmc.size() ; ++i )
 	    {
-	      auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+	      auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<size_t,unsigned> & __p) {
 		  return __p.first == vmc[i].first;
 		});
 	      temp[__itr->second][n] = vmc[i].second;
@@ -228,8 +235,8 @@ Rcpp::DataFrame MakeVariantMatrixSubset( const dipvector & diploids,
 }
 
 
-Rcpp::DataFrame MakeVariantMatrixSubset_GE( const dipvector & diploids,
-					    const vector<pair<mlist::iterator,unsigned> > & risk_indexes,
+Rcpp::DataFrame MakeVariantMatrixSubset_GE( const poptype::dipvector_t & diploids,
+					    const vector<pair<size_t,unsigned> > & risk_indexes,
 					    const std::vector<int> & subset,
 					    const int & nsample,
 					    const bool & selectedOnly )
@@ -250,7 +257,7 @@ Rcpp::DataFrame MakeVariantMatrixSubset_GE( const dipvector & diploids,
       vmcount_t vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,true);
       for( unsigned i = 0 ; i < vmc.size() ; ++i )
 	{
-	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+	  auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<size_t,unsigned> & __p) {
 	      return __p.first == vmc[i].first;
 	    });
 	  temp[__itr->second][n] = vmc[i].second;
@@ -262,7 +269,7 @@ Rcpp::DataFrame MakeVariantMatrixSubset_GE( const dipvector & diploids,
 	  vmc = get_mut_counts(diploids[ind].first,diploids[ind].second,false);
 	  for( unsigned i = 0 ; i < vmc.size() ; ++i )
 	    {
-	      auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<mlist::iterator,unsigned> & __p) {
+	      auto __itr = find_if( risk_indexes.begin(), risk_indexes.end(),[&vmc,&i](const pair<size_t,unsigned> & __p) {
 		  return __p.first == vmc[i].first;
 		});
 	      temp[__itr->second][n] = vmc[i].second;
@@ -290,10 +297,10 @@ Rcpp::DataFrame MakeVariantMatrixSubset_GE( const dipvector & diploids,
 // Details of how to get a genotype matrix for risk variants
 //[[Rcpp::export(".getVariantMatrixDetails")]]
 Rcpp::List getVariantMatrixDetails( const std::string & model,
-					const std::string & popfile,
-					const int64_t & popfile_offset,
-					const double & dominance = 0.,
-					const double & selectedOnly = true)
+				    const std::string & popfile,
+				    const int64_t & popfile_offset,
+				    const double & dominance = 0.,
+				    const double & selectedOnly = true)
 {
   gzFile gzin = gzopen(popfile.c_str(),"rb");
   if( gzin == NULL ) 
@@ -307,14 +314,14 @@ Rcpp::List getVariantMatrixDetails( const std::string & model,
 
   Gfxn_t dipG = setModel(model,dominance);
 
-  popstruct pop = readPop(gzin);
+  auto pop = readPop(gzin);
   gzclose(gzin);
 
-  vector<pair<mlist::iterator,unsigned> > risk_indexes = getVariantIndexes(pop.mutations,selectedOnly);
-  auto Gvals = getG(pop.diploids,dipG);
+  auto risk_indexes = getVariantIndexes(pop,selectedOnly);
+  auto Gvals = getG(pop,dipG);
   auto genos = MakeVariantMatrix(pop.diploids,Gvals,risk_indexes,selectedOnly);
-  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(risk_indexes),
-			    Rcpp::Named("position") = getPos(risk_indexes),
+  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(pop,risk_indexes),
+			    Rcpp::Named("position") = getPos(pop,risk_indexes),
 			    Rcpp::Named("genos") = genos);
  }
 				    
@@ -340,7 +347,7 @@ Rcpp::List getVariantMatrixDetails_Pheno( const std::string & model,
 
   Gfxn_t dipG = setModel(model,dominance);
 
-  popstruct pop = readPop(gzin);
+  auto pop = readPop(gzin);
   gzclose(gzin);
 
   gzin = gzopen(phenofile.c_str(),"rb");
@@ -356,10 +363,10 @@ Rcpp::List getVariantMatrixDetails_Pheno( const std::string & model,
       phenotypes[i] = G + E;
     }
   gzclose(gzin);
-  vector<pair<mlist::iterator,unsigned> > risk_indexes = getVariantIndexes(pop.mutations,selectedOnly);
+  auto risk_indexes = getVariantIndexes(pop,selectedOnly);
   auto genos = MakeVariantMatrix(pop.diploids,phenotypes,risk_indexes,selectedOnly);
-  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(risk_indexes),
-			    Rcpp::Named("position") = getPos(risk_indexes),
+  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(pop,risk_indexes),
+			    Rcpp::Named("position") = getPos(pop,risk_indexes),
 			    Rcpp::Named("genos") = genos);
  }
 
@@ -389,7 +396,7 @@ Rcpp::List getVariantMatrixDetails_Subset( const std::string & model,
 
   Gfxn_t dipG = setModel(model,dominance);
 
-  popstruct pop = readPop(gzin);
+  auto pop = readPop(gzin);
   gzclose(gzin);
 
   gzin = gzopen(phenofile.c_str(),"rb");
@@ -411,10 +418,10 @@ Rcpp::List getVariantMatrixDetails_Subset( const std::string & model,
       }
     }
   gzclose(gzin);
-  vector<pair<mlist::iterator,unsigned> > risk_indexes = getVariantIndexes(pop.mutations,selectedOnly);
+  auto risk_indexes = getVariantIndexes(pop,selectedOnly);
   auto genos = MakeVariantMatrixSubset(pop.diploids,phenotypes,risk_indexes,subset,nsample,selectedOnly);
-  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(risk_indexes),
-			    Rcpp::Named("position") = getPos(risk_indexes),
+  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(pop,risk_indexes),
+			    Rcpp::Named("position") = getPos(pop,risk_indexes),
 			    Rcpp::Named("genos") = genos);
 
 
@@ -445,7 +452,7 @@ Rcpp::List getVariantMatrixDetails_SubsetGE( const std::string & model,
 
   Gfxn_t dipG = setModel(model,dominance);
 
-  popstruct pop = readPop(gzin);
+  auto pop = readPop(gzin);
   gzclose(gzin);
 
   gzin = gzopen(phenofile.c_str(),"rb");
@@ -468,10 +475,10 @@ Rcpp::List getVariantMatrixDetails_SubsetGE( const std::string & model,
       }
     }
   gzclose(gzin);
-  vector<pair<mlist::iterator,unsigned> > risk_indexes = getVariantIndexes(pop.mutations,selectedOnly);
+  auto risk_indexes = getVariantIndexes(pop,selectedOnly);
   auto genos = MakeVariantMatrixSubset_GE(pop.diploids,risk_indexes,subset,nsample,selectedOnly);
-  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(risk_indexes),
-			    Rcpp::Named("position") = getPos(risk_indexes),
+  return Rcpp::List::create(Rcpp::Named("esizes") = getEsizes(pop,risk_indexes),
+			    Rcpp::Named("position") = getPos(pop,risk_indexes),
 			    Rcpp::Named("genos") = genos,
 			    Rcpp::Named("phenos") = phenotypes);
 

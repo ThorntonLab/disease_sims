@@ -6,6 +6,7 @@
 #include <random>
 #include <functional>
 #include <diseaseSims/ccintermediate.hpp>
+#include <diseaseSims/util.hpp>
 #include <SimPopData.hpp>
 #include <fwdpp/IO.hpp>
 
@@ -15,15 +16,13 @@ using namespace std;
 // [[Rcpp::plugins(cpp11)]]
 
 SimPopData::SimPopData(const std::string & filename,
-		       const unsigned long & offset) : mutations(mlist()),
-						       gametes(glist()),
-						       diploids(dipvector())
+		       const unsigned long & offset) : pop(poptype(0))
 {
-  this->readPop(filename.c_str(),offset);
+  this->readPopWrapper(filename.c_str(),offset);
 }
 
-void SimPopData::readPop(const char * filename,
-			 const unsigned long & offset)
+void SimPopData::readPopWrapper(const char * filename,
+				const unsigned long & offset)
 {
   gzFile gzin=gzopen(filename,"rb");
   if(gzin==NULL)
@@ -36,9 +35,10 @@ void SimPopData::readPop(const char * filename,
       return;
     }
   gzseek( gzin,offset,0 );
-  KTfwd::read_binary_pop( &(this->gametes), 
-			  &(this->mutations),
-			  &(this->diploids), std::bind(gzmreader(),std::placeholders::_1),gzin );
+  this->pop=readPop(gzin);
+  // KTfwd::read_binary_pop( &(this->gametes), 
+  // 			  &(this->mutations),
+  // 			  &(this->diploids), std::bind(gzmreader(),std::placeholders::_1),gzin );
   gzclose(gzin);
 }
 
@@ -48,7 +48,7 @@ void SimPopData::readPop(const char * filename,
 */
 List SimPopData::neutralGenotype(const size_t & i) const
 {
-  if( i == 0 || i > diploids.size() )
+  if( i == 0 || i > pop.diploids.size() )
     {
       ostringstream error;
       error << "Error: index " << i 
@@ -57,6 +57,9 @@ List SimPopData::neutralGenotype(const size_t & i) const
       return List::create();
     }
   std::vector<double> hap1,hap2;
+  for( auto && m: pop.gametes[pop.diploids[i-1].first].mutations ) hap1.push_back(pop.mutations[m].pos);
+  for( auto && m: pop.gametes[pop.diploids[i-1].second].mutations ) hap1.push_back(pop.mutations[m].pos);
+  /*
   for(gtype::mcont_const_iterator itr = diploids[i-1].first->mutations.begin() ; 
       itr < diploids[i-1].first->mutations.end() ; ++itr )
     {
@@ -68,6 +71,7 @@ List SimPopData::neutralGenotype(const size_t & i) const
     {
       hap2.push_back( (*itr)->pos );
     }
+  */
   return List::create( Named("hap1") = hap1,
 		       Named("hap2") = hap2 );
 }
@@ -78,7 +82,7 @@ List SimPopData::neutralGenotype(const size_t & i) const
 */
 List SimPopData::selectedGenotype(const size_t & i) const
 {
-  if( i == 0 || i > diploids.size() )
+  if( i == 0 || i > pop.diploids.size() )
     {
       ostringstream error;
       error << "Error: index " << i 
@@ -87,24 +91,26 @@ List SimPopData::selectedGenotype(const size_t & i) const
       return List::create();
     }
   std::vector<double> hap1,hap2;
-  for(gtype::mcont_const_iterator itr = diploids[i-1].first->smutations.begin() ; 
-      itr < diploids[i-1].first->smutations.end() ; ++itr )
-    {
-      hap1.push_back( (*itr)->pos );
-    }
+  for( auto && m: pop.gametes[pop.diploids[i-1].first].smutations ) hap1.push_back(pop.mutations[m].pos);
+  for( auto && m: pop.gametes[pop.diploids[i-1].second].smutations ) hap1.push_back(pop.mutations[m].pos);
+  // for(gtype::mcont_const_iterator itr = diploids[i-1].first->smutations.begin() ; 
+  //     itr < diploids[i-1].first->smutations.end() ; ++itr )
+  //   {
+  //     hap1.push_back( (*itr)->pos );
+  //   }
 
-  for(gtype::mcont_const_iterator itr = diploids[i-1].second->smutations.begin() ; 
-      itr < diploids[i-1].second->smutations.end() ; ++itr )
-    {
-      hap2.push_back( (*itr)->pos );
-    }
+  // for(gtype::mcont_const_iterator itr = diploids[i-1].second->smutations.begin() ; 
+  //     itr < diploids[i-1].second->smutations.end() ; ++itr )
+  //   {
+  //     hap2.push_back( (*itr)->pos );
+  //   }
   return List::create( Named("hap1") = hap1,
 		       Named("hap2") = hap2 );
 }
 
-dipvector::size_type SimPopData::popsize() const
+poptype::dipvector_t::size_type SimPopData::popsize() const
 {
-  return diploids.size();
+  return pop.diploids.size();
 }
 
 RCPP_MODULE(SimPopData)
@@ -196,7 +202,7 @@ List sampleCCfromPop( const char * popfilename,
   grab_putative_CC(mean_sd,phenos2,control_range,cutoff,put_controls,put_cases);
   shuffle( put_controls.begin(), put_controls.end(), default_random_engine(seed) );
   shuffle( put_cases.begin(), put_cases.end(), default_random_engine(seed) );
-  cc_intermediate ccblocks(process_population(spd.diploids,phenos2,
+  cc_intermediate ccblocks(process_population(spd.pop,phenos2,
 					      put_controls,
 					      put_cases,
 					      ncontrols,
