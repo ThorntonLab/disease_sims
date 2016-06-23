@@ -19,7 +19,7 @@
 #include <TFL_fitness_models.hpp>
 
 #include <fwdpp/sugar/serialization.hpp>
-
+#include <fwdpp/sugar/infsites.hpp>
 using namespace std;
 using namespace boost::interprocess;
 using namespace KTfwd;
@@ -53,7 +53,10 @@ TFLmtype mut_model_details(gsl_rng * r, const unsigned int & ttl_generations,
 			   poptype::lookup_table_t * lookup)
 {
   //Return a nonsensical value that will definitely cause assertions to fail, etc. :)
-  return TFLmtype(-1.,-1.,numeric_limits<unsigned>::max(),'Z',true);
+  return TFLmtype(numeric_limits<double>::quiet_NaN(),
+		  numeric_limits<double>::quiet_NaN(),
+		  numeric_limits<double>::quiet_NaN(),
+		  numeric_limits<unsigned>::max());
 }
 
 template<>
@@ -64,9 +67,9 @@ inline TFLmtype mut_model_details<fixed_tag>(gsl_rng * r, const unsigned int & t
   double pos = get_unique_pos(r,lookup);
   if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
     {
-      return TFLmtype(pos,mmp.s,ttl_generations,'A',false);      
+      return TFLmtype(pos,mmp.s,1.0,ttl_generations);//,'A',false);      
     }
-  return TFLmtype(pos,0.,ttl_generations,'S',true);
+  return TFLmtype(pos,0.,1.0,ttl_generations);//,'S',true);
 }
 
 template<>
@@ -77,9 +80,10 @@ inline TFLmtype mut_model_details<dist_tag>(gsl_rng * r, const unsigned int & tt
   double pos = get_unique_pos(r,lookup);
   if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
     {
-      return TFLmtype(pos,gsl_ran_exponential(r,mmp.s),ttl_generations,'A',false);
+      //return TFLmtype(pos,gsl_ran_exponential(r,mmp.s),ttl_generations,'A',false);
+      return TFLmtype(pos,gsl_ran_exponential(r,mmp.s),1.0,ttl_generations);//,'A',false);
     }
-  return TFLmtype(pos,0.,ttl_generations,'S',true);
+  return TFLmtype(pos,0.,1.0,ttl_generations);//,'S',true);
 }
 
 template<>
@@ -92,9 +96,11 @@ inline TFLmtype mut_model_details<ew_tag>(gsl_rng * r, const unsigned int & ttl_
     {
       //4Ns ~ \Gamma with shape mmp.shape and mean mmp.s, so s = 4Ns/4N...
       double s = gsl_ran_gamma(r,mmp.shape,mmp.s/mmp.shape)/(4.*double(mmp.N_ancestral));
-      return TFLmtype(pos,s,ttl_generations,'A',false);
+      return TFLmtype(pos,s,1.0,ttl_generations);//,'A',false);
+      //return TFLmtype(pos,s,ttl_generations,'A',false);
     }
-  return TFLmtype(pos,0.,ttl_generations,'S',true);
+  return TFLmtype(pos,0.,1.0,ttl_generations);
+  //return TFLmtype(pos,0.,ttl_generations,'S',true);
 }
 
 template<typename tag_type>
@@ -132,17 +138,42 @@ int main(int argc, char ** argv)
 
   //std::function<double(void)> recmap = std::bind(gsl_rng_uniform,r);
 
-  std::function<TFLmtype(poptype::mcont_t &)> MMODEL = std::bind(mut_model2<fixed_tag>,r,ttl_gen,params.mmp,&pop.mut_lookup);
-
+  //std::function<TFLmtype(poptype::mcont_t &)> MMODEL = std::bind(mut_model2<fixed_tag>,r,ttl_gen,params.mmp,&pop.mut_lookup);
+  
+  //mutation model with constant effect size...
+  std::function<std::size_t(std::queue<std::size_t> &,poptype::mcont_t &)> MMODEL = std::bind(KTfwd::infsites(),
+											      std::placeholders::_1,std::placeholders::_2,r,
+											      std::ref(pop.mut_lookup),&generation,
+											      params.mmp.mu_neutral,
+											      params.mmp.mu_disease,
+											      [&r](){return gsl_rng_uniform(r);},
+											      [&params](){return params.mmp.s;},
+											      [](){return 0.;});
   unsigned N_current = params.N;
   unsigned N_next = N_current;
 
   //Critical: mmp is getting bound to policies here, so we need to set the pointer to current N PRIOR to binding
   params.mmp.N_ancestral = params.N;
   if(params.mmp.dist_effects)
-    MMODEL = std::bind(mut_model2<dist_tag>,r,ttl_gen,params.mmp,&pop.mut_lookup);
+    MMODEL = std::bind(KTfwd::infsites(),
+		       std::placeholders::_1,std::placeholders::_2,r,
+		       std::ref(pop.mut_lookup),&generation,
+		       params.mmp.mu_neutral,
+		       params.mmp.mu_disease,
+		       [&r](){return gsl_rng_uniform(r);},
+		       [&r,&params](){return gsl_ran_exponential(r,params.mmp.s);},
+		       [](){return 0.;});
   if(params.model == MODEL::EYREWALKER)
-    MMODEL = std::bind(mut_model2<ew_tag>,r,ttl_gen,params.mmp,&pop.mut_lookup);
+    MMODEL = std::bind(KTfwd::infsites(),
+		       std::placeholders::_1,std::placeholders::_2,r,
+		       std::ref(pop.mut_lookup),&generation,
+		       params.mmp.mu_neutral,
+		       params.mmp.mu_disease,
+		       [&r](){return gsl_rng_uniform(r);},
+		       [&r,&params](){return gsl_ran_gamma(r,params.mmp.shape,params.mmp.s/params.mmp.shape)/(4.*double(params.mmp.N_ancestral));},
+		       [](){return 0.;});
+    //double s = 
+    //MMODEL = std::bind(mut_model2<ew_tag>,r,ttl_gen,params.mmp,&pop.mut_lookup);
   for( generation = 0; generation < params.ngens_burnin; ++generation,++ttl_gen )
     {
       //Evolution w/no deleterious mutations and no selection.
@@ -243,7 +274,7 @@ int main(int argc, char ** argv)
 
   //Write out the population
   KTfwd::serialize serializer;
-  serializer(pop,std::bind(mwriter(),std::placeholders::_1,std::placeholders::_2));
+  serializer(pop,std::bind(KTfwd::mutation_writer(),std::placeholders::_1,std::placeholders::_2));
   //ostringstream popbuffer;
   //write_binary_pop(&gametes,&mutations,&diploids,std::bind(mwriter(),std::placeholders::_1,std::placeholders::_2),popbuffer);
 
@@ -314,7 +345,7 @@ int main(int argc, char ** argv)
 	  double pos = i->pos;
 	  double s = i->s;
 	  double count = double(pop.mcounts[i-pop.mutations.begin()]);
-	  double age = double(ttl_gen - i->o + 1);
+	  double age = double(ttl_gen - i->g + 1);
 	  effectstream.write( reinterpret_cast<char *>(&pos), sizeof(double) );
 	  effectstream.write( reinterpret_cast<char *>(&s), sizeof(double) );
 	  effectstream.write( reinterpret_cast<char *>(&count), sizeof(double) );
