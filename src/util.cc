@@ -7,7 +7,7 @@ poptype readPop( gzFile gzin )
 {
   poptype p(0);
   //KTfwd::read_binary_pop( &p.gametes, &p.mutations, &p.diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
-  KTfwd::gzdeserialize()(gzin,p,std::bind(gzmreader(),std::placeholders::_1));
+  KTfwd::gzdeserialize()(gzin,p,std::bind(KTfwd::mutation_reader<TFLmtype>(),std::placeholders::_1));
   return p;
 }
 

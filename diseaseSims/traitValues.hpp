@@ -57,15 +57,15 @@ struct multiplicative_phenotype
 	    typename mcont_t>
   inline double operator()(const gamete_type & g1, const gamete_type & g2,const mcont_t & mutations) const
   {
-    using __mtype =  std::size_t;
-    return KTfwd::site_dependent_fitness()(g1,g2,
-					   [&mutations](double & fitness,const __mtype & mut)
+    using __mtype =  typename mcont_t::value_type;
+    return KTfwd::site_dependent_fitness()(g1,g2,mutations,
+					   [](double & fitness,const __mtype & mut)
 					   {
-					     fitness *= ( std::pow(1. + mutations[mut].s,2.) ); 
+					     fitness *= ( std::pow(1. + mut.s,2.) ); 
 					   },
-					   [&mutations](double & fitness,const __mtype & mut)
+					   [](double & fitness,const __mtype & mut)
 					   {
-					     fitness *= ( 1. + mutations[mut].s ); 
+					     fitness *= ( 1. + mut.s ); 
 					   },
 					   1.);
   }

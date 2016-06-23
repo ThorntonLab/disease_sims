@@ -28,7 +28,7 @@
 #include <zlib.h>
 
 #include <diseaseSims/mutation_with_age.hpp>
-
+#include <fwdpp/sugar/serialization.hpp>
 using namespace std;
 using namespace boost::program_options;
 using namespace boost::interprocess;
@@ -93,12 +93,7 @@ popparams parse_command_line(const int & argc, char ** argv)
 int main(int argc, char **argv )
 {
   
-  popparams params = parse_command_line(argc,argv);
-
-  glist gametes;
-  vector< pair< glist::iterator,glist::iterator > >  diploids;
-  mlist mutations;
-  
+  popparams params = parse_command_line(argc,argv);  
   gzFile gzin = gzopen(params.popfile.c_str(),"rb");
   ofstream output;
   output.open(params.ofile.c_str());
@@ -107,22 +102,22 @@ int main(int argc, char **argv )
 	 << "mat_mean_eff"<<' '<< "mat_var_eff"<<' '<<"mat_skew_eff"<<' '<<"mat_kurt_eff" <<' '
 	 <<"pat_mean_eff"<<' '<<"pat_var_eff" <<' '<<"pat_skew_eff"<<' '<<"pat_kurt_eff" <<'\n';
   for ( unsigned i = 0; i <params.reps; ++i ) {
-  
-    read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
-    vector<unsigned> nmom(diploids.size());
-    vector<unsigned> ndad(diploids.size());
-    vector<double> emom(diploids.size());
-    vector<double> edad(diploids.size());
-    for( unsigned j = 0 ; j < diploids.size() ; ++j )
+    poptype pop(0);
+    KTfwd::gzdeserialize()(gzin,pop,KTfwd::mutation_reader<TFLmtype>());
+    //read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+    vector<unsigned> nmom(pop.diploids.size());
+    vector<unsigned> ndad(pop.diploids.size());
+    vector<double> emom(pop.diploids.size());
+    vector<double> edad(pop.diploids.size());
+    std::size_t j=0;
+    for(const auto & dip : pop.diploids)
       {
-	//Get # of risk mutations on "maternal"/"paternal" haplotypes
-	nmom[j] =  diploids[j].first->smutations.size();
-        ndad[j] =  diploids[j].second->smutations.size();
-	
-	//Get effect sizes of each haplotype (warning--this may barf here. Untested as to whether it compiles...)
+	nmom[j]=pop.gametes[dip.first].smutations.size();
+	ndad[j]=pop.gametes[dip.second].smutations.size();
 	emom[j]={0.},edad[j]={0.};
-	for( const auto & ptr : diploids[j].first->smutations ){ emom[j] += ptr->s;}
-	for( const auto & ptr : diploids[j].second->smutations ){ edad[j] += ptr->s;}
+	for(const auto m : pop.gametes[dip.first].smutations) emom[j]+= pop.mutations[m].s;
+	for(const auto m : pop.gametes[dip.second].smutations) edad[j]+= pop.mutations[m].s;
+	++j;
       }
     accumulator_set<double, stats<tag::mean, tag::variance, tag::skewness, tag::kurtosis > > nmacc;
     for_each(nmom.begin(),nmom.end(),bind<void>(ref(nmacc),_1));
@@ -144,6 +139,5 @@ int main(int argc, char **argv )
   }
   gzclose(gzin);
   output.close();
-
 }
 

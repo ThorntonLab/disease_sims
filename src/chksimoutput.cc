@@ -3,7 +3,7 @@
 
 #include <diseaseSims/mutation_with_age.hpp>
 #include <simindex.hpp>
-#include <fwdpp/IO.hpp>
+#include <fwdpp/sugar/serialization.hpp>
 #include <zlib.h>
 //#include <boost/bind.hpp>
 #include <iostream>
@@ -31,9 +31,10 @@ int main( int argc, char ** argv )
 
   for( unsigned i = 1 ; i <= idx.size() ; ++i )
     {
-      mlist mutations;
-      glist gametes;
-      std::vector< pair<glist::iterator,glist::iterator> > diploids;
+      //mlist mutations;
+      //glist gametes;
+      //std::vector< pair<glist::iterator,glist::iterator> > diploids;
+      poptype pop(0);
       cerr << "checking record "
 	  << i 
 	  << " at positions "
@@ -42,7 +43,8 @@ int main( int argc, char ** argv )
 	  << idx.eoffset(i) 
 	  << '\n';
       gzseek( gzin, idx.hoffset(i), 0 );
-      KTfwd::read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+      KTfwd::gzdeserialize()(gzin,pop,KTfwd::mutation_reader<TFLmtype>());
+      //KTfwd::read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
 
       gzseek( gzin2, idx.eoffset(i), 0 );
       unsigned nmuts;
@@ -56,21 +58,23 @@ int main( int argc, char ** argv )
 	}
 
       bool FAIL = false;
-      if( pos.size() != mutations.size() )
+      std::size_t msize=std::count_if(pop.mcounts.begin(),pop.mcounts.end(),[](const unsigned & i){return i>0;});
+      
+      if( pos.size() != msize )
 	{
 	  cerr << "Record "
 	       << i 
-	       << " mutation numbers don't match up: " << pos.size() << ' ' << mutations.size() << '\n';
+	       << " mutation numbers don't match up: " << pos.size() << ' ' << msize << '\n';
 	  FAIL = true;
 	}
       else
 	{
-	  for( mlist::const_iterator itr = mutations.begin() ; 
-	       itr != mutations.end() ; ++itr )
+	  for( auto itr = pop.mutations.cbegin() ; 
+	       itr != pop.mutations.cend() ; ++itr )
 	    {
-	      std::vector<double>::const_iterator pitr = find(pos.begin(),
-							      pos.end(),
-							      itr->pos);
+	      auto pitr = find(pos.begin(),
+			       pos.end(),
+			       itr->pos);
 	      if( pitr == pos.end() )
 		{
 		  cerr << "Record "

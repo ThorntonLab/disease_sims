@@ -58,6 +58,7 @@
 #include <algorithm>
 #include <cstdlib> 
 #include <set>
+#include <sstream>
 
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -66,9 +67,9 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-#include <fwdpp/IO.hpp>
+//#include <fwdpp/IO.hpp>
 #include <fwdpp/sampling_functions.hpp>
-
+#include <fwdpp/sugar/serialization.hpp>
 #include <readSimOutput.hpp>
 
 using namespace std;
@@ -114,9 +115,10 @@ int main(int argc, char ** argv)
   gsl_rng_set(r,options.seed);
   
   //Read in the population
-  glist gametes;
-  mlist mutations;
-  vector< pair< glist::iterator,glist::iterator > > diploids;
+  poptype pop(0);
+  // glist gametes;
+  // mlist mutations;
+  // vector< pair< glist::iterator,glist::iterator > > diploids;
 
   bool found = false;
   //get offset of the population and the phenotypes from the indexfile
@@ -141,20 +143,21 @@ int main(int argc, char ** argv)
 
   gzFile gzin = gzopen(options.popfile.c_str(),"rb");
   gzseek( gzin, index.hoffset(options.record_no), 0);
-  read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+  //read_binary_pop( &gametes, &mutations, &diploids, std::bind(mutation_reader<TFLmtype>(),std::placeholders::_1),gzin );
+  KTfwd::gzdeserialize()(gzin,pop,KTfwd::mutation_reader<TFLmtype>());
   gzclose(gzin);
 
-  if ( gametes.size() > 2*diploids.size() )
+  if ( pop.gametes.size() > 2*pop.diploids.size() )
     {
-      cerr << "Error: there are " << gametes.size() 
-	   << " gametes for only " << diploids.size() 
+      cerr << "Error: there are " << pop.gametes.size() 
+	   << " gametes for only " << pop.diploids.size() 
 	   << " diploids.  Uncool!\n";
       exit(10);
     }
   //Make sure that ncases + ncontrols < N
-  if ( (options.ncontrols + options.ncases) > diploids.size() )
+  if ( (options.ncontrols + options.ncases) > pop.diploids.size() )
     {
-      std::cerr << "Error: population size is " << diploids.size() << " diploids. "
+      std::cerr << "Error: population size is " << pop.diploids.size() << " diploids. "
 		<< "Sum of cases and controls is " << (options.ncontrols + options.ncases) << '\n';
       exit(10);
     }
@@ -163,7 +166,7 @@ int main(int argc, char ** argv)
   vector< pair<double,double> > phenotypes = read_phenotypes(options.phenofile.c_str(),
 							     index.poffset(options.record_no));
 
-  assert( phenotypes.size() == diploids.size() );
+  assert( phenotypes.size() == pop.diploids.size() );
   //The real work starts here
 
   //1. get mean, sd, and upper quantile of pheno distribution
@@ -249,7 +252,7 @@ int main(int argc, char ** argv)
     assert( x < diploids.size() );
   }
 #endif
-  cc_intermediate ccblocks(process_population(diploids,phenotypes,
+  cc_intermediate ccblocks(process_population(pop,phenotypes,
 					      put_controls,
 					      put_cases,
 					      options.ncontrols,

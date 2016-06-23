@@ -69,7 +69,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-#include <fwdpp/IO.hpp>
+#include <fwdpp/sugar/serialization.hpp>
 #include <fwdpp/sampling_functions.hpp>
 
 #include <readSimOutput.hpp>
@@ -111,8 +111,40 @@ params::params() : indexfile(string()),
 
 params process_command_line(int argc, char ** argv);
 
-vector<pair<double,double> > EWphenos( const vector< pair< glist::iterator,glist::iterator > > & diploids,
-				       const vector< pair<mlist::iterator, double> > & ESIZES );
+//vector<pair<double,double> > EWphenos( const vector< pair< glist::iterator,glist::iterator > > & diploids,
+//				       const vector< pair<mlist::iterator, double> > & ESIZES );
+
+vector<pair<double,double> > EWphenos( const poptype & pop,
+				       const vector< pair<std::size_t, double> > & ESIZES )
+{
+  vector<pair<double,double> > rv;
+
+
+  for(const auto & dip : pop.diploids)
+    {
+      double trait = 0.;
+      for( const auto i : pop.gametes[dip.first].smutations )
+	{
+	  auto itr = std::find_if(ESIZES.begin(),ESIZES.end(),
+				   [&i](const pair<size_t,double> & p)
+				   {
+				     return p.first==i;
+				   });
+	  trait += itr->second;
+	}
+      for( const auto i : pop.gametes[dip.second].smutations )
+	{
+	  auto itr = std::find_if(ESIZES.begin(),ESIZES.end(),
+				   [&i](const pair<size_t,double> & p)
+				   {
+				     return p.first==i;
+				   });
+	  trait += itr->second;
+	}
+      rv.emplace_back( make_pair( trait, 0. ) ) ; //It's all "G", kids!
+    }
+  return rv;
+}
 
 int main(int argc, char ** argv)
 {
@@ -122,9 +154,10 @@ int main(int argc, char ** argv)
   gsl_rng_set(r,options.seed);
   
   //Read in the population
-  glist gametes;
-  mlist mutations;
-  vector< pair< glist::iterator,glist::iterator > > diploids;
+  poptype pop(0);
+  //glist gametes;
+  //mlist mutations;
+  //vector< pair< glist::iterator,glist::iterator > > diploids;
 
   bool found = false;
   //get offset of the population and the phenotypes from the indexfile
@@ -149,37 +182,42 @@ int main(int argc, char ** argv)
 
   gzFile gzin = gzopen(options.popfile.c_str(),"rb");
   gzseek( gzin, index.hoffset(options.record_no), 0);
-  read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+  //read_binary_pop( &gametes, &mutations, &diploids, std::bind(gzmreader(),std::placeholders::_1),gzin );
+  KTfwd::gzdeserialize()(gzin,pop,KTfwd::mutation_reader<TFLmtype>());
   gzclose(gzin);
 
-  if ( gametes.size() > 2*diploids.size() )
+  if ( pop.gametes.size() > 2*pop.diploids.size() )
     {
-      cerr << "Error: there are " << gametes.size() 
-	   << " gametes for only " << diploids.size() 
+      cerr << "Error: there are " << pop.gametes.size() 
+	   << " gametes for only " << pop.diploids.size() 
 	   << " diploids.  Uncool!\n";
       exit(10);
     }
   //Make sure that ncases + ncontrols < N
-  if ( (options.ncontrols + options.ncases) > diploids.size() )
+  if ( (options.ncontrols + options.ncases) > pop.diploids.size() )
     {
-      std::cerr << "Error: population size is " << diploids.size() << " diploids. "
+      std::cerr << "Error: population size is " << pop.diploids.size() << " diploids. "
 		<< "Sum of cases and controls is " << (options.ncontrols + options.ncases) << '\n';
       exit(10);
     }
 
   //Now, we need to assign effect sizes to each mutation that is segregating.
-  vector< pair<mlist::iterator, double> > ESIZES;
-  for( auto mitr = mutations.begin(); mitr != mutations.end() ; ++mitr )
+  vector< pair<std::size_t, double> > ESIZES;
+  //for( auto mitr = mutations.begin(); mitr != mutations.end() ; ++mitr )
+  for(std::size_t i=0;i<pop.mutations.size();++i)
     {
-      if( ! mitr->neutral )
+      if(pop.mcounts[i])
 	{
-	  double __delta = (gsl_rng_uniform(r) <= options.pdelta) ? 1. : -1.;
-	  ESIZES.push_back( make_pair(mitr,__delta*pow(4.*double(options.N)*(mitr->s),options.tau)*(1. + gsl_ran_gaussian(r,options.sigma))) );
+	  if( ! pop.mutations[i].neutral )
+	    {
+	      double __delta = (gsl_rng_uniform(r) <= options.pdelta) ? 1. : -1.;
+	      ESIZES.push_back( make_pair(i,__delta*pow(4.*double(options.N)*(pop.mutations[i].s),options.tau)*(1. + gsl_ran_gaussian(r,options.sigma))) );
+	    }
 	}
     }
 
   //Generate the phenotype data
-  vector< pair<double,double> > phenotypes = EWphenos(diploids,ESIZES);
+  vector< pair<double,double> > phenotypes = EWphenos(pop,ESIZES);
   assert( phenotypes.size() == diploids.size() );
   //The real work starts here
 
@@ -266,7 +304,7 @@ int main(int argc, char ** argv)
     assert( x < diploids.size() );
   }
 #endif
-  cc_intermediate ccblocks(process_population(diploids,phenotypes,
+  cc_intermediate ccblocks(process_population(pop,phenotypes,
 					      put_controls,
 					      put_cases,
 					      options.ncontrols,
@@ -346,50 +384,7 @@ int main(int argc, char ** argv)
 
   ...screw it.
 */
-vector<pair<double,double> > EWphenos( const vector< pair< glist::iterator,glist::iterator > > & diploids,
-				       const vector< pair<mlist::iterator, double> > & ESIZES )
-{
-  vector<pair<double,double> > rv;
 
-  for( unsigned i = 0 ; i < diploids.size() ; ++i )
-    {
-      double trait = 0.;
-      for( const auto & mitr : diploids[i].first->smutations )
-	{
-	  auto __cc = find_if( ESIZES.begin(), ESIZES.end(),
-			       [&mitr]( const pair<mlist::iterator, double> & __p ) 
-			       {
-				 return __p.first == mitr;
-			       } );
-	  assert(__cc != ESIZES.end());
-	  if(__cc == ESIZES.end())
-	    {
-	      cerr << "FATAL ERROR: mutation carried by a gamete is not present in the population. "
-		   << "Line " << __LINE__ << " of " << __FILE__ << '\n';
-	      exit(EXIT_FAILURE);
-	    }
-	  trait += __cc->second;
-	}
-      for( const auto & mitr : diploids[i].second->smutations )
-	{
-	  auto __cc = find_if( ESIZES.begin(), ESIZES.end(),
-			       [&mitr]( const pair<mlist::iterator, double> & __p ) 
-			       {
-				 return __p.first == mitr;
-			       } );
-	  assert(__cc != ESIZES.end());
-	  if(__cc == ESIZES.end())
-	    {
-	      cerr << "FATAL ERROR: mutation carried by a gamete is not present in the population. "
-		   << "Line " << __LINE__ << " of " << __FILE__ << '\n';
-	      exit(EXIT_FAILURE);
-	    }
-	  trait += __cc->second;
-	}
-      rv.emplace_back( make_pair( trait, 0. ) ) ; //It's all "G", kids!
-    }
-  return rv;
-}
 
 params process_command_line(int argc, char ** argv)
 {

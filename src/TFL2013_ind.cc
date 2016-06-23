@@ -24,94 +24,6 @@ using namespace std;
 using namespace boost::interprocess;
 using namespace KTfwd;
 
-//"tags" for the mutation model
-struct mut_model_tag {};
-struct fixed_tag : mut_model_tag {};
-struct dist_tag : mut_model_tag {};
-struct ew_tag : mut_model_tag {};  //Eyre-Walker 2010
-
-//New version, tag/dispatch model
-
-inline double get_unique_pos(gsl_rng * r, poptype::lookup_table_t * lookup)
-{
-  double pos = gsl_rng_uniform(r);
-  while(lookup->find(pos) != lookup->end())
-    {
-      pos = gsl_rng_uniform(r);
-    }
-  lookup->insert(pos);
-  return pos;
-}
-
-/*
-  This is a nonsensical version of the function. Essentially a place-holder
-  for the explicit speclizations that come later.
-*/
-template<typename tag_type>
-TFLmtype mut_model_details(gsl_rng * r, const unsigned int & ttl_generations,
-			   const mut_model_params & mmp,
-			   poptype::lookup_table_t * lookup)
-{
-  //Return a nonsensical value that will definitely cause assertions to fail, etc. :)
-  return TFLmtype(numeric_limits<double>::quiet_NaN(),
-		  numeric_limits<double>::quiet_NaN(),
-		  numeric_limits<double>::quiet_NaN(),
-		  numeric_limits<unsigned>::max());
-}
-
-template<>
-inline TFLmtype mut_model_details<fixed_tag>(gsl_rng * r, const unsigned int & ttl_generations,
-					     const mut_model_params & mmp,
-					     poptype::lookup_table_t * lookup)
-{
-  double pos = get_unique_pos(r,lookup);
-  if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
-    {
-      return TFLmtype(pos,mmp.s,1.0,ttl_generations);//,'A',false);      
-    }
-  return TFLmtype(pos,0.,1.0,ttl_generations);//,'S',true);
-}
-
-template<>
-inline TFLmtype mut_model_details<dist_tag>(gsl_rng * r, const unsigned int & ttl_generations,
-					    const mut_model_params & mmp,
-					    poptype::lookup_table_t * lookup)
-{
-  double pos = get_unique_pos(r,lookup);
-  if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
-    {
-      //return TFLmtype(pos,gsl_ran_exponential(r,mmp.s),ttl_generations,'A',false);
-      return TFLmtype(pos,gsl_ran_exponential(r,mmp.s),1.0,ttl_generations);//,'A',false);
-    }
-  return TFLmtype(pos,0.,1.0,ttl_generations);//,'S',true);
-}
-
-template<>
-inline TFLmtype mut_model_details<ew_tag>(gsl_rng * r, const unsigned int & ttl_generations,
-					  const mut_model_params & mmp,
-					  poptype::lookup_table_t * lookup)
-{
-  double pos = get_unique_pos(r,lookup);
-  if( gsl_rng_uniform(r) <= mmp.mu_disease/(mmp.mu_disease+mmp.mu_neutral) )
-    {
-      //4Ns ~ \Gamma with shape mmp.shape and mean mmp.s, so s = 4Ns/4N...
-      double s = gsl_ran_gamma(r,mmp.shape,mmp.s/mmp.shape)/(4.*double(mmp.N_ancestral));
-      return TFLmtype(pos,s,1.0,ttl_generations);//,'A',false);
-      //return TFLmtype(pos,s,ttl_generations,'A',false);
-    }
-  return TFLmtype(pos,0.,1.0,ttl_generations);
-  //return TFLmtype(pos,0.,ttl_generations,'S',true);
-}
-
-template<typename tag_type>
-TFLmtype mut_model2(gsl_rng * r, const unsigned int & ttl_generations,
-		    const mut_model_params & mmp,
-		    poptype::lookup_table_t * lookup)
-{
-  static_assert(std::is_base_of<mut_model_tag,tag_type>::value,"tag_type must be derived from mut_model_tag");
-  return mut_model_details<tag_type>(r,ttl_generations,mmp,lookup);
-}
-
 int main(int argc, char ** argv)
 {
   simparams params = parse_command_line(argc,argv);
@@ -135,10 +47,6 @@ int main(int argc, char ** argv)
   unsigned generation;
   unsigned ttl_gen = 0;
   double wbar=1;
-
-  //std::function<double(void)> recmap = std::bind(gsl_rng_uniform,r);
-
-  //std::function<TFLmtype(poptype::mcont_t &)> MMODEL = std::bind(mut_model2<fixed_tag>,r,ttl_gen,params.mmp,&pop.mut_lookup);
   
   //mutation model with constant effect size...
   std::function<std::size_t(std::queue<std::size_t> &,poptype::mcont_t &)> MMODEL = std::bind(KTfwd::infsites(),
@@ -149,6 +57,16 @@ int main(int argc, char ** argv)
 											      [&r](){return gsl_rng_uniform(r);},
 											      [&params](){return params.mmp.s;},
 											      [](){return 0.;});
+
+  //Mutation model for "burn in" period, if desired...
+  auto MMODEL_BURNIN = std::bind(KTfwd::infsites(),
+				 std::placeholders::_1,std::placeholders::_2,r,
+				 std::ref(pop.mut_lookup),&generation,
+				 params.mmp.mu_neutral,
+				 0.0,
+				 [&r](){return gsl_rng_uniform(r);},
+				 [&params](){return 0.;},
+				 [](){return 0.;});
   unsigned N_current = params.N;
   unsigned N_next = N_current;
 
@@ -172,8 +90,7 @@ int main(int argc, char ** argv)
 		       [&r](){return gsl_rng_uniform(r);},
 		       [&r,&params](){return gsl_ran_gamma(r,params.mmp.shape,params.mmp.s/params.mmp.shape)/(4.*double(params.mmp.N_ancestral));},
 		       [](){return 0.;});
-    //double s = 
-    //MMODEL = std::bind(mut_model2<ew_tag>,r,ttl_gen,params.mmp,&pop.mut_lookup);
+
   for( generation = 0; generation < params.ngens_burnin; ++generation,++ttl_gen )
     {
       //Evolution w/no deleterious mutations and no selection.
@@ -184,7 +101,7 @@ int main(int argc, char ** argv)
 			    pop.mcounts,
 			    params.N,
 			    params.mmp.mu_neutral,
-			    MMODEL,
+			    MMODEL_BURNIN,
 			    std::bind(KTfwd::poisson_xover(),r,params.littler,0.,1.,
 				      std::placeholders::_1,std::placeholders::_2,std::placeholders::_3),
 			    std::bind(KTfwd::no_selection(),std::placeholders::_1,std::placeholders::_2,std::placeholders::_3),

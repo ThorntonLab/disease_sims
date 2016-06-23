@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 #include <cstdlib>
+#include <zlib.h>
 #include <diseaseSims/mutation_with_age.hpp>
 
 using Gfxn_t = std::function<double(const std::size_t first,

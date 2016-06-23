@@ -3,7 +3,7 @@
 #include <Sequence/PolyTableFunctions.hpp>
 #include <fwdpp/sampling_functions.hpp>
 #include <cassert>
-
+#include <sstream>
 #include <gsl/gsl_statistics.h>
 
 using namespace std;
